@@ -1,0 +1,23 @@
+# Data Manipulation & Ingestion
+pandas==2.1.4
+numpy==1.26.2
+
+# Traditional Machine Learning
+scikit-learn==1.3.2
+
+# LLM, Agents, and Prompt Engineering
+#openai==1.6.0
+#langchain==0.1.0
+#langchain-community==0.0.13
+
+# API & Integrations
+requests==2.31.0
+
+# Database & Storage
+sqlalchemy==2.0.23
+
+# Dashboard & UI
+#streamlit==1.29.0
+
+# Environment Management
+python-dotenv==1.0.0
