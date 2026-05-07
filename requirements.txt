@@ -1,23 +1,19 @@
-# Data Manipulation & Ingestion
-pandas==2.1.4
-numpy==1.26.2
+# --- Core Data & API ---
+requests==2.31.0          # To connect to the Zoho/HubSpot APIs
+pandas==2.2.0             # For data manipulation and flattening JSONs
+numpy==1.26.4             # For numerical operations
 
-# Traditional Machine Learning
-scikit-learn==1.3.2
+# --- Machine Learning (Prediction Unit) ---
+scikit-learn==1.4.0       # For Logistic Regression / Random Forest models
+joblib==1.3.2             # To save and load your trained ML models
 
-# LLM, Agents, and Prompt Engineering
-#openai==1.6.0
-#langchain==0.1.0
-#langchain-community==0.0.13
+# --- LLM & AI Agents (Recommendation Engine) ---
+openai==1.12.0            # To interact with GPT models (or anthropic for Claude)
+langchain==0.1.5          # To build the Chains and Agents mentioned in your workflow
+langchain-openai==0.0.5   # Langchain's specific OpenAI integration
 
-# API & Integrations
-requests==2.31.0
+# --- UI / Dashboard ---
+streamlit==1.31.0         # To rapidly build the frontend dashboard for the Demo
 
-# Database & Storage
-sqlalchemy==2.0.23
-
-# Dashboard & UI
-#streamlit==1.29.0
-
-# Environment Management
-python-dotenv==1.0.0
+# --- Utilities ---
+python-dotenv==1.0.1      # To securely manage API keys (Zoho, OpenAI)
