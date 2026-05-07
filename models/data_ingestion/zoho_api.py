@@ -3,6 +3,7 @@ import requests
 import os 
 import json 
 from dotenv import load_dotenv
+import pandas as pd
 
 # Load credentials from .env file
 load_dotenv()
@@ -83,15 +84,52 @@ def fetch_deals_schema():
         print("=== DEALS DATA SCHEMA ===")
         # We print just the first deal beautifully formatted so you can study the fields
         if 'data' in data and len(data['data']) > 0:
-            print(json.dumps(data['data'][0], indent=4))
+            print(json.dumps(data['data'][1], indent=4))
+            
+            # save the JSON 
+            with open('real_sample_deals.json', 'w') as f:
+                json.dump(data['data'], f)
         else:
             print("No deals found in your CRM. Please add a dummy deal in Zoho first.")
     else:
         print(f"❌ Error: {response.status_code}")
         print(response.text)
 
+def flatten_deals_to_csv(raw_deals, output_filename="historical_deals.csv"):
+    """3. TRANSFORMATION: Flattens the raw JSON and saves it as a CSV."""
+    print("⚙️ Transforming JSON into a flat structure...")
+    flat_deals = []
+    
+    for deal in raw_deals:
+        flat_deal = {
+            "Deal_ID": deal.get("id"),
+            "Deal_Name": deal.get("Deal_Name"),
+            "Amount": deal.get("Amount", 0),
+            "Expected_Revenue": deal.get("Expected_Revenue") or 0,
+            "Probability": deal.get("Probability", 0),
+            "Stage": deal.get("Stage"),
+            "Closing_Date": deal.get("Closing_Date"),
+            
+            # Flatten the nested dictionaries safely
+            "Account_Name": deal.get("Account_Name", {}).get("name") if deal.get("Account_Name") else "Unknown",
+            "Contact_Name": deal.get("Contact_Name", {}).get("name") if deal.get("Contact_Name") else "Unknown",
+            "Owner_Name": deal.get("Owner", {}).get("name") if deal.get("Owner") else "Unknown",
+        }
+        flat_deals.append(flat_deal)
+    
+    # Convert to DataFrame and save
+    df = pd.DataFrame(flat_deals)
+    df.to_csv(output_filename, index=False)
+    print(f"💾 Data transformation complete! Saved to '{output_filename}'.")
+
 if __name__ == "__main__":
     fetch_deals_schema()
+    # Read my saved Zoho JSON file
+    
+    with open('real_sample_deals.json', 'r') as f:
+        real_json_data = json.load(f)
 
+    # Pass it to your function
+    flatten_deals_to_csv(real_json_data, "test_deals.csv")
 # Run the Script
 # python models/data_ingestion/zoho_api.py
