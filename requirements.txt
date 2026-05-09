@@ -3,17 +3,23 @@ requests==2.31.0          # To connect to the Zoho/HubSpot APIs
 pandas==2.2.0             # For data manipulation and flattening JSONs
 numpy==1.26.4             # For numerical operations
 
+# --- Database & Migrations (Added for Task 1.7) ---
+sqlalchemy==2.0.25        # ORM for database connections
+alembic==1.13.1           # For managing database schema migrations
+psycopg2-binary==2.9.9    # PostgreSQL database adapter for Python
+
 # --- Machine Learning (Prediction Unit) ---
 scikit-learn==1.4.0       # For Logistic Regression / Random Forest models
 joblib==1.3.2             # To save and load your trained ML models
 
 # --- LLM & AI Agents (Recommendation Engine) ---
-openai==1.12.0            # To interact with GPT models (or anthropic for Claude)
-langchain==0.1.5          # To build the Chains and Agents mentioned in your workflow
+openai==1.12.0            # To interact with GPT models
+langchain==0.1.5          # To build the Chains and Agents
 langchain-openai==0.0.5   # Langchain's specific OpenAI integration
 
-# --- UI / Dashboard ---
-streamlit==1.31.0         # To rapidly build the frontend dashboard for the Demo
+# --- Backend API (Replaces Streamlit for React Integration) ---
+fastapi==0.109.2          # High-performance API framework to serve data to React
+uvicorn==0.27.0           # The ASGI server to run FastAPI
 
 # --- Utilities ---
 python-dotenv==1.0.1      # To securely manage API keys (Zoho, OpenAI)
