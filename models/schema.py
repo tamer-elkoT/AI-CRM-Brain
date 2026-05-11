@@ -15,7 +15,10 @@ class ZohoDeal(Base):
     amount = Column(Float, default=0.0)
     closing_date = Column(DateTime)
     zoho_probability = Column(Float)
-    
+    expected_revenue = Column(Float, default=0.0)
+    contact_name = Column(String)
+    owner_name = Column(String)
+
     # JSONB is perfect for storing raw API data we might need later
     custom_fields = Column(JSONB) 
 
