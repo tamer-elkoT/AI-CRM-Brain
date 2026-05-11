@@ -1,0 +1,5 @@
+models/__pycache__/
+version/__pycache__/
+alembic/__pycache__
+alembic/versions
+models/data_ingestion/__pycache__
