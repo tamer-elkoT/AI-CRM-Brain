@@ -3,7 +3,7 @@ from models.database import SQLALCHEMY_DATABASE_URL
 from models.database import Base
 from models.schema import ZohoDeal, MLPrediction, LLMRecommendation
 from sqlalchemy import engine_from_config
-from sqlalchemy import create_engine 
+from sqlalchemy import create_engine
 from sqlalchemy import pool
 
 from alembic import context
@@ -54,19 +54,17 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
-    
-    # Bypass the config file completely and use our custom URL
-    connectable = create_engine(
-        SQLALCHEMY_DATABASE_URL, 
-        poolclass=pool.NullPool
-    )
+    # Use the same logic as test_db.py
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    db_url = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@localhost:5433/{os.getenv('DB_NAME')}"
+
+    connectable = create_engine(db_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, 
-            target_metadata=target_metadata
-        )
-
+        context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
             context.run_migrations()

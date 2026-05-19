@@ -1,4 +1,6 @@
 Deal_ID,Deal_Name,Amount,Expected_Revenue,Probability,Stage,Closing_Date,Account_Name,Contact_Name,Owner_Name
+7396871000000719033,cairo deal,80000,32000,40,Value Proposition,2026-08-12,SEG,Mohamed Elkot,Tamer Elkot
+7396871000000719002,Mansura,10000,5000,50,Closed Won,2026-06-13,Feltz Printing Service (Sample),Capla Paprocki (Sample),Tamer Elkot
 7396871000000612198,King,60000,0,60,Id. Decision Makers,2026-05-08,King (Sample),Kris Marrier (Sample),Tamer Elkot
 7396871000000612197,Truhlar And Truhlar Attys,45000,0,20,Needs Analysis,2026-05-06,Truhlar And Truhlar (Sample),Sage Wieser (Sample),Tamer Elkot
 7396871000000612196,Commercial Press,45000,0,0,Closed Lost,2026-05-07,Commercial Press (Sample),Leota Dilliard (Sample),Tamer Elkot

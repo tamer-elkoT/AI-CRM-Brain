@@ -51,3 +51,52 @@ To keep this looking professional, add a **"Status"** or **"Troubleshooting"** s
 
 * *If the container fails to start, verify that Docker Desktop is running on your Windows host.*
 * *If you encounter database connection issues, ensure the containers are in a "Running" state by checking `docker ps`.*
+
+
+
+### 2. How to run this exact request in Postman
+
+To replicate this exact API pull in Postman (which is great for quickly testing if a field exists before adding it to your Python script), follow these steps:
+
+**Step 1: Get a fresh Access Token**
+Run your Python script one time and copy the fresh token it prints out to your terminal (e.g., `1000.xxxxxxxxx...`).
+
+**Step 2: Setup the Postman Request**
+
+1. Open Postman and create a new request.
+2. Change the method dropdown to **GET**.
+3. Paste the URL into the address bar:
+`https://www.zohoapis.com/crm/v3/Deals` *(Use .eu or .in if your account is outside the US)*.
+
+**Step 3: Add the Query Parameters**
+We want to mimic your `params = {'fields': '...'}` code.
+
+1. Click the **Params** tab (right below the URL bar).
+2. Under "Key", type: `fields`
+3. Under "Value", paste your exact list: `Deal_Name,Amount,Stage,Closing_Date,Probability,Expected_Revenue,Account_Name,Contact_Name,Owner`
+
+**Step 4: Add your Authentication**
+
+1. Click the **Headers** tab.
+2. Under "Key", type: `Authorization`
+3. Under "Value", type: `Zoho-oauthtoken ` followed by a space, and then paste the access token you copied in Step 1.
+*(Example: `Zoho-oauthtoken 1000.abcdefg123456...`)*
+
+**Step 5: Hit Send!**
+Click the blue **Send** button. In the lower half of Postman, you will see the exact same JSON response that your Python script just processed!
+
+
+# To Generate a New Migration using Alembic (Commit the changes)
+In your terminal, inside your project folder, run the command that tells Alembic to detect the change:
+
+```bash
+
+alembic revision --autogenerate -m "add account_name to zoho_deals"
+```
+. Apply the Migration
+After running that, Alembic will have created a new file in your alembic/versions/ folder. Review it to ensure it looks correct, then apply it:
+
+``` bash 
+
+alembic upgrade head
+```
