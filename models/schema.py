@@ -1,9 +1,10 @@
 # ai_crm_brain/models/schemas.py
-from sqlalchemy import Column, String, Float, Boolean, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, String, Float, Boolean, DateTime, ForeignKey, Integer
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 import datetime
 from models.database import Base
+import uuid
 
 
 class ZohoDeal(Base):
@@ -36,14 +37,26 @@ class ZohoDeal(Base):
 class MLPrediction(Base):
     __tablename__ = "ml_predictions"
 
-    id = Column(String, primary_key=True)  # Usually a UUID
-    deal_id = Column(String, ForeignKey("zoho_deals.id"), nullable=False)
-    base_probability = Column(Float, nullable=False)  # The % score from our ML model
-    feature_vector = Column(
-        JSONB
-    )  # Storing the exact features used for SHAP explainability
-    prediction_date = Column(DateTime, default=datetime.datetime.utcnow)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
 
+    # CRITICAL: Added unique=True so we can use ON CONFLICT(deal_id) DO UPDATE
+    deal_id = Column(String, ForeignKey("zoho_deals.id"), nullable=False, unique=True)
+
+    # --- ML Outputs ---
+    predicted_stage_encoded = Column(Integer, nullable=True)  # e.g., 3 for "Won"
+    base_probability = Column(Float, nullable=False)  # e.g., 92.84
+    confidence_all_classes = Column(
+        JSONB, nullable=True
+    )  # Array of all 4 probabilities
+    feature_vector = Column(JSONB, nullable=True)  # For SHAP / LLM Context in Sprint 4
+
+    # Automatically updates the timestamp whenever the prediction changes
+    prediction_date = Column(
+        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow
+    )
+    updated_at = Column(
+        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow
+    )
     # Relationships
     deal = relationship("ZohoDeal", back_populates="predictions")
 
