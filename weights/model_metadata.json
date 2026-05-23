@@ -1,0 +1,75 @@
+{
+  "model_name": "RandomForestClassifier",
+  "model_version": "v1.0.0",
+  "n_estimators": 1000,
+  "class_weight": "balanced",
+  "feature_cols": [
+    "Amount",
+    "Close_Month",
+    "Close_Year",
+    "Close_Quarter",
+    "Close_DayOfWeek",
+    "Deal_Age_Days",
+    "Owner_Freq",
+    "Account_Freq"
+  ],
+  "stage_classes": [
+    "Engaging",
+    "Lost",
+    "Prospecting",
+    "Won"
+  ],
+  "stage_mapping": {
+    "Engaging": 0,
+    "Lost": 1,
+    "Prospecting": 2,
+    "Won": 3
+  },
+  "performance": {
+    "validation_accuracy": 0.9364,
+    "validation_precision": 0.9613,
+    "validation_recall": 0.9364,
+    "validation_f1": 0.941,
+    "auc_per_class": {
+      "Engaging": 0.9903,
+      "Lost": 1.0,
+      "Prospecting": 0.9733,
+      "Won": 1.0
+    },
+    "macro_auc": 0.9909
+  },
+  "feature_importance": [
+    {
+      "Feature": "Amount",
+      "% Share": 39.29
+    },
+    {
+      "Feature": "Owner_Freq",
+      "% Share": 15.08
+    },
+    {
+      "Feature": "Close_Month",
+      "% Share": 8.93
+    },
+    {
+      "Feature": "Close_Year",
+      "% Share": 8.85
+    },
+    {
+      "Feature": "Close_DayOfWeek",
+      "% Share": 8.52
+    },
+    {
+      "Feature": "Deal_Age_Days",
+      "% Share": 8.29
+    },
+    {
+      "Feature": "Close_Quarter",
+      "% Share": 8.03
+    },
+    {
+      "Feature": "Account_Freq",
+      "% Share": 3.01
+    }
+  ]
+}
