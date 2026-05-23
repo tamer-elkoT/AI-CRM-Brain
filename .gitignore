@@ -3,3 +3,7 @@ version/__pycache__/
 alembic/__pycache__
 alembic/versions
 models/data_ingestion/__pycache__
+/mnt/d/01_Projects/NLP/AI CRM Brain/AI-CRM-Brain/notebooks/mlruns
+__pycache__/
+notebooks/__pycache__/
+notebooks/mlruns

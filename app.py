@@ -7,6 +7,12 @@ from models.database import engine, SessionLocal
 from models.schema import ZohoDeal  # Your SQLAlchemy Model declaration
 
 from models.data_ingestion.zoho_api import fetch_deals_schema
+from pydantic import BaseModel
+from typing import List
+import pandas as pd
+
+# Import the inference functions we just wrote
+from models.ml_engine.inference import preprocess_new_deal, predict_batch
 
 app = FastAPI(title="AI CRM Brain Pipelines")
 
@@ -95,3 +101,54 @@ def ingest_zoho_deals():
 
     finally:
         db.close()
+
+
+# --- Pydantic Schemas ---
+class ZohoDeal(BaseModel):
+    Deal_ID: str
+    Amount: float
+    Closing_Date: str
+    Owner_Name: str
+    Account_Name: str
+    # Add other raw Zoho fields here as needed
+
+
+class DealPredictionResponse(BaseModel):
+    Deal_ID: str
+    predicted_stage_encoded: int
+    base_probability: float
+    confidence_all_classes: List[float]
+
+
+# --- API Endpoint ---
+@app.post("/api/v1/predict/deals", response_model=List[DealPredictionResponse])
+async def predict_deals_endpoint(deals: List[ZohoDeal]):
+    """
+    Receives a batch of raw Zoho Deals, preprocesses them, and returns closure probabilities.
+    """
+    try:
+        # 1. Convert Pydantic models to dicts
+        raw_deals = [deal.dict() for deal in deals]
+
+        # 2. Preprocess (Vectorized)
+        X_processed = preprocess_new_deal(raw_deals)
+
+        # 3. Predict (Vectorized)
+        ml_results = predict_batch(X_processed)
+
+        # 4. Attach Deal_IDs back to the results for the response
+        final_response = []
+        for raw, res in zip(raw_deals, ml_results):
+            final_response.append(
+                DealPredictionResponse(
+                    Deal_ID=raw["Deal_ID"],
+                    predicted_stage_encoded=res["predicted_stage_encoded"],
+                    base_probability=res["base_probability"],
+                    confidence_all_classes=res["confidence_all_classes"],
+                )
+            )
+
+        return final_response
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")

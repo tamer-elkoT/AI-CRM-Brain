@@ -1,0 +1,19 @@
+{
+  "features": [
+    "Amount",
+    "Close_Month",
+    "Close_Year",
+    "Close_Quarter",
+    "Close_DayOfWeek",
+    "Deal_Age_Days",
+    "Owner_Freq",
+    "Account_Freq"
+  ],
+  "target": "Stage_Encoded",
+  "stage_mapping": {
+    "Engaging": 0,
+    "Lost": 1,
+    "Prospecting": 2,
+    "Won": 3
+  }
+}
