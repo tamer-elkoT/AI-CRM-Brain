@@ -1,5 +1,16 @@
 # ai_crm_brain/models/schemas.py
-from sqlalchemy import Column, String, Float, Boolean, DateTime, ForeignKey, Integer
+from sqlalchemy import (
+    Column,
+    String,
+    Float,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Text,
+    Integer,
+    Numeric,
+    Computed,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 import datetime
@@ -64,15 +75,78 @@ class MLPrediction(Base):
 class LLMRecommendation(Base):
     __tablename__ = "llm_recommendations"
 
-    id = Column(String, primary_key=True)  # Usually a UUID
-    deal_id = Column(String, ForeignKey("zoho_deals.id"), nullable=False)
-    recommendation_text = Column(String, nullable=False)  # The actual AI advice
-    risk_flag = Column(String)  # e.g., "HIGH", "MEDIUM", "LOW"
+    # --- Primary Key ---
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    # Tracking Sales Rep Interactions (Crucial for MVP)
-    rep_action_taken = Column(Boolean, default=False)
-    rep_feedback_at = Column(DateTime, nullable=True)
-    generated_date = Column(DateTime, default=datetime.datetime.utcnow)
+    # --- Foreign Keys ---
+    deal_id = Column(
+        String(64), ForeignKey("zoho_deals.id", ondelete="CASCADE"), nullable=False
+    )
+    prediction_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("ml_predictions.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
-    # Relationships
+    # --- LLM Input Context ---
+    # Stores exactly what you sent to Claude so you can debug hallucinations
+    llm_payload = Column(JSONB, nullable=False)
+
+    # --- LLM Output & Scores ---
+    adjusted_probability = Column(Numeric(5, 4), nullable=False)
+
+    # Computed in the DB automatically
+    adjusted_score_pct = Column(
+        Numeric(5, 2), Computed("ROUND(adjusted_probability * 100, 2)", persisted=True)
+    )
+
+    base_probability = Column(Numeric(5, 4), nullable=True)
+    score_delta = Column(
+        Numeric(5, 2),
+        Computed(
+            "ROUND((adjusted_probability - base_probability) * 100, 2)", persisted=True
+        ),
+    )
+
+    # --- Natural Language Recommendations ---
+    recommendation_ar = Column(Text, nullable=False)
+    recommendation_en = Column(Text, nullable=True)
+
+    # --- Tiers & Risks ---
+    priority_tier = Column(
+        String(10),
+        Computed(
+            "CASE WHEN adjusted_probability >= 0.75 THEN 'HIGH' WHEN adjusted_probability >= 0.45 THEN 'MEDIUM' ELSE 'LOW' END",
+            persisted=True,
+        ),
+    )
+    risk_flag = Column(String(20), nullable=True)
+    risk_reasoning = Column(Text, nullable=True)
+
+    # --- LLM Provenance (Crucial for MLOps) ---
+    llm_model_id = Column(String(64), nullable=False)  # e.g., "claude-3-5-sonnet"
+    prompt_version = Column(String(16), nullable=False)  # e.g., "v1.2"
+    llm_latency_ms = Column(Integer, nullable=True)
+    llm_tokens_used = Column(Integer, nullable=True)
+
+    # --- Batch Tracking ---
+    batch_id = Column(UUID(as_uuid=True), nullable=True)
+    generated_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+
+    # --- Sales Rep Feedback Loop (For Streamlit UI) ---
+    rep_action_taken = Column(Boolean, default=None, nullable=True)
+    rep_feedback_at = Column(DateTime(timezone=True), nullable=True)
+    rep_feedback_text = Column(Text, nullable=True)
+
+    # --- Audit ---
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True),
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow,
+    )
+
+    # --- Relationships ---
     deal = relationship("ZohoDeal", back_populates="recommendations")
+    # Uncomment if you have the MLPrediction model defined:
+    prediction = relationship("MLPrediction", back_populates="llm_recommendation")
