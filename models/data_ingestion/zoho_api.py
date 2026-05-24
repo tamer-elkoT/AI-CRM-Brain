@@ -129,6 +129,11 @@ def flatten_deals_to_csv(raw_deals, output_filename="historical_deals.csv"):
             "Owner_Name": (
                 deal.get("Owner", {}).get("name") if deal.get("Owner") else "Unknown"
             ),
+            "custom_fields": (
+                deal.get("Custom_Fields")
+                if deal.get("Custom_Fields") is not None
+                else {}
+            ),
         }
         flat_deals.append(flat_deal)
 
