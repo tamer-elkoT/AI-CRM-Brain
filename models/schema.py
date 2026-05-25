@@ -47,9 +47,8 @@ class ZohoDeal(Base):
 
 class MLPrediction(Base):
     __tablename__ = "ml_predictions"
-
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+   
     # CRITICAL: Added unique=True so we can use ON CONFLICT(deal_id) DO UPDATE
     deal_id = Column(String, ForeignKey("zoho_deals.id"), nullable=False, unique=True)
 
