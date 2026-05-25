@@ -26,9 +26,18 @@ class Settings(BaseSettings):
     PGADMIN_EMAIL: str
     PGADMIN_PASSWORD: str
 
+    # Batch Processing
+    BATCH_INTERVAL_MINUTES: int = 30
+
     # Pydantic v2 configuration
     model_config = SettingsConfigDict(env_file=".env")
 
 
 # Instantiate settings
+settings = Settings()
+class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+
 settings = Settings()

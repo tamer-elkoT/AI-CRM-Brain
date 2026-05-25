@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 # --- Response Validation Schema ---
+# Define the pydantic Schema for the output of the LLM (JSON)
 class LLMRecommendationOutput(BaseModel):
     """Pydantic model for validating LLM JSON responses."""
 
@@ -48,6 +49,7 @@ class LLMRecommendationOutput(BaseModel):
 
 
 # --- Main Recommender Service ---
+# Define the pydantic schema for the
 class LLMRecommenderService:
     """Service class to generate sales recommendations using an LLM."""
     def __init__(
@@ -75,6 +77,7 @@ class LLMRecommenderService:
         logger.info(f"LLM Recommender initialized with model: {model_id}")
     # The retry decorator will automatically retry the _call_llm_api method up to 3 times with exponential backoff if a RateLimitError or APIError is raised. This helps to handle transient issues with the LLM API without crashing the entire recommendation generation process.
     @retry(
+        # Try up to 3 times with exponential backoff (1s, 2s, 4s) on RateLimitError or APIError
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         # Use the imported error classes here
@@ -99,7 +102,7 @@ class LLMRecommenderService:
                 messages=messages,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
-                # Groq/OpenAI compatible response format
+                # Groq/OpenAI compatible response format to ensure that the model resonse is a JSON object that can be parsed directly, rather than a raw string that may contain markdown or other formatting.
                 response_format={"type": "json_object"},
             )
 
@@ -129,7 +132,8 @@ class LLMRecommenderService:
             ValueError: If parsing or validation fails
         """
         try:
-            # Strip markdown code fences if present
+            # Even with JSON mode on, LLMs sometimes wrap their response in Markdown blocks (```json { ... } ```).
+            # This code cleans off the markdown formatting, parses the string into a Python dictionary, and pushes it through the LLMRecommendationOutput Pydantic validator.
             content = raw_content.strip()
             if content.startswith("```"):
                 content = content.split("```")[1]

@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import FastAPI, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert
@@ -55,7 +57,10 @@ async def predict_deals_endpoint(deals: List[ZohoDealResponse]):
 
 
 @router.post("/jobs/run-predictions")
-def run_batch_predictions(db: Session = Depends(get_db)):
+def run_batch_predictions(
+    batch_id: str = None,  # 1. Allow the user to pass a batch_id via query parameter
+    db: Session = Depends(get_db),
+):
     """
     Automated Data Pipeline:
     1. Reads raw deals from the `zoho_deals` table.
@@ -63,6 +68,10 @@ def run_batch_predictions(db: Session = Depends(get_db)):
     3. Upserts results into the `ml_predictions` table.
     """
     try:
+
+        # 2. If the user didn't provide one, generate a fresh one automatically
+        if not batch_id:
+            batch_id = str(uuid.uuid4())
         # 1. Fetch Deals from the database
         # (In the future, you can filter this to only pull deals where Status == 'Open')
         db_deals = db.query(ZohoDeal).all()
@@ -101,6 +110,7 @@ def run_batch_predictions(db: Session = Depends(get_db)):
                 predicted_stage_encoded=res["predicted_stage_encoded"],
                 base_probability=res["base_probability"],
                 confidence_all_classes=res["confidence_all_classes"],
+                batch_id=batch_id,
             )
 
             # If the deal_id already exists, UPDATE the ML scores instead of crashing
@@ -110,6 +120,7 @@ def run_batch_predictions(db: Session = Depends(get_db)):
                     "predicted_stage_encoded": stmt.excluded.predicted_stage_encoded,
                     "base_probability": stmt.excluded.base_probability,
                     "confidence_all_classes": stmt.excluded.confidence_all_classes,
+                    "batch_id": stmt.excluded.batch_id,
                     "updated_at": func.now(),
                 },
             )

@@ -16,6 +16,7 @@ from sqlalchemy.orm import relationship
 import datetime
 from models.database import Base
 import uuid
+from sqlalchemy import UniqueConstraint
 
 
 class ZohoDeal(Base):
@@ -51,7 +52,8 @@ class MLPrediction(Base):
 
     # CRITICAL: Added unique=True so we can use ON CONFLICT(deal_id) DO UPDATE
     deal_id = Column(String, ForeignKey("zoho_deals.id"), nullable=False, unique=True)
-
+    # For generate a recommendation on batchs, we can link multiple predictions to a single batch_id. This allows us to track which predictions were generated together and potentially analyze batch-level performance later on.
+    batch_id = Column(UUID(as_uuid=True), nullable=True)
     # --- ML Outputs ---
     predicted_stage_encoded = Column(Integer, nullable=True)  # e.g., 3 for "Won"
     base_probability = Column(Float, nullable=False)  # e.g., 92.84
@@ -77,6 +79,7 @@ class MLPrediction(Base):
 class LLMRecommendation(Base):
     __tablename__ = "llm_recommendations"
 
+    __table_args__ = (UniqueConstraint("deal_id", "batch_id", name="_deal_batch_uc"),)
     # --- Primary Key ---
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
@@ -95,18 +98,22 @@ class LLMRecommendation(Base):
     llm_payload = Column(JSONB, nullable=False)
 
     # --- LLM Output & Scores ---
-    adjusted_probability = Column(Numeric(5, 4), nullable=False)
+    adjusted_probability = Column(Float, nullable=False)
 
     # Computed in the DB automatically
     adjusted_score_pct = Column(
-        Numeric(5, 2), Computed("ROUND(adjusted_probability * 100, 2)", persisted=True)
+        Float,
+        Computed(
+            "ROUND((adjusted_probability * 100)::numeric, 2)::float", persisted=True
+        ),
     )
 
-    base_probability = Column(Numeric(5, 4), nullable=True)
+    base_probability = Column(Float, nullable=True)
     score_delta = Column(
-        Numeric(5, 2),
+        Float,
         Computed(
-            "ROUND((adjusted_probability - base_probability) * 100, 2)", persisted=True
+            "ROUND(((adjusted_probability - base_probability) * 100)::numeric, 2)::float",
+            persisted=True,
         ),
     )
 
