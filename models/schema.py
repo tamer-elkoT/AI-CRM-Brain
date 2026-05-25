@@ -48,7 +48,7 @@ class ZohoDeal(Base):
 class MLPrediction(Base):
     __tablename__ = "ml_predictions"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-   
+
     # CRITICAL: Added unique=True so we can use ON CONFLICT(deal_id) DO UPDATE
     deal_id = Column(String, ForeignKey("zoho_deals.id"), nullable=False, unique=True)
 
@@ -69,6 +69,9 @@ class MLPrediction(Base):
     )
     # Relationships
     deal = relationship("ZohoDeal", back_populates="predictions")
+    llm_recommendation = relationship(
+        "LLMRecommendation", back_populates="prediction", uselist=False
+    )
 
 
 class LLMRecommendation(Base):

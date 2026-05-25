@@ -7,3 +7,5 @@ models/data_ingestion/__pycache__
 __pycache__/
 notebooks/__pycache__/
 notebooks/mlruns
+ models/__pycache__
+ models/data_ingestion/__pycache__

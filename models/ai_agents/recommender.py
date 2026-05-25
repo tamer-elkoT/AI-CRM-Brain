@@ -9,7 +9,6 @@ import logging
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field, validator
 
-# CHANGE: Import client and errors specifically
 from openai import OpenAI, RateLimitError, APIError
 from tenacity import (
     retry,
@@ -20,7 +19,7 @@ from tenacity import (
 
 from models.ai_agents.prompts import build_llm_prompt, PROMPT_VERSION
 from config import settings  # Your config module
-
+# logging.getLogger(__name__) will be used to create a logger for this module. the Logger is configured in the main application entry point, so it will inherit those settings (like log level, format, handlers, etc.)
 logger = logging.getLogger(__name__)
 
 
@@ -50,6 +49,7 @@ class LLMRecommendationOutput(BaseModel):
 
 # --- Main Recommender Service ---
 class LLMRecommenderService:
+    """Service class to generate sales recommendations using an LLM."""
     def __init__(
         self,
         api_key: str,
@@ -73,7 +73,7 @@ class LLMRecommenderService:
         )
 
         logger.info(f"LLM Recommender initialized with model: {model_id}")
-
+    # The retry decorator will automatically retry the _call_llm_api method up to 3 times with exponential backoff if a RateLimitError or APIError is raised. This helps to handle transient issues with the LLM API without crashing the entire recommendation generation process.
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
@@ -81,6 +81,15 @@ class LLMRecommenderService:
         retry=retry_if_exception_type((RateLimitError, APIError)),
     )
     def _call_llm_api(self, messages: list) -> Dict[str, Any]:
+        """Calls the LLM API with retry logic for transient errors.
+        
+        Args:
+            messages: List of message dicts for the chat completion API
+
+        Returns:
+            Dict containing the API response and metadata
+
+        """
         start_time = time.time()
 
         try:

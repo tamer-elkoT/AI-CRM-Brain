@@ -139,13 +139,13 @@ FEW_SHOT_EXAMPLES: List[Dict[str, Any]] = [
 
 def build_llm_prompt(deal_data: Dict[str, Any]) -> List[Dict[str, str]]:
     """
-    Constructs the messages array for OpenAI/Anthropic API.
+    Constructs the messages array for Groq API.
 
     Args:
         deal_data: Fused deal payload with ML prediction + custom fields
 
     Returns:
-        List of message dicts in OpenAI format
+        List of message dicts in Groq format
     """
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
