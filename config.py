@@ -35,9 +35,3 @@ class Settings(BaseSettings):
 
 # Instantiate settings
 settings = Settings()
-class Config:
-        env_file = ".env"
-        case_sensitive = True
-
-
-settings = Settings()
