@@ -69,7 +69,6 @@ settings.POSTGRES_USER  # "tamer"
 
 **Why this matters:** No credentials are hardcoded in source files. If you ever need to change your API key, you only change the `.env` file — not 10 different Python files. The `pydantic_settings.BaseSettings` class automatically validates that required values exist; if `LLM_API_KEY` is missing from `.env`, the app refuses to start with a clear error.
 
-**Bug note:** `config.py` currently instantiates `settings = Settings()` **twice** at the bottom. The second instantiation is redundant. You can safely delete the last two lines (`class Config` and the second `settings = Settings()`).
 
 ---
 
