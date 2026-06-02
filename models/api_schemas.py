@@ -98,6 +98,18 @@ class DealDetailResponse(BaseModel):
     client_phone: Optional[str] = None
     client_email: Optional[str] = None
 
+class DealCreate(BaseModel):
+    deal_name: str
+    account_name: Optional[str] = "Unknown"
+    contact_name: Optional[str] = "Unknown"
+    owner_name: Optional[str] = "Unknown"
+    amount: float = 0.0
+    stage: str = "Qualification"
+    zoho_probability: float = 0.0
+    closing_date: Optional[str] = None
+    client_phone: Optional[str] = None
+    client_email: Optional[str] = None
+
 from pydantic import EmailStr
 
 class UserCreate(BaseModel):

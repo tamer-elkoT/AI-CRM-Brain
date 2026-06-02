@@ -10,6 +10,8 @@ import type {
   AccountRankingResponse,
   GenerateResponse,
   AllDealsResponse,
+  DealCreate,
+  CreateDealResponse,
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -37,6 +39,7 @@ export const dashboardApi = {
     api.get('/deals', { params: { page, page_size: pageSize, search: search || undefined, sort_by: sortBy } }).then((res) => res.data),
   getAccountRanking: (): Promise<AccountRankingResponse> => api.get('/analytics/accounts/ranked').then((res) => res.data),
   getDealDetail: (id: string): Promise<DealDetail> => api.get(`/deals/${id}`).then((res) => res.data),
+  createDeal: (data: DealCreate): Promise<CreateDealResponse> => api.post('/deals', data).then((res) => res.data),
 };
 
 export const actionApi = {

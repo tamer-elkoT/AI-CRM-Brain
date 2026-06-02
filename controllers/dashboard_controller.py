@@ -16,6 +16,7 @@ from models.api_schemas import (
     AccountRankingResponse,
     AccountRanking,
     PaginatedDealsResponse,
+    DealCreate,
 )
 
 router = APIRouter()
@@ -99,6 +100,48 @@ def get_all_deals(
         page_size=page_size,
         total_pages=total_pages,
     )
+
+
+@router.post("/deals")
+def create_deal(deal_data: DealCreate, db: Session = Depends(get_db)):
+    """
+    Create a new deal manually (not from CRM sync).
+    """
+    import uuid
+    from datetime import datetime
+
+    deal_id = f"MANUAL-{uuid.uuid4().hex[:12].upper()}"
+
+    closing_dt = None
+    if deal_data.closing_date:
+        try:
+            closing_dt = datetime.strptime(deal_data.closing_date, "%Y-%m-%d")
+        except ValueError:
+            closing_dt = None
+
+    new_deal = ZohoDeal(
+        id=deal_id,
+        deal_name=deal_data.deal_name,
+        account_name=deal_data.account_name,
+        contact_name=deal_data.contact_name,
+        owner_name=deal_data.owner_name,
+        amount=deal_data.amount,
+        stage=deal_data.stage,
+        zoho_probability=deal_data.zoho_probability,
+        closing_date=closing_dt,
+        client_phone=deal_data.client_phone,
+        client_email=deal_data.client_email,
+    )
+
+    db.add(new_deal)
+    db.commit()
+    db.refresh(new_deal)
+
+    return {
+        "status": "success",
+        "message": f"Deal '{deal_data.deal_name}' created successfully.",
+        "deal_id": deal_id,
+    }
 
 
 @router.get("/deals/ranked", response_model=DashboardResponse)

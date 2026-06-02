@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useDashboard } from '../hooks/useDeals';
-import { useAllDeals } from '../hooks/useDeals';
+import { useAllDeals, useTriggerSync } from '../hooks/useDeals';
+import { useToast } from '../components/ui/Toast';
 import DealDrawer from '../components/DealDrawer';
+import CreateDealModal from '../components/CreateDealModal';
 import { Select } from '../components/ui/Select';
-import { Flame, Hourglass, AlertTriangle, Search } from 'lucide-react';
+import { Flame, Hourglass, AlertTriangle, Search, Plus, RefreshCw } from 'lucide-react';
 import type { RankedDeal } from '../types';
 
 const PRIORITY_STYLES: Record<string, string> = {
@@ -14,17 +15,20 @@ const PRIORITY_STYLES: Record<string, string> = {
 
 export default function Home() {
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState('ai_score');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
 
+  const { toast } = useToast();
+  const syncMutation = useTriggerSync();
+
   // Debounced search
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
-    // Simple debounce
     clearTimeout((window as any).__searchTimeout);
     (window as any).__searchTimeout = setTimeout(() => {
       setDebouncedSearch(value);
@@ -34,6 +38,25 @@ export default function Home() {
   const handleSortChange = (newSort: string) => {
     setSortBy(newSort);
     setCurrentPage(1);
+  };
+
+  const handleSync = () => {
+    syncMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        toast({
+          title: '🔄 Sync Complete',
+          description: res.message,
+          variant: 'success',
+        });
+      },
+      onError: (err) => {
+        toast({
+          title: 'Sync Failed',
+          description: err.message || 'Could not sync CRM data.',
+          variant: 'destructive',
+        });
+      },
+    });
   };
 
   const { data, isLoading } = useAllDeals(currentPage, pageSize, debouncedSearch, sortBy);
@@ -48,7 +71,6 @@ export default function Home() {
     return <AlertTriangle className="w-4 h-4 text-red-500" />;
   };
 
-  // Build page numbers with ellipsis for large page counts
   const getPageNumbers = () => {
     const pages: (number | '...')[] = [];
     if (totalPages <= 7) {
@@ -73,6 +95,23 @@ export default function Home() {
           <div className="flex-1">
             <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">All Deals Pipeline</h2>
             <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">خط أنابيب جميع الصفقات</p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleSync}
+              disabled={syncMutation.isPending}
+              className="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center space-x-2 disabled:opacity-50 shadow-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{syncMutation.isPending ? 'Syncing...' : 'Sync & Refresh'}</span>
+            </button>
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="bg-secondary text-on-secondary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center space-x-2 shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Create Deal</span>
+            </button>
           </div>
         </div>
       </header>
@@ -121,15 +160,22 @@ export default function Home() {
             <div className="flex-1 flex flex-col justify-center items-center py-20 text-center">
               <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-4">search_off</span>
               <p className="font-headline-md text-headline-md text-on-surface mb-1">No deals found</p>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                {debouncedSearch ? `No results for "${debouncedSearch}"` : 'Sync your CRM data to populate the pipeline.'}
+              <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">
+                {debouncedSearch ? `No results for "${debouncedSearch}"` : 'Sync your CRM data or create a deal to get started.'}
               </p>
+              <button
+                onClick={() => setCreateModalOpen(true)}
+                className="bg-secondary text-on-secondary px-5 py-2.5 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create Your First Deal
+              </button>
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-320px)]">
                 <table className="w-full text-left border-collapse">
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="bg-[#F1F5F9] border-b border-outline-variant">
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[180px]">Deal Name</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[130px]">Account</th>
@@ -239,6 +285,7 @@ export default function Home() {
       </div>
 
       {selectedDealId && <DealDrawer dealId={selectedDealId} onClose={() => setSelectedDealId(null)} />}
+      <CreateDealModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
     </>
   );
 }

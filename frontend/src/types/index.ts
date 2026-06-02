@@ -117,3 +117,23 @@ export interface GenerateResponse {
   recommendations_generated: number;
   urgent_deals_flagged: number;
 }
+
+// --- Create Deal ---
+export interface DealCreate {
+  deal_name: string;
+  account_name?: string;
+  contact_name?: string;
+  owner_name?: string;
+  amount?: number;
+  stage?: string;
+  zoho_probability?: number;
+  closing_date?: string;
+  client_phone?: string;
+  client_email?: string;
+}
+
+export interface CreateDealResponse {
+  status: string;
+  message: string;
+  deal_id: string;
+}

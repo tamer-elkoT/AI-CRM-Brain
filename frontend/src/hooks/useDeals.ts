@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dashboardApi, actionApi } from '../services/api';
-import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse } from '../types';
+import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse, DealCreate, CreateDealResponse } from '../types';
 
 export function useDashboard(sortBy: string = 'ai_score', limit?: number) {
   return useQuery<DashboardResponse>({
@@ -58,6 +58,18 @@ export function useTriggerSync() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       void queryClient.invalidateQueries({ queryKey: ['account_ranking'] });
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+    },
+  });
+}
+
+export function useCreateDeal() {
+  const queryClient = useQueryClient();
+  return useMutation<CreateDealResponse, Error, DealCreate>({
+    mutationFn: (data: DealCreate) => dashboardApi.createDeal(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }

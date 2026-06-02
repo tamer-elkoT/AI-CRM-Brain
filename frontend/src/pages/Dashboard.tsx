@@ -144,7 +144,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#F1F5F9] border-b border-outline-variant">
