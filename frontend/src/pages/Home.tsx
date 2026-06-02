@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAllDeals, useTriggerSync } from '../hooks/useDeals';
+import { useAllDeals, useTriggerSync, useGenerateRecommendations } from '../hooks/useDeals';
 import { useToast } from '../components/ui/Toast';
 import DealDrawer from '../components/DealDrawer';
 import CreateDealModal from '../components/CreateDealModal';
@@ -24,6 +24,7 @@ export default function Home() {
 
   const { toast } = useToast();
   const syncMutation = useTriggerSync();
+  const generateMutation = useGenerateRecommendations();
 
   // Debounced search
   const handleSearchChange = (value: string) => {
@@ -53,6 +54,25 @@ export default function Home() {
         toast({
           title: 'Sync Failed',
           description: err.message || 'Could not sync CRM data.',
+          variant: 'destructive',
+        });
+      },
+    });
+  };
+
+  const handleGenerateAI = () => {
+    generateMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        toast({
+          title: '🧠 AI Analysis Complete',
+          description: `${res.recommendations_generated} recommendations generated. ${res.urgent_deals_flagged} urgent deals flagged.`,
+          variant: 'success',
+        });
+      },
+      onError: (err) => {
+        toast({
+          title: 'AI Pipeline Failed',
+          description: err.message || 'Something went wrong.',
           variant: 'destructive',
         });
       },
@@ -106,6 +126,23 @@ export default function Home() {
               <span className="hidden sm:inline">{syncMutation.isPending ? 'Syncing...' : 'Sync & Refresh'}</span>
             </button>
             <button
+              onClick={handleGenerateAI}
+              disabled={generateMutation.isPending}
+              className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center space-x-2 disabled:opacity-50 shadow-sm"
+            >
+              {generateMutation.isPending ? (
+                <>
+                  <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                  <span className="hidden sm:inline">Analyzing...</span>
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">psychology</span>
+                  <span className="hidden sm:inline">Generate AI</span>
+                </>
+              )}
+            </button>
+            <button
               onClick={() => setCreateModalOpen(true)}
               className="bg-secondary text-on-secondary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center space-x-2 shadow-sm"
             >
@@ -141,6 +178,7 @@ export default function Home() {
                   { value: 'ml_score', label: 'Sort by ML Score' },
                   { value: 'amount', label: 'Sort by Amount' },
                   { value: 'deal_name', label: 'Sort by Name' },
+                  { value: 'risk', label: '⚠ Sort by Risk Deals' },
                 ]}
               />
             </div>

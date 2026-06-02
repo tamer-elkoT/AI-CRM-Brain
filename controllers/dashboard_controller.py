@@ -86,6 +86,9 @@ def get_all_deals(
         deals.sort(key=lambda x: x.amount, reverse=True)
     elif sort_by == "deal_name":
         deals.sort(key=lambda x: x.deal_name.lower())
+    elif sort_by == "risk":
+        # Risk = lowest AI score with highest amount (most money at stake)
+        deals.sort(key=lambda x: (x.ai_score, -x.amount))
 
     # Paginate
     total_pages = max(1, math.ceil(total / page_size))
@@ -351,3 +354,18 @@ def get_account_ranking(db: Session = Depends(get_db)):
         )
 
     return AccountRankingResponse(accounts=accounts)
+
+
+@router.get("/accounts/names")
+def get_account_names(db: Session = Depends(get_db)):
+    """
+    Returns a list of distinct account names from all deals.
+    Used by the CreateDealModal dropdown.
+    """
+    results = db.query(ZohoDeal.account_name)\
+        .filter(ZohoDeal.account_name.isnot(None))\
+        .distinct()\
+        .order_by(ZohoDeal.account_name)\
+        .all()
+
+    return [row[0] for row in results if row[0]]

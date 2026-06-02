@@ -31,4 +31,95 @@
   @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
   /* rtl for arabic */
   .rtl-content { direction: rtl; text-align: right; }
+
+  /* Smooth theme transition */
+  * {
+    transition-property: background-color, border-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+  }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   Remap Material Design color tokens to dark palette
+   ═══════════════════════════════════════════════════════════════ */
+.dark {
+  /* Surfaces */
+  --tw-bg-surface: #0f1724;
+  color-scheme: dark;
+}
+
+/* Override Tailwind utility colors in dark mode */
+.dark .bg-surface { background-color: #0f1724 !important; }
+.dark .bg-surface-container-lowest { background-color: #0a0f1a !important; }
+.dark .bg-surface-container-low { background-color: #141c2e !important; }
+.dark .bg-surface-container { background-color: #1a2438 !important; }
+.dark .bg-surface-container-high { background-color: #1f2d44 !important; }
+.dark .bg-surface-container-highest { background-color: #253650 !important; }
+.dark .bg-surface-bright { background-color: #1a2438 !important; }
+.dark .bg-surface-variant { background-color: #253650 !important; }
+.dark .bg-background { background-color: #0f1724 !important; }
+
+/* Text colors */
+.dark .text-on-surface { color: #e2e8f0 !important; }
+.dark .text-on-surface-variant { color: #94a3b8 !important; }
+.dark .text-on-background { color: #e2e8f0 !important; }
+
+/* Borders */
+.dark .border-outline-variant { border-color: #2d3a50 !important; }
+.dark .border-outline { border-color: #475569 !important; }
+
+/* Primary container (used for logo bg, header elements) */
+.dark .bg-primary-container { background-color: #1e293b !important; }
+.dark .text-on-primary-container { color: #cbd5e1 !important; }
+
+/* Secondary (teal accent — keep vibrant) */
+.dark .bg-secondary { background-color: #0d9488 !important; }
+.dark .text-secondary { color: #2dd4bf !important; }
+.dark .bg-secondary\/10 { background-color: rgba(13, 148, 136, 0.15) !important; }
+
+/* Error */
+.dark .bg-error-container { background-color: #3b1419 !important; }
+.dark .text-on-error-container { color: #fca5a5 !important; }
+.dark .bg-error\/10 { background-color: rgba(186, 26, 26, 0.2) !important; }
+.dark .text-error { color: #f87171 !important; }
+
+/* Table specific */
+.dark .bg-\[\#F1F5F9\] { background-color: #1a2438 !important; }
+.dark .bg-\[\#F8FAFC\] { background-color: #141c2e !important; }
+.dark .hover\:bg-\[\#F8FAFC\]:hover { background-color: #1a2438 !important; }
+
+/* Cards shadow in dark mode */
+.dark .shadow-level-1 { box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3); }
+
+/* Input focus in dark mode */
+.dark input:focus {
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25);
+  border-color: #2dd4bf;
+}
+.dark input, .dark select {
+  background-color: #141c2e !important;
+  border-color: #2d3a50 !important;
+  color: #e2e8f0 !important;
+}
+.dark input::placeholder { color: #64748b !important; }
+
+/* Scrollbar dark mode */
+.dark ::-webkit-scrollbar { width: 8px; height: 8px; }
+.dark ::-webkit-scrollbar-track { background: #0f1724; }
+.dark ::-webkit-scrollbar-thumb { background: #2d3a50; border-radius: 4px; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #3b4f6b; }
+
+/* Auth page specific - keep dark on the right panel */
+.dark .bg-surface-container.hidden { background-color: #141c2e !important; }
+
+/* Deal drawer overlay */
+.dark .bg-primary-container\/20 { background-color: rgba(10, 15, 26, 0.6) !important; }
+
+/* WhatsApp button stays green in dark */
+.dark .bg-\[\#25D366\]\/10 { background-color: rgba(37, 211, 102, 0.15) !important; }
+
+/* Red danger zone */
+.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; }
+.dark .border-red-200 { border-color: rgba(239, 68, 68, 0.3) !important; }

@@ -1,7 +1,38 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeProvider';
 
 export default function Settings() {
   const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+
+  // Notification preferences (persisted in localStorage for MVP)
+  const [whatsappAlerts, setWhatsappAlerts] = useState(() => {
+    return localStorage.getItem('pref-whatsapp-alerts') === 'true';
+  });
+  const [emailNotifications, setEmailNotifications] = useState(() => {
+    return localStorage.getItem('pref-email-notifications') !== 'false'; // default ON
+  });
+  const [autoSync, setAutoSync] = useState(() => {
+    return localStorage.getItem('pref-auto-sync') === 'true';
+  });
+  const [arabicRecs, setArabicRecs] = useState(() => {
+    return localStorage.getItem('pref-arabic-recs') !== 'false'; // default ON
+  });
+
+  // Persist all toggles
+  useEffect(() => {
+    localStorage.setItem('pref-whatsapp-alerts', String(whatsappAlerts));
+  }, [whatsappAlerts]);
+  useEffect(() => {
+    localStorage.setItem('pref-email-notifications', String(emailNotifications));
+  }, [emailNotifications]);
+  useEffect(() => {
+    localStorage.setItem('pref-auto-sync', String(autoSync));
+  }, [autoSync]);
+  useEffect(() => {
+    localStorage.setItem('pref-arabic-recs', String(arabicRecs));
+  }, [arabicRecs]);
 
   return (
     <>
@@ -52,6 +83,84 @@ export default function Settings() {
             </div>
           </div>
 
+          {/* 🔔 Notification Preferences Card */}
+          <div className="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-[#25D366]/10 text-[#25D366] flex items-center justify-center">
+                <span className="material-symbols-outlined">notifications_active</span>
+              </div>
+              <div>
+                <h3 className="font-headline-md text-headline-md text-on-surface">🔔 Notification Preferences</h3>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">Configure deal alerts & notifications</p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              {/* WhatsApp Alerts Toggle */}
+              <div className="flex items-center justify-between py-3 border-b border-outline-variant">
+                <div>
+                  <p className="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                    <span className="text-[#25D366]">●</span>
+                    WhatsApp Alerts
+                  </p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                    Get WhatsApp notifications for urgent & hot deals
+                  </p>
+                </div>
+                <button
+                  onClick={() => setWhatsappAlerts(!whatsappAlerts)}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${
+                    whatsappAlerts ? 'bg-[#25D366]' : 'bg-outline-variant'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${
+                      whatsappAlerts ? 'right-0.5' : 'left-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Email Notifications Toggle */}
+              <div className="flex items-center justify-between py-3 border-b border-outline-variant">
+                <div>
+                  <p className="font-label-md text-label-md text-on-surface">Email Notifications</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">Get email alerts for urgent deals</p>
+                </div>
+                <button
+                  onClick={() => setEmailNotifications(!emailNotifications)}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${
+                    emailNotifications ? 'bg-secondary' : 'bg-outline-variant'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${
+                      emailNotifications ? 'right-0.5' : 'left-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {whatsappAlerts && (
+                <div className="bg-[#25D366]/5 border border-[#25D366]/20 rounded-lg p-3">
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                    <span className="font-label-sm text-[#25D366]">Active:</span> You'll receive WhatsApp messages when:
+                  </p>
+                  <ul className="mt-1.5 space-y-1 font-body-sm text-body-sm text-on-surface-variant">
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-500 text-xs">🚨</span>
+                      Risk deals: High amount + low AI probability
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-orange-500 text-xs">🔥</span>
+                      Hot leads: AI probability &gt; 85% — ready to close
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Preferences Card */}
           <div className="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -65,38 +174,73 @@ export default function Settings() {
             </div>
 
             <div className="space-y-5">
+              {/* Dark Mode Toggle */}
               <div className="flex items-center justify-between py-3 border-b border-outline-variant">
                 <div>
-                  <p className="font-label-md text-label-md text-on-surface">Email Notifications</p>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">Get alerts for urgent deals</p>
+                  <p className="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px]">{theme === 'dark' ? 'dark_mode' : 'light_mode'}</span>
+                    Dark Mode
+                  </p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">Switch between light and dark themes</p>
                 </div>
-                <div className="w-11 h-6 bg-secondary rounded-full relative cursor-pointer">
-                  <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm" />
-                </div>
+                <button
+                  onClick={toggleTheme}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${
+                    theme === 'dark' ? 'bg-secondary' : 'bg-outline-variant'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${
+                      theme === 'dark' ? 'right-0.5' : 'left-0.5'
+                    }`}
+                  />
+                </button>
               </div>
+
+              {/* Auto-sync Toggle */}
               <div className="flex items-center justify-between py-3 border-b border-outline-variant">
                 <div>
                   <p className="font-label-md text-label-md text-on-surface">Auto-sync CRM Data</p>
                   <p className="font-body-sm text-body-sm text-on-surface-variant">Sync every 6 hours automatically</p>
                 </div>
-                <div className="w-11 h-6 bg-outline-variant rounded-full relative cursor-pointer">
-                  <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm" />
-                </div>
+                <button
+                  onClick={() => setAutoSync(!autoSync)}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${
+                    autoSync ? 'bg-secondary' : 'bg-outline-variant'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${
+                      autoSync ? 'right-0.5' : 'left-0.5'
+                    }`}
+                  />
+                </button>
               </div>
+
+              {/* Arabic Recommendations Toggle */}
               <div className="flex items-center justify-between py-3">
                 <div>
                   <p className="font-label-md text-label-md text-on-surface">Arabic Recommendations</p>
                   <p className="font-body-sm text-body-sm text-on-surface-variant">Show AI suggestions in Arabic (RTL)</p>
                 </div>
-                <div className="w-11 h-6 bg-secondary rounded-full relative cursor-pointer">
-                  <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm" />
-                </div>
+                <button
+                  onClick={() => setArabicRecs(!arabicRecs)}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${
+                    arabicRecs ? 'bg-secondary' : 'bg-outline-variant'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${
+                      arabicRecs ? 'right-0.5' : 'left-0.5'
+                    }`}
+                  />
+                </button>
               </div>
             </div>
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-surface-container-lowest border border-red-200 shadow-level-1 rounded-xl p-6 lg:col-span-2">
+          <div className="bg-surface-container-lowest border border-red-200 shadow-level-1 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
                 <span className="material-symbols-outlined">warning</span>

@@ -23,6 +23,14 @@ export function useAccountRanking() {
   });
 }
 
+export function useAccountNames() {
+  return useQuery<string[]>({
+    queryKey: ['account_names'],
+    queryFn: dashboardApi.getAccountNames,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
 export function useDealDetail(dealId: string | null) {
   return useQuery<DealDetail>({
     queryKey: ['deal', dealId],

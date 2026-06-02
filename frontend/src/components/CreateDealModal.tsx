@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCreateDeal } from '../hooks/useDeals';
+import { useCreateDeal, useAccountNames } from '../hooks/useDeals';
 import { useToast } from './ui/Toast';
 import { Select } from './ui/Select';
 import { X } from 'lucide-react';
@@ -36,7 +36,9 @@ const initialForm: DealCreate = {
 
 export default function CreateDealModal({ open, onClose }: CreateDealModalProps) {
   const [form, setForm] = useState<DealCreate>({ ...initialForm });
+  const [isNewAccount, setIsNewAccount] = useState(false);
   const createDeal = useCreateDeal();
+  const { data: accountNames } = useAccountNames();
   const { toast } = useToast();
 
   if (!open) return null;
@@ -44,6 +46,21 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
   const handleChange = (field: keyof DealCreate, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleAccountSelect = (value: string) => {
+    if (value === '__NEW__') {
+      setIsNewAccount(true);
+      handleChange('account_name', '');
+    } else {
+      setIsNewAccount(false);
+      handleChange('account_name', value);
+    }
+  };
+
+  const accountOptions = [
+    ...(accountNames ?? []).map((name) => ({ value: name, label: name })),
+    { value: '__NEW__', label: '➕ Add New Account' },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +74,7 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
           variant: 'success',
         });
         setForm({ ...initialForm });
+        setIsNewAccount(false);
         onClose();
       },
       onError: (err) => {
@@ -104,17 +122,40 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
             />
           </div>
 
-          {/* Two-column grid */}
+          {/* Account Name — Dropdown with "Add New" */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-label-sm text-label-sm text-on-surface mb-1">Account Name</label>
-              <input
-                type="text"
-                value={form.account_name}
-                onChange={(e) => handleChange('account_name', e.target.value)}
-                placeholder="Company name"
-                className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none transition-all"
-              />
+              {isNewAccount ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={form.account_name}
+                    onChange={(e) => handleChange('account_name', e.target.value)}
+                    placeholder="New account name"
+                    autoFocus
+                    className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsNewAccount(false);
+                      handleChange('account_name', '');
+                    }}
+                    className="px-2 py-1 text-on-surface-variant hover:text-on-surface text-sm shrink-0"
+                    title="Back to dropdown"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <Select
+                  value={form.account_name || ''}
+                  onChange={handleAccountSelect}
+                  options={accountOptions}
+                  placeholder="Select account..."
+                />
+              )}
             </div>
             <div>
               <label className="block font-label-sm text-label-sm text-on-surface mb-1">Contact Name</label>

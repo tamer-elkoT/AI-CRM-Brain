@@ -15,6 +15,7 @@ from models.ml_engine.data_fusion import fuse_deal_payload
 from models.ml_engine.inference import preprocess_new_deal, predict_batch
 from models.ai_agents.recommender import create_recommender_service
 from models.api_schemas import RecommendationResponse
+from services.notification_service import evaluate_and_notify
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql import func
 
@@ -215,18 +216,31 @@ async def generate_all_recommendations(
                 db.execute(upsert_stmt)
                 rec_generated += 1
                 
-                # ─── Urgent Deal Detection (BackgroundTask) ───
+                # ─── WhatsApp Alert Evaluation (BackgroundTask) ───
                 adj_prob = recommendation_data.get("adjusted_probability", 1.0)
                 deal_amount = fused_payload.get("amount", 0)
                 risk_flag = recommendation_data.get("risk_flag", "NONE")
                 
                 is_urgent = (
                     (deal_amount >= 50000 and adj_prob < 0.45) or
-                    risk_flag in ("HIGH_RISK", "STALLED", "COMPETITOR_PRESENT")
+                    risk_flag in ("HIGH_RISK", "STALLED", "COMPETITOR_PRESENT") or
+                    adj_prob > 0.85
                 )
                 
                 if is_urgent:
                     urgent_count += 1
+                    background_tasks.add_task(
+                        evaluate_and_notify,
+                        deal_name=fused_payload.get("deal_name", "Unknown"),
+                        account_name=fused_payload.get("account_name", "Unknown"),
+                        amount=deal_amount,
+                        adjusted_probability=adj_prob,
+                        risk_flag=risk_flag,
+                        owner_name=fused_payload.get("owner_name", "Unknown"),
+                        owner_phone=fused_payload.get("client_phone"),
+                        recommendation_ar=recommendation_data.get("recommendation_ar", ""),
+                    )
+                    # Keep legacy manager notification for backwards compatibility
                     background_tasks.add_task(
                         notify_sales_manager,
                         deal_name=fused_payload.get("deal_name", "Unknown"),

@@ -40,6 +40,7 @@ export const dashboardApi = {
   getAccountRanking: (): Promise<AccountRankingResponse> => api.get('/analytics/accounts/ranked').then((res) => res.data),
   getDealDetail: (id: string): Promise<DealDetail> => api.get(`/deals/${id}`).then((res) => res.data),
   createDeal: (data: DealCreate): Promise<CreateDealResponse> => api.post('/deals', data).then((res) => res.data),
+  getAccountNames: (): Promise<string[]> => api.get('/accounts/names').then((res) => res.data),
 };
 
 export const actionApi = {

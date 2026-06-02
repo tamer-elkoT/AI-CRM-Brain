@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeProvider';
 
 interface NavItem {
   icon: string;
@@ -19,6 +20,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const sidebarContent = (
@@ -58,16 +60,25 @@ export default function AppLayout() {
         </div>
       </div>
 
-      <button
-        onClick={() => {
-          logout();
-          setMobileOpen(false);
-        }}
-        className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors"
-      >
-        <span className="material-symbols-outlined text-[20px]">logout</span>
-        Sign Out
-      </button>
+      <div className="space-y-1">
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        >
+          <span className="material-symbols-outlined text-[20px]">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </button>
+        <button
+          onClick={() => {
+            logout();
+            setMobileOpen(false);
+          }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors"
+        >
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+          Sign Out
+        </button>
+      </div>
     </>
   );
 
