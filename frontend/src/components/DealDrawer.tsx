@@ -256,22 +256,36 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
           <section>
             <h3 className="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              <a
-                href={`https://wa.me/1234567890?text=${encodeURIComponent(`Hi, following up on the ${deal.deal_name} deal.`)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg font-label-md text-sm transition-colors border border-[#25D366]/30"
-              >
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp Client
-              </a>
-              <a
-                href={`mailto:client@example.com?subject=${encodeURIComponent(`Regarding ${deal.deal_name}`)}`}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 bg-surface-container-high text-on-surface hover:bg-surface-variant rounded-lg font-label-md text-sm transition-colors border border-outline-variant"
-              >
-                <Mail className="w-4 h-4" />
-                Email Client
-              </a>
+              {deal.client_phone ? (
+                <a
+                  href={`https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi, following up on the ${deal.deal_name} deal.`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg font-label-md text-sm transition-colors border border-[#25D366]/30"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp Client
+                </a>
+              ) : (
+                <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-surface-container-high text-on-surface-variant/50 rounded-lg font-label-md text-sm border border-outline-variant cursor-not-allowed" title="No phone number available for this deal">
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp (N/A)
+                </div>
+              )}
+              {deal.client_email ? (
+                <a
+                  href={`mailto:${deal.client_email}?subject=${encodeURIComponent(`Regarding ${deal.deal_name}`)}`}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-surface-container-high text-on-surface hover:bg-surface-variant rounded-lg font-label-md text-sm transition-colors border border-outline-variant"
+                >
+                  <Mail className="w-4 h-4" />
+                  Email Client
+                </a>
+              ) : (
+                <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-surface-container-high text-on-surface-variant/50 rounded-lg font-label-md text-sm border border-outline-variant cursor-not-allowed" title="No email available for this deal">
+                  <Mail className="w-4 h-4" />
+                  Email (N/A)
+                </div>
+              )}
               <button
                 onClick={() => {
                   escalateDeal.mutate(dealId, {

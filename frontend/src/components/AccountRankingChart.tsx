@@ -62,7 +62,7 @@ export default function AccountRankingChart() {
     return (
       <div className="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-8 text-center">
         <span className="material-symbols-outlined text-on-surface-variant text-4xl mb-2">bar_chart</span>
-        <p className="font-body-md text-body-md text-on-surface-variant">No account data available yet.</p>
+        <p className="font-body-md text-body-md text-on-surface-variant">No account data yet — generate AI recommendations first.</p>
       </div>
     );
   }

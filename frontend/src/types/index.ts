@@ -81,6 +81,8 @@ export interface DealDetail {
   feature_vector: Record<string, number> | null;
   risk_flag: string | null;
   priority_tier: string | null;
+  client_phone: string | null;
+  client_email: string | null;
 }
 
 // --- Actions ---
@@ -92,9 +94,14 @@ export interface ActionResponse {
 export interface SyncResponse {
   status: string;
   message: string;
-  details: {
-    ingestion: unknown;
-    ml: unknown;
-    llm: unknown;
-  };
+  source?: string;
+}
+
+export interface GenerateResponse {
+  status: string;
+  message: string;
+  batch_id: string;
+  ml_predictions_generated: number;
+  recommendations_generated: number;
+  urgent_deals_flagged: number;
 }

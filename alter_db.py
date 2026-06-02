@@ -14,5 +14,17 @@ try:
 except Exception as e:
     print("Error on users:", e)
 
+try:
+    db.execute(text("ALTER TABLE zoho_deals ADD COLUMN IF NOT EXISTS client_phone VARCHAR(255);"))
+    print("Added client_phone to zoho_deals")
+except Exception as e:
+    print("Error on zoho_deals client_phone:", e)
+
+try:
+    db.execute(text("ALTER TABLE zoho_deals ADD COLUMN IF NOT EXISTS client_email VARCHAR(255);"))
+    print("Added client_email to zoho_deals")
+except Exception as e:
+    print("Error on zoho_deals client_email:", e)
+
 db.commit()
 print("Done!")

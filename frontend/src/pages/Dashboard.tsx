@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useDashboard, useTriggerSync } from '../hooks/useDeals';
+import { useDashboard, useTriggerSync, useGenerateRecommendations } from '../hooks/useDeals';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/ui/Toast';
 import DealDrawer from '../components/DealDrawer';
 import ScatterChart from '../components/ScatterChart';
 import AccountRankingChart from '../components/AccountRankingChart';
@@ -28,19 +29,50 @@ const NAV_ITEMS: NavItem[] = [
   { icon: 'settings', label: 'Settings', path: '/settings', disabled: true },
 ];
 
+const DEALS_PER_PAGE = 15;
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const { toast } = useToast();
   
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('ai_score');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const limit = undefined;
-  const { data, isLoading } = useDashboard(sortBy, limit);
+  const { data, isLoading } = useDashboard(sortBy);
   const syncMutation = useTriggerSync();
+  const generateMutation = useGenerateRecommendations();
 
-  const displayedDeals = data?.ranked_deals ?? [];
+  const allDeals = data?.ranked_deals ?? [];
+  const totalPages = Math.max(1, Math.ceil(allDeals.length / DEALS_PER_PAGE));
+  const displayedDeals = allDeals.slice((currentPage - 1) * DEALS_PER_PAGE, currentPage * DEALS_PER_PAGE);
+
+  // Reset to page 1 when sort changes
+  const handleSortChange = (newSort: string) => {
+    setSortBy(newSort);
+    setCurrentPage(1);
+  };
+
+  const handleGenerateAI = () => {
+    generateMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        toast({
+          title: '🧠 AI Analysis Complete',
+          description: `${res.recommendations_generated} recommendations generated. ${res.urgent_deals_flagged} urgent deals flagged.`,
+          variant: 'success',
+        });
+      },
+      onError: (err) => {
+        toast({
+          title: 'AI Pipeline Failed',
+          description: err.message || 'Something went wrong.',
+          variant: 'destructive',
+        });
+      },
+    });
+  };
 
   const getStatusIcon = (score: number) => {
     if (score >= 80) return <Flame className="w-4 h-4 text-orange-500" />;
@@ -107,7 +139,7 @@ export default function Dashboard() {
               <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Dashboard</h2>
               <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">دماغ إدارة علاقات العملاء بالذكاء الاصطناعي</p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => syncMutation.mutate()}
                 disabled={syncMutation.isPending}
@@ -115,6 +147,23 @@ export default function Dashboard() {
               >
                 <span className={`material-symbols-outlined text-[18px] ${syncMutation.isPending ? 'animate-spin' : ''}`}>sync</span>
                 <span className="hidden sm:inline">Sync CRM</span>
+              </button>
+              <button
+                onClick={handleGenerateAI}
+                disabled={generateMutation.isPending}
+                className="bg-secondary text-on-secondary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center space-x-2 disabled:opacity-50 shadow-sm"
+              >
+                {generateMutation.isPending ? (
+                  <>
+                    <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                    <span className="hidden sm:inline">Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[18px]">psychology</span>
+                    <span className="hidden sm:inline">🧠 Generate AI</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -164,14 +213,14 @@ export default function Dashboard() {
                   <h3 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
                     Ranked Deals
                     <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-label-sm text-xs">
-                      All
+                      {allDeals.length} total
                     </span>
                   </h3>
                 </div>
                 <div className="w-full sm:w-64">
                   <Select
                     value={sortBy}
-                    onChange={setSortBy}
+                    onChange={handleSortChange}
                     options={[
                       { value: 'ai_score', label: 'Sort by AI Score (High-Low)' },
                       { value: 'ml_score', label: 'Sort by ML Score' },
@@ -224,7 +273,7 @@ export default function Dashboard() {
                         <td className="p-3 text-right">
                           <button
                             onClick={(e) => {
-                              e.stopPropagation(); // prevent row click from firing twice
+                              e.stopPropagation();
                               setSelectedDealId(deal.deal_id);
                             }}
                             className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-variant transition-colors shadow-sm group-hover:bg-secondary group-hover:text-white"
@@ -237,6 +286,44 @@ export default function Dashboard() {
                   </tbody>
                 </table>
               </div>
+
+              {/* ─── Pagination ─── */}
+              {totalPages > 1 && (
+                <div className="p-3 bg-surface-container-lowest flex items-center justify-between border-t border-outline-variant">
+                  <span className="font-label-sm text-label-sm text-on-surface-variant">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1.5 rounded font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      ← Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded font-label-sm text-label-sm transition-colors ${
+                          page === currentPage
+                            ? 'bg-secondary text-on-secondary'
+                            : 'text-on-surface-variant hover:bg-surface-container-high'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1.5 rounded font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+              )}
               
             </div>
           </div>

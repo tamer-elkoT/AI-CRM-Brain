@@ -84,6 +84,8 @@ class DealDetailResponse(BaseModel):
     feature_vector: Optional[dict] = None
     risk_flag: Optional[str] = None
     priority_tier: Optional[str] = None
+    client_phone: Optional[str] = None
+    client_email: Optional[str] = None
 
 from pydantic import EmailStr
 

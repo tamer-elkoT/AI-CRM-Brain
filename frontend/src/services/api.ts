@@ -8,6 +8,7 @@ import type {
   ActionResponse,
   SyncResponse,
   AccountRankingResponse,
+  GenerateResponse,
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -39,6 +40,7 @@ export const actionApi = {
   markActioned: (dealId: string): Promise<ActionResponse> => api.patch(`/recommendations/${dealId}/action`).then((res) => res.data),
   escalateDeal: (dealId: string): Promise<ActionResponse> => api.post(`/recommendations/${dealId}/escalate`).then((res) => res.data),
   triggerSync: (): Promise<SyncResponse> => api.post('/ingest/deals').then((res) => res.data),
+  generateRecommendations: (): Promise<GenerateResponse> => api.post('/recommendations/generate').then((res) => res.data),
 };
 
 export const ingestionApi = {

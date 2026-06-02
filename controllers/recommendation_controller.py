@@ -2,7 +2,7 @@
 FastAPI endpoints for LLM recommendation generation.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
@@ -10,11 +10,13 @@ import asyncio
 import logging
 
 from models.database import SessionLocal
-from models.schema import MLPrediction, LLMRecommendation
+from models.schema import ZohoDeal, MLPrediction, LLMRecommendation
 from models.ml_engine.data_fusion import fuse_deal_payload
+from models.ml_engine.inference import preprocess_new_deal, predict_batch
 from models.ai_agents.recommender import create_recommender_service
 from models.api_schemas import RecommendationResponse
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.sql import func
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -30,6 +32,29 @@ def get_db():
 
 # Initialize LLM service (singleton)
 llm_service = create_recommender_service()
+
+
+# --- Urgent Deal Notification (BackgroundTask) ---
+def notify_sales_manager(deal_name: str, account_name: str, amount: float, recommendation_ar: str, risk_flag: str):
+    """
+    Simulated notification to the sales manager for urgent deals.
+    In production, this would send an email/Slack/SMS.
+    """
+    logger.warning(
+        "\n"
+        "╔══════════════════════════════════════════════════════════════╗\n"
+        "║  🚨 URGENT DEAL ALERT — Sales Manager Notification        ║\n"
+        "╠══════════════════════════════════════════════════════════════╣\n"
+        f"║  Deal: {deal_name:<52}║\n"
+        f"║  Account: {account_name:<49}║\n"
+        f"║  Amount: ${amount:,.0f:<50}║\n"
+        f"║  Risk Flag: {risk_flag:<47}║\n"
+        "╠══════════════════════════════════════════════════════════════╣\n"
+        f"║  AI Recommendation: {recommendation_ar[:38]+'...' if len(recommendation_ar) > 38 else recommendation_ar:<39}║\n"
+        "╠══════════════════════════════════════════════════════════════╣\n"
+        "║  ⚠️  ACTION REQUIRED: Please call the client immediately.  ║\n"
+        "╚══════════════════════════════════════════════════════════════╝"
+    )
 
 
 @router.post("/recommendations/generate/{deal_id}")
@@ -89,6 +114,147 @@ async def generate_single_recommendation(
     except Exception as e:
         logger.error(f"Recommendation generation failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/recommendations/generate")
+async def generate_all_recommendations(
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    Full AI pipeline: For all deals that lack ML predictions or LLM recommendations,
+    run the ML model and LLM agent to generate scores and recommendations.
+    """
+    try:
+        batch_id = str(uuid.uuid4())
+        
+        # ─── Phase 1: Find deals missing ML predictions ───
+        deals_needing_predictions = db.query(ZohoDeal).outerjoin(
+            MLPrediction, ZohoDeal.id == MLPrediction.deal_id
+        ).filter(MLPrediction.id == None).all()
+        
+        ml_processed = 0
+        if deals_needing_predictions:
+            raw_deals = []
+            for d in deals_needing_predictions:
+                raw_deals.append({
+                    "Deal_ID": d.id,
+                    "Amount": d.amount,
+                    "Closing_Date": str(d.closing_date) if d.closing_date else "2026-12-31",
+                    "Owner_Name": d.owner_name or "Unknown",
+                    "Account_Name": d.account_name or "Unknown",
+                    "Stage": d.stage,
+                })
+            
+            X_processed = preprocess_new_deal(raw_deals)
+            ml_results = predict_batch(X_processed)
+            
+            for raw, res in zip(raw_deals, ml_results):
+                stmt = insert(MLPrediction).values(
+                    deal_id=raw["Deal_ID"],
+                    predicted_stage_encoded=res["predicted_stage_encoded"],
+                    base_probability=res["base_probability"],
+                    confidence_all_classes=res["confidence_all_classes"],
+                    batch_id=batch_id,
+                )
+                upsert_stmt = stmt.on_conflict_do_update(
+                    index_elements=["deal_id"],
+                    set_={
+                        "predicted_stage_encoded": stmt.excluded.predicted_stage_encoded,
+                        "base_probability": stmt.excluded.base_probability,
+                        "confidence_all_classes": stmt.excluded.confidence_all_classes,
+                        "batch_id": stmt.excluded.batch_id,
+                        "updated_at": func.now(),
+                    },
+                )
+                db.execute(upsert_stmt)
+                ml_processed += 1
+            
+            db.commit()
+            logger.info(f"Phase 1: Generated ML predictions for {ml_processed} deals.")
+        
+        # ─── Phase 2: Find deals missing LLM recommendations ───
+        deals_needing_recs = db.query(MLPrediction).outerjoin(
+            LLMRecommendation, MLPrediction.deal_id == LLMRecommendation.deal_id
+        ).filter(LLMRecommendation.id == None).all()
+        
+        rec_generated = 0
+        urgent_count = 0
+        
+        for prediction in deals_needing_recs:
+            try:
+                # Fuse data
+                fused_payload = fuse_deal_payload(db, prediction)
+                
+                # Normalize probability
+                raw_prob = float(fused_payload.get("base_probability", 0))
+                fused_payload["base_probability"] = raw_prob / 100 if raw_prob > 1 else raw_prob
+                
+                # Call LLM
+                recommendation_data = llm_service.generate_recommendation(fused_payload)
+                
+                # Upsert to DB
+                stmt = insert(LLMRecommendation).values(
+                    id=str(uuid.uuid4()),
+                    deal_id=prediction.deal_id,
+                    prediction_id=str(prediction.id),
+                    batch_id=batch_id,
+                    **recommendation_data,
+                )
+                upsert_stmt = stmt.on_conflict_do_update(
+                    index_elements=["deal_id", "batch_id"],
+                    set_={
+                        "adjusted_probability": stmt.excluded.adjusted_probability,
+                        "recommendation_ar": stmt.excluded.recommendation_ar,
+                        "recommendation_en": stmt.excluded.recommendation_en,
+                        "risk_flag": stmt.excluded.risk_flag,
+                        "llm_latency_ms": stmt.excluded.llm_latency_ms,
+                        "updated_at": func.now(),
+                    },
+                )
+                db.execute(upsert_stmt)
+                rec_generated += 1
+                
+                # ─── Urgent Deal Detection (BackgroundTask) ───
+                adj_prob = recommendation_data.get("adjusted_probability", 1.0)
+                deal_amount = fused_payload.get("amount", 0)
+                risk_flag = recommendation_data.get("risk_flag", "NONE")
+                
+                is_urgent = (
+                    (deal_amount >= 50000 and adj_prob < 0.45) or
+                    risk_flag in ("HIGH_RISK", "STALLED", "COMPETITOR_PRESENT")
+                )
+                
+                if is_urgent:
+                    urgent_count += 1
+                    background_tasks.add_task(
+                        notify_sales_manager,
+                        deal_name=fused_payload.get("deal_name", "Unknown"),
+                        account_name=fused_payload.get("account_name", "Unknown"),
+                        amount=deal_amount,
+                        recommendation_ar=recommendation_data.get("recommendation_ar", ""),
+                        risk_flag=risk_flag,
+                    )
+                
+            except Exception as e:
+                logger.error(f"LLM failed for deal {prediction.deal_id}: {e}")
+                continue
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"AI pipeline complete. {ml_processed} ML predictions + {rec_generated} LLM recommendations generated.",
+            "batch_id": batch_id,
+            "ml_predictions_generated": ml_processed,
+            "recommendations_generated": rec_generated,
+            "urgent_deals_flagged": urgent_count,
+        }
+    
+    except Exception as e:
+        db.rollback()
+        logger.error(f"AI recommendation pipeline failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI pipeline failed: {str(e)}")
 
 
 @router.post("/recommendations/batch")

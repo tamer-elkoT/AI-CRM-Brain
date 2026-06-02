@@ -74,6 +74,13 @@ def ingest_zoho_deals():
                     if deal.get("Owner")
                     else "Unknown"
                 ),
+                # Extract contact info for WhatsApp/Email actions
+                "client_phone": deal.get("Phone") or deal.get("Mobile") or None,
+                "client_email": deal.get("Email") or (
+                    deal.get("Contact_Name", {}).get("email")
+                    if isinstance(deal.get("Contact_Name"), dict)
+                    else None
+                ),
             }
 
             # 3. High-Performance PostgreSQL Upsert (ON CONFLICT DO UPDATE)

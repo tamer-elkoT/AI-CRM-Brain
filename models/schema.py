@@ -43,6 +43,8 @@ class ZohoDeal(Base):
     expected_revenue = Column(Float, default=0.0)
     contact_name = Column(String)
     owner_name = Column(String)
+    client_phone = Column(String, nullable=True)
+    client_email = Column(String, nullable=True)
 
     # JSONB is perfect for storing raw API data we might need later
     custom_fields = Column(JSONB)

@@ -137,19 +137,22 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
         recommendation_en=rec.recommendation_en if rec else "Analysis pending...",
         feature_vector=pred.feature_vector if pred else {},
         risk_flag=rec.risk_flag if rec else "PENDING",
-        priority_tier=rec.priority_tier if rec else "LOW"
+        priority_tier=rec.priority_tier if rec else "LOW",
+        client_phone=deal.client_phone,
+        client_email=deal.client_email,
     )
 
 @router.get("/analytics/accounts/ranked", response_model=AccountRankingResponse)
 def get_account_ranking(db: Session = Depends(get_db)):
     """
     Returns accounts ranked by highest average AI win probability.
+    Uses outer join so accounts appear even without recommendations.
     """
     results = db.query(
         ZohoDeal.account_name,
         func.avg(LLMRecommendation.adjusted_probability).label('avg_score'),
         func.count(ZohoDeal.id).label('deal_count')
-    ).join(
+    ).outerjoin(
         LLMRecommendation, LLMRecommendation.deal_id == ZohoDeal.id
     ).filter(
         ZohoDeal.account_name != None,
@@ -157,14 +160,15 @@ def get_account_ranking(db: Session = Depends(get_db)):
     ).group_by(
         ZohoDeal.account_name
     ).order_by(
-        func.avg(LLMRecommendation.adjusted_probability).desc()
+        func.coalesce(func.avg(LLMRecommendation.adjusted_probability), 0).desc()
     ).limit(8).all()
 
     accounts = []
     for row in results:
+        avg = row.avg_score if row.avg_score is not None else 0.0
         accounts.append(AccountRanking(
             account_name=row.account_name,
-            avg_score=round(row.avg_score * 100, 1) if row.avg_score else 0.0,
+            avg_score=round(avg * 100, 1) if avg <= 1 else round(avg, 1),
             deal_count=row.deal_count
         ))
 
