@@ -1,30 +1,24 @@
+"""
+alter_db.py — Run this ONCE to ensure client_phone / client_email columns
+exist on the zoho_deals table. Safe to run multiple times (IF NOT EXISTS).
+
+Usage:
+    python alter_db.py
+"""
 from sqlalchemy import text
-from models.database import SessionLocal
+from models.database import engine
 
-db = SessionLocal()
-try:
-    db.execute(text("ALTER TABLE zoho_deals ADD COLUMN IF NOT EXISTS is_escalated BOOLEAN DEFAULT FALSE;"))
-    print("Added is_escalated to zoho_deals")
-except Exception as e:
-    print("Error on zoho_deals:", e)
-    
-try:
-    db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS business_field VARCHAR(255);"))
-    print("Added business_field to users")
-except Exception as e:
-    print("Error on users:", e)
+SQL = text("""
+ALTER TABLE zoho_deals
+    ADD COLUMN IF NOT EXISTS client_phone VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS client_email VARCHAR(255);
+""")
 
-try:
-    db.execute(text("ALTER TABLE zoho_deals ADD COLUMN IF NOT EXISTS client_phone VARCHAR(255);"))
-    print("Added client_phone to zoho_deals")
-except Exception as e:
-    print("Error on zoho_deals client_phone:", e)
+def run():
+    with engine.connect() as conn:
+        conn.execute(SQL)
+        conn.commit()
+        print("✅  Columns client_phone / client_email ensured on zoho_deals.")
 
-try:
-    db.execute(text("ALTER TABLE zoho_deals ADD COLUMN IF NOT EXISTS client_email VARCHAR(255);"))
-    print("Added client_email to zoho_deals")
-except Exception as e:
-    print("Error on zoho_deals client_email:", e)
-
-db.commit()
-print("Done!")
+if __name__ == "__main__":
+    run()

@@ -1,11 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dashboardApi, actionApi } from '../services/api';
-import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse } from '../types';
+import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse } from '../types';
 
 export function useDashboard(sortBy: string = 'ai_score', limit?: number) {
   return useQuery<DashboardResponse>({
     queryKey: ['dashboard', sortBy, limit],
     queryFn: () => dashboardApi.getRankedDeals(sortBy, limit),
+  });
+}
+
+export function useAllDeals(page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score') {
+  return useQuery<AllDealsResponse>({
+    queryKey: ['all_deals', page, pageSize, search, sortBy],
+    queryFn: () => dashboardApi.getAllDeals(page, pageSize, search, sortBy),
   });
 }
 

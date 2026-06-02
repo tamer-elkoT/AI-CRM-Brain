@@ -21,7 +21,7 @@ export default function Auth() {
 
   // If already authenticated, redirect
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +31,7 @@ export default function Auth() {
     try {
       if (isLogin) {
         await login({ email, password });
-        navigate('/dashboard');
+        navigate('/home');
       } else {
         await signup({ email, password, name, business_field: businessField });
         navigate('/onboarding');
@@ -55,7 +55,7 @@ export default function Auth() {
       setErrorMsg('');
       try {
         await googleLogin(tokenResponse.access_token);
-        navigate('/dashboard');
+        navigate('/home');
       } catch {
         setErrorMsg('Google login failed.');
       } finally {

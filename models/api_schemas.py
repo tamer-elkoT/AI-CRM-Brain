@@ -51,11 +51,22 @@ class RankedDeal(BaseModel):
     ml_score: float
     ai_score: float
     amount: float
+    stage: Optional[str] = None
+    closing_date: Optional[str] = None
+    client_phone: Optional[str] = None
+    client_email: Optional[str] = None
 
 class DashboardKPIs(BaseModel):
     total_active: int
     high_priority_count: int
     avg_ai_score: float
+
+class PaginatedDealsResponse(BaseModel):
+    items: List[RankedDeal]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
 
 class DashboardResponse(BaseModel):
     kpis: DashboardKPIs

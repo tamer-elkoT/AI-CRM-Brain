@@ -48,12 +48,24 @@ export interface RankedDeal {
   ml_score: number;
   ai_score: number;
   amount: number;
+  stage?: string;
+  closing_date?: string;
+  client_phone?: string | null;
+  client_email?: string | null;
 }
 
 export interface DashboardResponse {
   kpis: DashboardKPIs;
   scatter_points: DealScatterPoint[];
   ranked_deals: RankedDeal[];
+}
+
+export interface AllDealsResponse {
+  items: RankedDeal[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
 }
 
 export interface AccountRanking {

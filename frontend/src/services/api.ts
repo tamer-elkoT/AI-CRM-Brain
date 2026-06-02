@@ -9,6 +9,7 @@ import type {
   SyncResponse,
   AccountRankingResponse,
   GenerateResponse,
+  AllDealsResponse,
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -32,6 +33,8 @@ api.interceptors.request.use((config) => {
 export const dashboardApi = {
   getRankedDeals: (sortBy: string = 'ai_score', limit?: number): Promise<DashboardResponse> => 
     api.get('/deals/ranked', { params: { sort_by: sortBy, limit } }).then((res) => res.data),
+  getAllDeals: (page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score'): Promise<AllDealsResponse> =>
+    api.get('/deals', { params: { page, page_size: pageSize, search: search || undefined, sort_by: sortBy } }).then((res) => res.data),
   getAccountRanking: (): Promise<AccountRankingResponse> => api.get('/analytics/accounts/ranked').then((res) => res.data),
   getDealDetail: (id: string): Promise<DealDetail> => api.get(`/deals/${id}`).then((res) => res.data),
 };

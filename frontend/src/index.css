@@ -27,6 +27,8 @@
   .backdrop-blur-layer { backdrop-filter: blur(8px); }
   .drawer-slide-in { animation: slideIn 0.3s ease-out forwards; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  .drawer-slide-in-left { animation: slideInLeft 0.3s ease-out forwards; }
+  @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
   /* rtl for arabic */
   .rtl-content { direction: rtl; text-align: right; }
 }

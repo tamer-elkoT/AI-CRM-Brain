@@ -180,7 +180,7 @@ export default function Onboarding() {
                 <p className="font-display-lg text-headline-lg text-secondary">Active</p>
                 <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">CRM Connection established</p>
               </div>
-              <button onClick={() => navigate('/dashboard')} className="w-full py-3.5 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity">
+              <button onClick={() => navigate('/home')} className="w-full py-3.5 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity">
                 Go to Dashboard
               </button>
             </div>
