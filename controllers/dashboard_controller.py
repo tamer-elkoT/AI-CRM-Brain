@@ -35,9 +35,9 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
     # 1. Fetch all deals that have recommendations (for MVP, we assume recommendations are the source of truth for the dashboard)
     # To get the latest, we might just query LLMRecommendation and join ZohoDeal and MLPrediction
     
-    recs = db.query(LLMRecommendation, ZohoDeal, MLPrediction)\
-        .join(ZohoDeal, LLMRecommendation.deal_id == ZohoDeal.id)\
-        .join(MLPrediction, LLMRecommendation.prediction_id == MLPrediction.id)\
+    recs = db.query(ZohoDeal, MLPrediction, LLMRecommendation)\
+        .outerjoin(MLPrediction, ZohoDeal.id == MLPrediction.deal_id)\
+        .outerjoin(LLMRecommendation, ZohoDeal.id == LLMRecommendation.deal_id)\
         .all()
         
     if not recs:
@@ -50,8 +50,11 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
 
     # 2. Calculate KPIs
     total_active = len(recs)
-    high_priority_count = sum(1 for r, d, m in recs if r.priority_tier == "HIGH")
-    avg_ai_score = sum(r.adjusted_score_pct for r, d, m in recs) / total_active if total_active > 0 else 0.0
+    high_priority_count = sum(1 for deal, pred, rec in recs if rec and rec.priority_tier == "HIGH")
+    
+    total_scores = sum(rec.adjusted_score_pct for deal, pred, rec in recs if rec)
+    deals_with_scores = sum(1 for deal, pred, rec in recs if rec)
+    avg_ai_score = total_scores / deals_with_scores if deals_with_scores > 0 else 0.0
 
     kpis = DashboardKPIs(
         total_active=total_active,
@@ -63,10 +66,10 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
     scatter_points = []
     ranked_deals = []
     
-    for rec, deal, pred in recs:
-        ai_score = rec.adjusted_score_pct
-        ml_score = round(pred.base_probability * 100, 1) if pred.base_probability <= 1 else pred.base_probability
-        priority = rec.priority_tier or "LOW"
+    for deal, pred, rec in recs:
+        ai_score = rec.adjusted_score_pct if rec else 0.0
+        ml_score = round(pred.base_probability * 100, 1) if pred and pred.base_probability <= 1 else (pred.base_probability if pred else 0.0)
+        priority = rec.priority_tier if rec else "LOW"
         
         scatter_points.append(ScatterPoint(
             deal_id=deal.id,
@@ -109,9 +112,9 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
     """
     Fetches full detail for the Right Drawer.
     """
-    record = db.query(LLMRecommendation, ZohoDeal, MLPrediction)\
-        .join(ZohoDeal, LLMRecommendation.deal_id == ZohoDeal.id)\
-        .join(MLPrediction, LLMRecommendation.prediction_id == MLPrediction.id)\
+    record = db.query(ZohoDeal, MLPrediction, LLMRecommendation)\
+        .outerjoin(MLPrediction, ZohoDeal.id == MLPrediction.deal_id)\
+        .outerjoin(LLMRecommendation, ZohoDeal.id == LLMRecommendation.deal_id)\
         .filter(ZohoDeal.id == deal_id)\
         .order_by(LLMRecommendation.created_at.desc())\
         .first()
@@ -119,7 +122,7 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
     if not record:
         raise HTTPException(status_code=404, detail="Deal details not found")
         
-    rec, deal, pred = record
+    deal, pred, rec = record
     
     return DealDetailResponse(
         deal_id=deal.id,
@@ -128,13 +131,13 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
         stage=deal.stage,
         amount=deal.amount or 0.0,
         closing_date=str(deal.closing_date)[:10] if deal.closing_date else "N/A",
-        base_probability=round(pred.base_probability * 100, 1) if pred.base_probability <= 1 else pred.base_probability,
-        adjusted_probability=rec.adjusted_score_pct,
-        recommendation_ar=rec.recommendation_ar,
-        recommendation_en=rec.recommendation_en,
-        feature_vector=pred.feature_vector,
-        risk_flag=rec.risk_flag,
-        priority_tier=rec.priority_tier
+        base_probability=round(pred.base_probability * 100, 1) if pred and pred.base_probability <= 1 else (pred.base_probability if pred else 0.0),
+        adjusted_probability=rec.adjusted_score_pct if rec else 0.0,
+        recommendation_ar=rec.recommendation_ar if rec else "جاري التحليل...",
+        recommendation_en=rec.recommendation_en if rec else "Analysis pending...",
+        feature_vector=pred.feature_vector if pred else {},
+        risk_flag=rec.risk_flag if rec else "PENDING",
+        priority_tier=rec.priority_tier if rec else "LOW"
     )
 
 @router.get("/analytics/accounts/ranked", response_model=AccountRankingResponse)
