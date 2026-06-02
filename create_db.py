@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
 # IMPORTANT: Import all your models here so Base knows about them
-from models.schema import Base, ZohoDeal, MLPrediction, LLMRecommendation
+from models.schema import Base, User, ZohoDeal, MLPrediction, LLMRecommendation
 
 load_dotenv()
 

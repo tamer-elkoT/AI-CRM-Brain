@@ -9,3 +9,8 @@ notebooks/__pycache__/
 notebooks/mlruns
  models/__pycache__/
  models/data_ingestion/__pycache__
+ utils/__pycache__
+ frontend/node_modules/
+models/data_ingestion/__pycache__/__init__.cpython-310.py
+controllers/__pycache__/__init__.cpython-310.pyc
+models/__pycache__/database.cpython-310.pyc

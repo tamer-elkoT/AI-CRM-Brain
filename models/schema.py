@@ -19,6 +19,15 @@ import uuid
 from sqlalchemy import UniqueConstraint
 
 
+class User(Base):
+    __tablename__ = "users"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=True) # Null for OAuth users
+    name = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+
 class ZohoDeal(Base):
     __tablename__ = "zoho_deals"
 
@@ -36,6 +45,7 @@ class ZohoDeal(Base):
 
     # JSONB is perfect for storing raw API data we might need later
     custom_fields = Column(JSONB)
+    is_escalated = Column(Boolean, default=False)
 
     # Relationships
     predictions = relationship(

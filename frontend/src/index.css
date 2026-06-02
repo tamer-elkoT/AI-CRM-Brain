@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .material-symbols-outlined.fill {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  input:focus {
+    box-shadow: 0 0 0 2px rgba(0, 106, 97, 0.2);
+    border-color: #006a61;
+  }
+  
+  .shadow-level-1 { box-shadow: 0px 2px 4px rgba(15, 23, 42, 0.05); }
+        
+  /* Progress Bar Animation */
+  @keyframes loadProgress {
+    0% { width: 0; }
+  }
+  .progress-animate {
+    animation: loadProgress 1s ease-out forwards;
+  }
+  
+  .backdrop-blur-layer { backdrop-filter: blur(8px); }
+  .drawer-slide-in { animation: slideIn 0.3s ease-out forwards; }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  /* rtl for arabic */
+  .rtl-content { direction: rtl; text-align: right; }
+}

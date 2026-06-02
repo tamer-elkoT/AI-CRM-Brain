@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, FastAPI
+from fastapi import APIRouter, Depends, HTTPException, FastAPI, File, UploadFile
 from sqlalchemy.orm import Session
 from models.database import SessionLocal
 from models.schema import ZohoDeal
@@ -6,6 +6,20 @@ from models.data_ingestion.zoho_api import fetch_deals_schema
 from sqlalchemy.dialects.postgresql import insert
 
 router = APIRouter()
+
+@router.post("/ingestion/upload")
+async def upload_custom_crm(file: UploadFile = File(...)):
+    """
+    Accepts a .csv or .xlsx file for Custom CRM integration.
+    """
+    if not (file.filename.endswith(".csv") or file.filename.endswith(".xlsx")):
+        raise HTTPException(status_code=400, detail="Invalid file type. Only .csv and .xlsx allowed.")
+    
+    # Read headers / process mock (just returning success for now)
+    return {
+        "status": "success", 
+        "message": f"File {file.filename} uploaded and validated successfully."
+    }
 
 
 @router.post("/ingest/deals")
