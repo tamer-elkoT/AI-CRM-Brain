@@ -1,16 +1,85 @@
-models/__pycache__/
-version/__pycache__/
-alembic/__pycache__
-alembic/versions
-models/data_ingestion/__pycache__
-/mnt/d/01_Projects/NLP/AI CRM Brain/AI-CRM-Brain/notebooks/mlruns
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
 __pycache__/
-notebooks/__pycache__/
-notebooks/mlruns
- models/__pycache__/
- models/data_ingestion/__pycache__
- utils/__pycache__
- frontend/node_modules/
-models/data_ingestion/__pycache__/__init__.cpython-310.py
-controllers/__pycache__/__init__.cpython-310.pyc
-models/__pycache__/database.cpython-310.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+
+# Environment Variables
+.env
+.env.local
+.env.*
+!.env.example
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# MLflow & Model Tracking
+mlruns/
+notebooks/mlruns/
+
+# Frontend (Node.js / Vite / React)
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs and Databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+.pytest_cache/
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Project Specific Data (Raw & Processed)
+data/raw data/
+data/raw data 2/
+data/sales_cleaned/
+data/Sales_Preprocessed/
