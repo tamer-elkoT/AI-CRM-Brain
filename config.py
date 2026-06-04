@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     BATCH_INTERVAL_MINUTES: int = 30
 
     # Pydantic v2 configuration
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 # Instantiate settings
