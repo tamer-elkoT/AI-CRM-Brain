@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 🧠 AI CRM Brain
 
@@ -16,7 +16,7 @@
 
 **AI CRM Brain** is an AI-powered decision engine that sits on top of your existing CRM, predicts deal closure probability with **93.6% accuracy** using a Random Forest classifier, and generates **multilingual (Arabic/English) next-best-action recommendations** powered by LLMs — so your sales team knows *exactly* what to do next, on every deal, every day.
 
-[Getting Started](#-setup--installation) · [Architecture](#-system-architecture--data-flow) · [API Reference](#-api-endpoints) · [Roadmap](#-future-roadmap--expansions)
+[Getting Started](#-setup--installation-guide) · [Architecture](#-visualizing-the-system) · [API Reference](#-api-endpoints) · [Roadmap](#-future-roadmap--expansions)
 
 </div>
 
@@ -24,13 +24,13 @@
 
 ## 📋 Table of Contents
 
-- [Project Overview & Value Proposition](#-project-overview--value-proposition)
-- [Tech Stack & Technologies](#-tech-stack--technologies)
+- [Project Overview and Value Proposition](#-project-overview--value-proposition)
+- [Tech Stack and Technologies](#-tech-stack--technologies)
 - [Project Structure](#-project-structure)
-- [Setup & Installation Guide](#-setup--installation)
+- [Setup and Installation Guide](#-setup--installation-guide)
 - [API Endpoints](#-api-endpoints)
-- [Visualizing the System (Mermaid Diagrams)](#-system-architecture--data-flow)
-- [Future Roadmap & Expansions](#-future-roadmap--expansions)
+- [Visualizing the System](#-visualizing-the-system)
+- [Future Roadmap and Expansions](#-future-roadmap--expansions)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -51,45 +51,71 @@ Without this, sales managers fly blind. High-value deals slip through the cracks
 **AI CRM Brain** doesn't replace your CRM — it **supercharges it**. The system operates as a three-stage intelligence pipeline:
 
 | Stage | What Happens | Technology |
-|-------|-------------|------------|
+|:------|:-------------|:-----------|
 | 🔄 **Ingest** | Real-time sync of deal data from Zoho CRM via OAuth 2.0 API, with support for manual CSV/XLSX uploads | Zoho REST API v3, Pandas |
 | 🤖 **Predict** | A Random Forest classifier (1000 estimators, 93.6% validation accuracy, 0.99 macro AUC) scores every deal with a closure probability | scikit-learn, joblib |
 | 🧠 **Recommend** | An LLM agent (Llama 3.3 70B via Groq) receives the ML score + deal context + custom fields, then generates an **adjusted probability** and a **bilingual next-best-action** in Arabic and English | LangChain, OpenAI-compatible API |
 
 ### The Added Value
 
-- **📈 Revenue Acceleration** — AI-ranked deal prioritization ensures reps focus on the highest-ROI opportunities first
-- **🌍 Multilingual Intelligence** — Native Arabic and English recommendations serve MENA-region sales teams natively
-- **🚨 Proactive Alerts** — WhatsApp notifications fire automatically for at-risk deals (>$50K, <45% probability) and hot leads (>85% probability)
-- **🔄 Closed-Loop Feedback** — Sales reps mark actions as taken, creating a feedback loop for continuous model improvement
-- **📊 Executive Dashboards** — Real-time KPIs, AI-score scatter plots, account rankings, and priority-tiered deal tables
+- 📈 **Revenue Acceleration** — AI-ranked deal prioritization ensures reps focus on the highest-ROI opportunities first
+- 🌍 **Multilingual Intelligence** — Native Arabic and English recommendations serve MENA-region sales teams natively
+- 🚨 **Proactive Alerts** — WhatsApp notifications fire automatically for at-risk deals (>$50K, <45% probability) and hot leads (>85% probability)
+- 🔄 **Closed-Loop Feedback** — Sales reps mark actions as taken, creating a feedback loop for continuous model improvement
+- 📊 **Executive Dashboards** — Real-time KPIs, AI-score scatter plots, account rankings, and priority-tiered deal tables
 
 ---
 
 ## 🛠 Tech Stack & Technologies
 
-<table>
-<tr><td><b>Layer</b></td><td><b>Technology</b></td><td><b>Purpose</b></td></tr>
-<tr><td rowspan="4"><b>🔧 Backend</b></td><td>Python 3.10+</td><td>Core runtime</td></tr>
-<tr><td>FastAPI 0.109 + Uvicorn</td><td>High-performance async REST API</td></tr>
-<tr><td>SQLAlchemy 2.0 + Alembic</td><td>ORM & database schema migrations</td></tr>
-<tr><td>Pydantic v2 + Pydantic Settings</td><td>Request/response validation & env management</td></tr>
-<tr><td rowspan="4"><b>🤖 AI / ML</b></td><td>scikit-learn 1.4 (Random Forest)</td><td>Deal closure prediction (93.6% accuracy)</td></tr>
-<tr><td>LangChain 0.1 + OpenAI SDK</td><td>LLM chain orchestration & prompt engineering</td></tr>
-<tr><td>Groq API (Llama 3.3 70B)</td><td>Ultra-fast LLM inference for recommendations</td></tr>
-<tr><td>MLflow 2.10</td><td>Experiment tracking & model registry</td></tr>
-<tr><td rowspan="5"><b>⚛️ Frontend</b></td><td>React 18 + TypeScript</td><td>Type-safe UI development</td></tr>
-<tr><td>Vite 5</td><td>Lightning-fast dev server & build tool</td></tr>
-<tr><td>TailwindCSS 3</td><td>Utility-first styling with dark mode</td></tr>
-<tr><td>Recharts</td><td>Interactive data visualizations</td></tr>
-<tr><td>TanStack React Query</td><td>Server state management & caching</td></tr>
-<tr><td rowspan="2"><b>🗄 Database</b></td><td>PostgreSQL 16</td><td>Primary data store with JSONB for custom fields</td></tr>
-<tr><td>pgAdmin 4</td><td>Database administration GUI</td></tr>
-<tr><td rowspan="2"><b>🔐 Security</b></td><td>JWT (python-jose) + bcrypt</td><td>Stateless auth with password hashing</td></tr>
-<tr><td>Google OAuth 2.0</td><td>Social SSO login</td></tr>
-<tr><td rowspan="2"><b>🐳 DevOps</b></td><td>Docker Compose</td><td>Containerized PostgreSQL + pgAdmin</td></tr>
-<tr><td>Tenacity</td><td>Retry logic for resilient API calls</td></tr>
-</table>
+### 🔧 Backend
+
+| Technology | Purpose |
+|:-----------|:--------|
+| Python 3.10+ | Core runtime |
+| FastAPI 0.109 + Uvicorn | High-performance async REST API |
+| SQLAlchemy 2.0 + Alembic | ORM and database schema migrations |
+| Pydantic v2 + Pydantic Settings | Request/response validation and env management |
+
+### 🤖 AI / ML
+
+| Technology | Purpose |
+|:-----------|:--------|
+| scikit-learn 1.4 (Random Forest) | Deal closure prediction (93.6% accuracy) |
+| LangChain 0.1 + OpenAI SDK | LLM chain orchestration and prompt engineering |
+| Groq API (Llama 3.3 70B) | Ultra-fast LLM inference for recommendations |
+| MLflow 2.10 | Experiment tracking and model registry |
+
+### ⚛️ Frontend
+
+| Technology | Purpose |
+|:-----------|:--------|
+| React 18 + TypeScript | Type-safe UI development |
+| Vite 5 | Lightning-fast dev server and build tool |
+| TailwindCSS 3 | Utility-first styling with dark mode |
+| Recharts | Interactive data visualizations |
+| TanStack React Query | Server state management and caching |
+
+### 🗄 Database
+
+| Technology | Purpose |
+|:-----------|:--------|
+| PostgreSQL 16 | Primary data store with JSONB for custom fields |
+| pgAdmin 4 | Database administration GUI |
+
+### 🔐 Security
+
+| Technology | Purpose |
+|:-----------|:--------|
+| JWT (python-jose) + bcrypt | Stateless auth with password hashing |
+| Google OAuth 2.0 | Social SSO login |
+
+### 🐳 DevOps
+
+| Technology | Purpose |
+|:-----------|:--------|
+| Docker Compose | Containerized PostgreSQL + pgAdmin |
+| Tenacity | Retry logic for resilient API calls |
 
 ---
 
@@ -99,85 +125,85 @@ The project follows a clean **MVC (Model-View-Controller)** architecture with cl
 
 ```
 AI-CRM-Brain/
-│
-├── 📄 app.py                      # FastAPI entry point — registers all routers & CORS
-├── 📄 config.py                   # Pydantic Settings — centralized env variable management
-├── 📄 requirements.txt            # Python dependencies (pinned versions)
-├── 🐳 docker-compose.yaml         # PostgreSQL 16 + pgAdmin 4 containers
-├── 📄 .env                        # Environment secrets (API keys, DB creds, JWT config)
-│
-├── 🎮 controllers/                # ── CONTROLLERS (API Routes / Business Logic) ──
-│   ├── auth_controller.py         #   JWT login, signup with OTP, Google SSO, profile mgmt
-│   ├── ingestion_controller.py    #   Zoho CRM sync + CSV/XLSX upload endpoints
-│   ├── ml_controller.py           #   ML batch prediction pipeline triggers
-│   ├── recommendation_controller.py #  LLM recommendation generation (single + batch)
-│   ├── dashboard_controller.py    #   KPIs, ranked deals, deal detail, account analytics
-│   └── action_controller.py       #   Mark-as-actioned, escalation, full pipeline orchestrator
-│
-├── 🧩 models/                     # ── MODELS (Data Layer) ──
-│   ├── database.py                #   SQLAlchemy engine, SessionLocal, Base
-│   ├── schema.py                  #   ORM models: User, OTPCode, ZohoDeal, MLPrediction, LLMRecommendation
-│   ├── api_schemas.py             #   Pydantic request/response schemas for all endpoints
-│   │
-│   ├── 📊 ml_engine/              #   Machine Learning Subsystem
-│   │   ├── inference.py           #     Preprocessing pipeline + Random Forest batch inference
-│   │   └── data_fusion.py         #     Merges ML predictions with CRM context for LLM input
-│   │
-│   ├── 🤖 ai_agents/              #   LLM / Generative AI Subsystem
-│   │   ├── recommender.py         #     LLMRecommenderService — API calls, retry, validation
-│   │   └── prompts.py             #     System prompt, few-shot examples, prompt builder
-│   │
-│   └── 📥 data_ingestion/         #   CRM Data Pipeline
-│       └── zoho_api.py            #     OAuth token refresh, deal fetching, JSON flattening
-│
-├── 👁 views/                      # ── VIEWS (Legacy Streamlit Dashboards) ──
-│   ├── dashboard.py               #   Streamlit dashboard components
-│   ├── components.py              #   Reusable UI widgets
-│   └── screen_*.html              #   Static HTML mockups (design reference)
-│
-├── ⚛️ frontend/                   # ── FRONTEND (React + TypeScript SPA) ──
-│   ├── src/
-│   │   ├── App.tsx                #   Root component with React Router & providers
-│   │   ├── pages/                 #   Auth, Onboarding, Home, Dashboard, Integrations, Settings
-│   │   ├── components/            #   DealDrawer, ScatterChart, CreateDealModal, OTPModal, etc.
-│   │   ├── context/               #   AuthContext (JWT state), ThemeProvider (dark mode)
-│   │   ├── services/api.ts        #   Axios HTTP client for FastAPI communication
-│   │   └── types/                 #   TypeScript type definitions
-│   ├── package.json               #   React 18, Recharts, TanStack Query, Lucide Icons
-│   └── vite.config.ts             #   Vite dev server config (proxied to :8000)
-│
-├── 🔧 services/                   # ── SERVICES (Cross-Cutting Concerns) ──
-│   └── notification_service.py    #   WhatsApp OTP delivery + deal alert notifications
-│
-├── 🔐 utils/                      # ── UTILITIES ──
-│   └── security.py                #   bcrypt hashing, JWT creation/verification
-│
-├── ⚖️ weights/                    # ── ML MODEL ARTIFACTS ──
-│   ├── random_forest_v1.pkl       #   Trained Random Forest model (~16MB, 1000 estimators)
-│   └── model_metadata.json        #   Performance metrics, feature importance, hyperparams
-│
-├── 🧪 artifacts/                  # ── PREPROCESSING ARTIFACTS ──
-│   ├── standard_scaler.pkl        #   Fitted StandardScaler for feature normalization
-│   ├── feature_columns.json       #   Feature column names + frequency encoding maps
-│   ├── label_encoder_stage.pkl    #   Stage label encoder (Engaging/Lost/Prospecting/Won)
-│   └── frequency_maps.json        #   Owner & Account frequency encoding dictionaries
-│
-├── 📓 notebooks/                  # ── JUPYTER NOTEBOOKS (ML Development) ──
-│   ├── Sprint2_Phase1_EDA_Simple.ipynb        #   Exploratory Data Analysis
-│   ├── Sprint2_Phase2_Preprocessing.ipynb     #   Feature engineering pipeline
-│   ├── Sprint2_Phase3_ModelTraining.ipynb      #   Model training, evaluation, MLflow logging
-│   └── mlruns/                                #   MLflow experiment tracking data
-│
-└── 📂 data/                       # ── RAW & PROCESSED DATASETS ──
-    ├── raw data/                  #   Original Zoho CRM exports
-    ├── raw data 2/                #   Secondary data collection
-    ├── sales_cleaned/             #   Cleaned datasets after EDA
-    └── Sales_Preprocessed/        #   Feature-engineered datasets ready for training
+|
+|-- app.py                          # FastAPI entry point - registers all routers & CORS
+|-- config.py                       # Pydantic Settings - centralized env variable management
+|-- requirements.txt                # Python dependencies (pinned versions)
+|-- docker-compose.yaml             # PostgreSQL 16 + pgAdmin 4 containers
+|-- .env                            # Environment secrets (API keys, DB creds, JWT config)
+|
+|-- controllers/                    # == CONTROLLERS (API Routes / Business Logic) ==
+|   |-- auth_controller.py          #   JWT login, signup with OTP, Google SSO, profile mgmt
+|   |-- ingestion_controller.py     #   Zoho CRM sync + CSV/XLSX upload endpoints
+|   |-- ml_controller.py            #   ML batch prediction pipeline triggers
+|   |-- recommendation_controller.py #  LLM recommendation generation (single + batch)
+|   |-- dashboard_controller.py     #   KPIs, ranked deals, deal detail, account analytics
+|   +-- action_controller.py        #   Mark-as-actioned, escalation, full pipeline orchestrator
+|
+|-- models/                         # == MODELS (Data Layer) ==
+|   |-- database.py                 #   SQLAlchemy engine, SessionLocal, Base
+|   |-- schema.py                   #   ORM: User, OTPCode, ZohoDeal, MLPrediction, LLMRecommendation
+|   |-- api_schemas.py              #   Pydantic request/response schemas for all endpoints
+|   |
+|   |-- ml_engine/                  #   Machine Learning Subsystem
+|   |   |-- inference.py            #     Preprocessing pipeline + Random Forest batch inference
+|   |   +-- data_fusion.py          #     Merges ML predictions with CRM context for LLM input
+|   |
+|   |-- ai_agents/                  #   LLM / Generative AI Subsystem
+|   |   |-- recommender.py          #     LLMRecommenderService - API calls, retry, validation
+|   |   +-- prompts.py              #     System prompt, few-shot examples, prompt builder
+|   |
+|   +-- data_ingestion/             #   CRM Data Pipeline
+|       +-- zoho_api.py             #     OAuth token refresh, deal fetching, JSON flattening
+|
+|-- views/                          # == VIEWS (Legacy Streamlit Dashboards) ==
+|   |-- dashboard.py                #   Streamlit dashboard components
+|   |-- components.py               #   Reusable UI widgets
+|   +-- screen_*.html               #   Static HTML mockups (design reference)
+|
+|-- frontend/                       # == FRONTEND (React + TypeScript SPA) ==
+|   |-- src/
+|   |   |-- App.tsx                 #   Root component with React Router & providers
+|   |   |-- pages/                  #   Auth, Onboarding, Home, Dashboard, Integrations, Settings
+|   |   |-- components/             #   DealDrawer, ScatterChart, CreateDealModal, OTPModal, etc.
+|   |   |-- context/                #   AuthContext (JWT state), ThemeProvider (dark mode)
+|   |   |-- services/api.ts         #   Axios HTTP client for FastAPI communication
+|   |   +-- types/                  #   TypeScript type definitions
+|   |-- package.json                #   React 18, Recharts, TanStack Query, Lucide Icons
+|   +-- vite.config.ts              #   Vite dev server config (proxied to :8000)
+|
+|-- services/                       # == SERVICES (Cross-Cutting Concerns) ==
+|   +-- notification_service.py     #   WhatsApp OTP delivery + deal alert notifications
+|
+|-- utils/                          # == UTILITIES ==
+|   +-- security.py                 #   bcrypt hashing, JWT creation/verification
+|
+|-- weights/                        # == ML MODEL ARTIFACTS ==
+|   |-- random_forest_v1.pkl        #   Trained Random Forest model (~16MB, 1000 estimators)
+|   +-- model_metadata.json         #   Performance metrics, feature importance, hyperparams
+|
+|-- artifacts/                      # == PREPROCESSING ARTIFACTS ==
+|   |-- standard_scaler.pkl         #   Fitted StandardScaler for feature normalization
+|   |-- feature_columns.json        #   Feature column names + frequency encoding maps
+|   |-- label_encoder_stage.pkl     #   Stage label encoder (Engaging/Lost/Prospecting/Won)
+|   +-- frequency_maps.json         #   Owner & Account frequency encoding dictionaries
+|
+|-- notebooks/                      # == JUPYTER NOTEBOOKS (ML Development) ==
+|   |-- Sprint2_Phase1_EDA_Simple.ipynb        # Exploratory Data Analysis
+|   |-- Sprint2_Phase2_Preprocessing.ipynb     # Feature engineering pipeline
+|   |-- Sprint2_Phase3_ModelTraining.ipynb      # Model training, evaluation, MLflow logging
+|   +-- mlruns/                                # MLflow experiment tracking data
+|
++-- data/                           # == RAW & PROCESSED DATASETS ==
+    |-- raw data/                   #   Original Zoho CRM exports
+    |-- raw data 2/                 #   Secondary data collection
+    |-- sales_cleaned/              #   Cleaned datasets after EDA
+    +-- Sales_Preprocessed/         #   Feature-engineered datasets ready for training
 ```
 
 ---
 
-## 🚀 Setup & Installation
+## 🚀 Setup & Installation Guide
 
 ### Prerequisites
 
@@ -217,13 +243,13 @@ cp .env.example .env
 Then fill in the required values:
 
 ```env
-# ── Zoho CRM API Credentials ──
+# -- Zoho CRM API Credentials --
 ZOHO_CLIENT_ID="your_zoho_client_id"
 ZOHO_CLIENT_SECRET="your_zoho_client_secret"
 SCOPE_NAME="your_scope_name"
 ZOHO_REFRESH_TOKEN="your_refresh_token"
 
-# ── PostgreSQL Database ──
+# -- PostgreSQL Database --
 POSTGRES_USER=your_db_user
 POSTGRES_PASSWORD="your_db_password"
 PGADMIN_EMAIL=your_email@domain.com
@@ -231,12 +257,12 @@ PGADMIN_PASSWORD="your_pgadmin_password"
 DB_NAME="ai_crm_brain"
 DB_PORT="5433"
 
-# ── LLM Configuration (Groq / OpenAI-compatible) ──
+# -- LLM Configuration (Groq / OpenAI-compatible) --
 LLM_API_KEY="your_groq_api_key"
 LLM_PROVIDER=groq
 LLM_MODEL_ID=llama-3.3-70b-versatile
 
-# ── JWT Authentication ──
+# -- JWT Authentication --
 SECRET_KEY=your_256_bit_secret_key
 API_BASE_URL=http://localhost:8000
 ALGORITHM="HS256"
@@ -270,8 +296,8 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 The API will be live at:
-- **Swagger UI** → `http://localhost:8000/docs`
-- **Health Check** → `http://localhost:8000/health`
+- **Swagger UI** : `http://localhost:8000/docs`
+- **Health Check** : `http://localhost:8000/health`
 
 ### Step 8: Start the React Frontend
 
@@ -290,29 +316,29 @@ The frontend will be live at `http://localhost:5173`
 All endpoints are prefixed with `/api/v1`.
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+|:-------|:---------|:------------|
 | `POST` | `/ingest/deals` | Sync deals from Zoho CRM API to PostgreSQL |
 | `POST` | `/ingestion/upload` | Upload CSV/XLSX for custom CRM data |
 | `POST` | `/predict/deals` | Run ML predictions on a submitted batch of deals |
 | `POST` | `/jobs/run-predictions` | Trigger batch ML predictions from the database |
 | `POST` | `/recommendations/generate/{deal_id}` | Generate LLM recommendation for a single deal |
-| `POST` | `/recommendations/generate` | Full AI pipeline — ML + LLM for all unprocessed deals |
+| `POST` | `/recommendations/generate` | Full AI pipeline: ML + LLM for all unprocessed deals |
 | `POST` | `/recommendations/batch` | Generate batch LLM recommendations for a specific batch |
-| `GET` | `/deals` | Get all deals with pagination, search & sorting |
+| `GET` | `/deals` | Get all deals with pagination, search and sorting |
 | `POST` | `/deals` | Create a new deal manually |
-| `GET` | `/deals/ranked` | Dashboard summary — KPIs, scatter data, ranked deals |
-| `GET` | `/deals/{deal_id}` | Full deal detail with AI recommendation & risk analysis |
+| `GET` | `/deals/ranked` | Dashboard summary: KPIs, scatter data, ranked deals |
+| `GET` | `/deals/{deal_id}` | Full deal detail with AI recommendation and risk analysis |
 | `GET` | `/analytics/accounts/ranked` | Account rankings by average AI win probability |
 | `GET` | `/accounts/names` | Distinct account names for dropdowns |
 | `PATCH` | `/recommendations/{deal_id}/action` | Mark a recommendation as actioned by sales rep |
 | `POST` | `/recommendations/{deal_id}/escalate` | Escalate a deal for management attention |
-| `POST` | `/batch/trigger` | Orchestrate full pipeline: Ingest → Predict → Recommend |
+| `POST` | `/batch/trigger` | Orchestrate full pipeline: Ingest, Predict, Recommend |
 | `POST` | `/auth/login` | JWT login with email/password |
 | `POST` | `/auth/signup` | 2-step signup with WhatsApp OTP verification |
 | `POST` | `/auth/verify-otp` | Verify OTP and issue JWT token |
 | `POST` | `/auth/google` | Google OAuth SSO login |
-| `GET` | `/auth/users/me` | Get current user's profile |
-| `PATCH` | `/auth/users/me/templates` | Update user's outreach templates |
+| `GET` | `/auth/users/me` | Get current user profile |
+| `PATCH` | `/auth/users/me/templates` | Update user outreach templates |
 | `GET` | `/health` | Service health check |
 
 ---
@@ -321,178 +347,52 @@ All endpoints are prefixed with `/api/v1`.
 
 ### Diagram 1: System Architecture & Data Flow
 
-```mermaid
-flowchart TB
-    subgraph External["☁️ External Services"]
-        ZOHO["🔗 Zoho CRM API v3"]
-        GROQ["🧠 Groq API\nLlama 3.3 70B"]
-        GOOGLE["🔐 Google OAuth"]
-        TWILIO["📱 WhatsApp API\n(Twilio/Meta)"]
-    end
+This diagram shows the complete system architecture — from external CRM APIs through the AI pipeline to the React frontend, including the WhatsApp notification branch for urgent deals.
 
-    subgraph Backend["⚙️ FastAPI Backend (Port 8000)"]
-        direction TB
-        INGEST["📥 Ingestion Controller\nOAuth Refresh → Fetch → Flatten → Upsert"]
-        ML["🤖 ML Controller\nPreprocess → Random Forest → Batch Predict"]
-        REC["🧠 Recommendation Controller\nData Fusion → LLM Prompt → Validate → Store"]
-        DASH["📊 Dashboard Controller\nKPIs, Rankings, Deal Detail"]
-        AUTH["🔐 Auth Controller\nJWT, OTP, Google SSO"]
-        ACTION["⚡ Action Controller\nMark Actioned, Escalate, Full Sync"]
-        NOTIFY["🔔 Notification Service\nWhatsApp OTP + Deal Alerts"]
-    end
+![System Architecture](dashboard/user_scenario/system_architecture.svg)
 
-    subgraph Data["🗄️ Data Layer"]
-        DB[("🐘 PostgreSQL 16\nPort 5433")]
-        MODELS["📦 ML Artifacts\nRandom Forest .pkl\nScaler, Encoders"]
-    end
-
-    subgraph Frontend["⚛️ React Frontend (Port 5173)"]
-        UI["🖥️ React 18 + TypeScript\nTailwindCSS + Recharts"]
-    end
-
-    ZOHO -->|"REST API + OAuth 2.0"| INGEST
-    INGEST -->|"Upsert Deals"| DB
-    DB -->|"Read Deals"| ML
-    ML -->|"Feature Vector"| MODELS
-    MODELS -->|"Probabilities"| ML
-    ML -->|"Store Predictions"| DB
-    DB -->|"Read Predictions + Deals"| REC
-    REC -->|"Fused Payload"| GROQ
-    GROQ -->|"JSON Response"| REC
-    REC -->|"Store Recommendations"| DB
-    REC -->|"Urgent Deals"| NOTIFY
-    NOTIFY -->|"WhatsApp Message"| TWILIO
-    DB -->|"KPIs + Ranked Data"| DASH
-    UI -->|"Axios HTTP"| DASH
-    UI -->|"Axios HTTP"| AUTH
-    UI -->|"Axios HTTP"| ACTION
-    AUTH -->|"Verify Token"| GOOGLE
-    AUTH -->|"Send OTP"| NOTIFY
-
-    style External fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
-    style Backend fill:#0f172a,stroke:#10b981,color:#e2e8f0
-    style Data fill:#1e293b,stroke:#f59e0b,color:#e2e8f0
-    style Frontend fill:#1e293b,stroke:#8b5cf6,color:#e2e8f0
-```
+---
 
 ### Diagram 2: User Flow — Sales Manager Scenario
 
-```mermaid
-flowchart LR
-    A["👤 Sales Manager\nOpens App"] --> B["🔐 Login\nEmail/Password or Google SSO"]
-    B --> C{"First Time?"}
-    C -->|"Yes"| D["📋 Onboarding\nBusiness Field, Templates"]
-    C -->|"No"| E["🏠 Home Page\nDeal Pipeline Table"]
-    D --> E
-    E --> F["🔄 Sync CRM Data\nTrigger /batch/trigger"]
-    F --> G["🤖 ML Engine Scores\nAll Deals Predicted"]
-    G --> H["🧠 LLM Generates\nNext-Best-Actions"]
-    H --> I["📊 View Dashboard\nKPIs + Scatter Plot"]
-    I --> J["📋 Browse Ranked Deals\nSorted by AI Score"]
-    J --> K["🔍 Open Deal Drawer\nFull Detail + Recommendation"]
-    K --> L{"Take Action?"}
-    L -->|"📞 Call Client"| M["✅ Mark as Actioned\nFeedback Loop Updated"]
-    L -->|"📱 WhatsApp"| N["💬 Send Outreach\nUsing Custom Template"]
-    L -->|"⬆️ Escalate"| O["🚨 Escalate Deal\nFlagged for Management"]
-    M --> J
-    N --> J
-    O --> J
+This diagram traces the full user journey: login, CRM data sync, AI processing, dashboard review, deal inspection, and the action/feedback loop.
 
-    style A fill:#1e293b,stroke:#8b5cf6,color:#e2e8f0
-    style I fill:#0f172a,stroke:#10b981,color:#e2e8f0
-    style K fill:#0f172a,stroke:#f59e0b,color:#e2e8f0
-    style M fill:#0f172a,stroke:#22c55e,color:#e2e8f0
-    style N fill:#0f172a,stroke:#3b82f6,color:#e2e8f0
-    style O fill:#0f172a,stroke:#ef4444,color:#e2e8f0
-```
+![User Flow](dashboard/user_scenario/user_flow.svg)
+
+---
 
 ### Diagram 3: MVC Architecture Interaction
 
-```mermaid
-flowchart TB
-    subgraph Views["👁️ Views (React Frontend)"]
-        direction LR
-        AUTH_PAGE["Auth Page\nLogin / Signup / OTP"]
-        HOME_PAGE["Home Page\nDeal Pipeline Table"]
-        DASH_PAGE["Dashboard Page\nKPIs + Charts"]
-        DETAIL["Deal Drawer\nFull Detail + AI Rec"]
-        SETTINGS["Settings Page\nProfile + Templates"]
-    end
+This diagram shows how the three MVC layers interact: React Views make HTTP requests to FastAPI Controllers, which query SQLAlchemy Models and AI subsystems, all backed by PostgreSQL and external APIs.
 
-    subgraph Controllers["🎮 Controllers (FastAPI Routers)"]
-        direction LR
-        AUTH_CTRL["auth_controller\n/auth/*"]
-        INGEST_CTRL["ingestion_controller\n/ingest/*"]
-        ML_CTRL["ml_controller\n/predict/* /jobs/*"]
-        REC_CTRL["recommendation_controller\n/recommendations/*"]
-        DASH_CTRL["dashboard_controller\n/deals/* /analytics/*"]
-        ACT_CTRL["action_controller\n/recommendations/*/action"]
-    end
-
-    subgraph Models["🧩 Models (Data + AI Layer)"]
-        direction LR
-        ORM["SQLAlchemy ORM\nUser, ZohoDeal,\nMLPrediction,\nLLMRecommendation"]
-        ML_ENG["ML Engine\ninference.py\ndata_fusion.py"]
-        AI_AGENT["AI Agents\nrecommender.py\nprompts.py"]
-        SCHEMAS["Pydantic Schemas\napi_schemas.py"]
-    end
-
-    subgraph Infra["🗄️ Infrastructure"]
-        DB[("PostgreSQL 16")]
-        LLM["Groq LLM API"]
-    end
-
-    AUTH_PAGE -->|"POST /auth/login"| AUTH_CTRL
-    HOME_PAGE -->|"GET /deals"| DASH_CTRL
-    DASH_PAGE -->|"GET /deals/ranked"| DASH_CTRL
-    DETAIL -->|"GET /deals/:id"| DASH_CTRL
-    SETTINGS -->|"PATCH /users/me"| AUTH_CTRL
-
-    AUTH_CTRL -->|"Query/Create User"| ORM
-    INGEST_CTRL -->|"Upsert ZohoDeal"| ORM
-    ML_CTRL -->|"Read Deals, Write Predictions"| ORM
-    ML_CTRL -->|"Preprocess + Predict"| ML_ENG
-    REC_CTRL -->|"Fuse Data"| ML_ENG
-    REC_CTRL -->|"Generate Recommendation"| AI_AGENT
-    DASH_CTRL -->|"JOIN Queries"| ORM
-    ACT_CTRL -->|"Update Feedback"| ORM
-
-    SCHEMAS -.->|"Validates"| Controllers
-    ORM <-->|"Read/Write"| DB
-    AI_AGENT <-->|"API Call"| LLM
-
-    style Views fill:#1e293b,stroke:#8b5cf6,color:#e2e8f0
-    style Controllers fill:#0f172a,stroke:#10b981,color:#e2e8f0
-    style Models fill:#1e293b,stroke:#f59e0b,color:#e2e8f0
-    style Infra fill:#0f172a,stroke:#ef4444,color:#e2e8f0
-```
+![MVC Interaction](dashboard/user_scenario/mvc_interaction.svg)
 
 ---
 
 ## 🚀 Future Roadmap & Expansions
 
-### 🗺️ Phase 1: Multi-CRM Integration Ecosystem
+### Phase 1: Multi-CRM Integration Ecosystem
 
 | Integration | Status | Description |
-|-------------|--------|-------------|
+|:------------|:-------|:------------|
 | Zoho CRM | ✅ Live | Full OAuth 2.0 API sync with token auto-refresh |
 | Manual Upload (CSV/XLSX) | ✅ Live | File upload endpoint with validation |
-| HubSpot CRM | 🔜 Planned | REST API integration with deal & contact sync |
+| HubSpot CRM | 🔜 Planned | REST API integration with deal and contact sync |
 | Salesforce | 🔜 Planned | Bulk API 2.0 integration with SOQL query support |
 | Google Sheets | 🔜 Planned | Google Sheets API v4 for lightweight CRM users |
 
-### 🧬 Phase 2: Domain-Specific Fine-Tuning
+### Phase 2: Domain-Specific Fine-Tuning
 
 Train and deploy **industry-specific ML models** that understand sector-specific deal dynamics:
 
-- **🏠 Real Estate** — Factors like property type, location tier, financing status, and seasonal demand cycles
-- **🚗 Automotive** — Trade-in value, inventory aging, manufacturer incentives, and credit approval probability
-- **💻 SaaS** — Monthly Recurring Revenue (MRR), churn risk signals, expansion revenue potential, and user engagement metrics
-- **🏥 Healthcare** — Procurement committee cycles, regulatory compliance timelines, and budget allocation periods
+- 🏠 **Real Estate** — Factors like property type, location tier, financing status, and seasonal demand cycles
+- 🚗 **Automotive** — Trade-in value, inventory aging, manufacturer incentives, and credit approval probability
+- 💻 **SaaS** — Monthly Recurring Revenue (MRR), churn risk signals, expansion revenue potential, and user engagement metrics
+- 🏥 **Healthcare** — Procurement committee cycles, regulatory compliance timelines, and budget allocation periods
 
 Users upload their historical deal data, and the platform trains a custom Random Forest or XGBoost model tailored to their vertical.
 
-### 🗣️ Phase 3: RAG System & Conversational CRM Chatbot
+### Phase 3: RAG System & Conversational CRM Chatbot
 
 Integrate a **Retrieval-Augmented Generation (RAG)** pipeline that indexes all deal history, communication logs, and recommendation transcripts into a vector database (Pinecone / Weaviate). Sales reps can then:
 
@@ -500,7 +400,7 @@ Integrate a **Retrieval-Augmented Generation (RAG)** pipeline that indexes all d
 - 💬 *"Show me the AI recommendation history for account TechFlow"*
 - 💬 *"What was the average deal cycle length for won deals last quarter?"*
 
-### 🤖 Phase 4: AI Automation Agent
+### Phase 4: AI Automation Agent
 
 Move from **recommendations** to **autonomous actions**:
 
@@ -509,7 +409,7 @@ Move from **recommendations** to **autonomous actions**:
 - 📅 **Calendar Integration** — Auto-schedule follow-up calls based on deal urgency and time zone
 - 🔁 **CRM Write-Back** — Update deal stages in Zoho/HubSpot automatically when AI detects stage progression signals
 
-### 🔐 Phase 5: Advanced Authentication & User Profiles
+### Phase 5: Advanced Authentication & User Profiles
 
 - **Google SSO** — ✅ Implemented (OAuth 2.0 token verification)
 - **WhatsApp OTP** — ✅ Implemented (2-step signup with 6-digit OTP)
@@ -517,7 +417,7 @@ Move from **recommendations** to **autonomous actions**:
 - **Team Management** — Invite team members, assign deal territories, set notification preferences
 - **Comprehensive Profile Editing** — Business field, custom outreach templates (WhatsApp + Email), notification settings
 
-### 🌟 Phase 6: The "Ultimate Goal" — AI-First CRM
+### Phase 6: The Ultimate Goal — AI-First CRM
 
 Evolve from an AI layer on *top* of existing CRMs into a **standalone, AI-native CRM platform** where intelligence isn't an add-on — it's the foundation. Every field, every workflow, every notification is powered by AI from Day 1.
 
@@ -560,14 +460,14 @@ Build a real-time competitive intelligence layer that automatically enriches dea
 
 - Monitor public signals (press releases, job postings, funding announcements) for accounts in your pipeline
 - Auto-detect when a competitor is mentioned in deal notes or custom fields
-- Provide AI-generated counter-positioning strategies: *"Competitor X was just mentioned — here's a battle card with 3 key differentiators and a tailored objection-handling script"*
+- Provide AI-generated counter-positioning strategies tailored to each competitor
 - Track win/loss ratios against specific competitors over time and surface pattern insights
 
 #### 🔗 5. Cross-Deal Relationship Graph Intelligence
 
 Build a **knowledge graph** that maps relationships between deals, accounts, contacts, and industries:
 
-- Discover hidden connections: *"The CTO at Account A previously worked at Account B, where we closed a $200K deal"*
+- Discover hidden connections between accounts through shared contacts and decision-makers
 - Identify warm introduction paths through existing customers
 - Detect "cluster risks" — when multiple high-value deals depend on the same decision-maker or budget cycle
 - Recommend cross-sell and upsell opportunities based on graph proximity and purchase pattern similarity
@@ -578,7 +478,7 @@ Transform sales performance management with AI-driven gamification:
 
 - **Real-time leaderboards** ranked by AI-adjusted pipeline value (not just raw revenue)
 - **Achievement badges** for following AI recommendations that lead to successful closures
-- **AI Sales Coach** — a personalized agent that reviews each rep's deal portfolio weekly and provides tailored improvement suggestions: *"You're strong on initial outreach but lose 40% of deals in the negotiation stage — here are 3 specific techniques to improve"*
+- **AI Sales Coach** — a personalized agent that reviews each rep's deal portfolio weekly and provides tailored improvement suggestions
 - **Team challenges** that incentivize CRM data quality and recommendation follow-through
 
 ---
@@ -608,4 +508,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 *Turning data into decisions. Turning decisions into revenue.*
 
 </div>
-]]>

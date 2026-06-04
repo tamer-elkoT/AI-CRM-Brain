@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="step1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="step2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="step3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669"/>
+      <stop offset="100%" style="stop-color:#047857"/>
+    </linearGradient>
+    <linearGradient id="step4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d97706"/>
+      <stop offset="100%" style="stop-color:#b45309"/>
+    </linearGradient>
+    <linearGradient id="step5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626"/>
+      <stop offset="100%" style="stop-color:#b91c1c"/>
+    </linearGradient>
+    <linearGradient id="stepTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d9488"/>
+      <stop offset="100%" style="stop-color:#0f766e"/>
+    </linearGradient>
+    <linearGradient id="stepPink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#db2777"/>
+      <stop offset="100%" style="stop-color:#be185d"/>
+    </linearGradient>
+    <linearGradient id="stepIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5"/>
+      <stop offset="100%" style="stop-color:#4338ca"/>
+    </linearGradient>
+    <filter id="sh2">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arr2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
+    </marker>
+    <marker id="arr2g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="arr2a" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
+    </marker>
+    <marker id="arr2r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f87171"/>
+    </marker>
+    <marker id="arr2p" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+    </marker>
+    <marker id="arr2t" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#5eead4"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" fill="url(#bg2)" rx="16"/>
+
+  <!-- Title -->
+  <text x="600" y="42" text-anchor="middle" fill="#f8fafc" font-size="22" font-weight="700">AI CRM Brain — User Flow Scenario (Sales Manager)</text>
+  <text x="600" y="65" text-anchor="middle" fill="#94a3b8" font-size="13">From login to taking action on AI-ranked deals</text>
+
+  <!-- ═══ ROW 1: Login Flow ═══ -->
+  <!-- Step 1: Open App -->
+  <rect x="40" y="95" width="160" height="80" rx="10" fill="url(#step1)" filter="url(#sh2)"/>
+  <text x="120" y="125" text-anchor="middle" fill="#fff" font-size="28">👤</text>
+  <text x="120" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Sales Manager</text>
+  <text x="120" y="164" text-anchor="middle" fill="#ddd6fe" font-size="9">Opens the App</text>
+
+  <!-- Arrow -->
+  <line x1="200" y1="135" x2="238" y2="135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arr2p)"/>
+
+  <!-- Step 2: Login -->
+  <rect x="240" y="95" width="180" height="80" rx="10" fill="url(#step2)" filter="url(#sh2)"/>
+  <text x="330" y="125" text-anchor="middle" fill="#fff" font-size="28">🔐</text>
+  <text x="330" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Authenticate</text>
+  <text x="330" y="164" text-anchor="middle" fill="#bfdbfe" font-size="9">Email/Password or Google SSO</text>
+
+  <!-- Arrow -->
+  <line x1="420" y1="135" x2="458" y2="135" stroke="#60a5fa" stroke-width="2" marker-end="url(#arr2)"/>
+
+  <!-- Step 3: Decision -->
+  <rect x="460" y="95" width="140" height="80" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="2" filter="url(#sh2)"/>
+  <text x="530" y="125" text-anchor="middle" fill="#fbbf24" font-size="22">❓</text>
+  <text x="530" y="148" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">First Time?</text>
+  <text x="530" y="164" text-anchor="middle" fill="#fde68a" font-size="9">Check if onboarding needed</text>
+
+  <!-- Arrow YES (down) -->
+  <line x1="530" y1="175" x2="530" y2="208" stroke="#fbbf24" stroke-width="2" marker-end="url(#arr2a)"/>
+  <text x="548" y="197" fill="#fde68a" font-size="10" font-weight="600">YES</text>
+
+  <!-- Step 3b: Onboarding -->
+  <rect x="460" y="210" width="140" height="70" rx="10" fill="url(#step4)" filter="url(#sh2)"/>
+  <text x="530" y="238" text-anchor="middle" fill="#fff" font-size="22">📋</text>
+  <text x="530" y="258" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Onboarding</text>
+  <text x="530" y="272" text-anchor="middle" fill="#fef3c7" font-size="9">Business, Templates</text>
+
+  <!-- Arrow from Onboarding to Home -->
+  <path d="M 600 245 L 640 245 Q 650 245 650 235 L 650 135 Q 650 125 660 125 L 688 135" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arr2a)"/>
+
+  <!-- Arrow NO (right) -->
+  <line x1="600" y1="135" x2="688" y2="135" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
+  <text x="638" y="127" fill="#6ee7b7" font-size="10" font-weight="600">NO</text>
+
+  <!-- Step 4: Home Page -->
+  <rect x="690" y="95" width="180" height="80" rx="10" fill="url(#step3)" filter="url(#sh2)"/>
+  <text x="780" y="125" text-anchor="middle" fill="#fff" font-size="28">🏠</text>
+  <text x="780" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Home Page</text>
+  <text x="780" y="164" text-anchor="middle" fill="#a7f3d0" font-size="9">Deal Pipeline Table</text>
+
+  <!-- Arrow -->
+  <line x1="870" y1="135" x2="918" y2="135" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
+
+  <!-- Step 5: Sync -->
+  <rect x="920" y="95" width="240" height="80" rx="10" fill="url(#step2)" filter="url(#sh2)"/>
+  <text x="1040" y="125" text-anchor="middle" fill="#fff" font-size="28">🔄</text>
+  <text x="1040" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Sync CRM Data</text>
+  <text x="1040" y="164" text-anchor="middle" fill="#bfdbfe" font-size="9">POST /api/v1/batch/trigger</text>
+
+  <!-- ═══ ROW 2: AI Pipeline ═══ -->
+  <!-- Arrow down from Sync -->
+  <line x1="1040" y1="175" x2="1040" y2="218" stroke="#60a5fa" stroke-width="2" marker-end="url(#arr2)"/>
+
+  <!-- Step 6: ML Prediction -->
+  <rect x="900" y="220" width="260" height="80" rx="10" fill="url(#step3)" filter="url(#sh2)"/>
+  <text x="1030" y="248" text-anchor="middle" fill="#fff" font-size="24">🤖</text>
+  <text x="1030" y="270" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">ML Engine Scores All Deals</text>
+  <text x="1030" y="286" text-anchor="middle" fill="#a7f3d0" font-size="9">Random Forest (1000 estimators, 93.6% accuracy)</text>
+
+  <!-- Arrow left -->
+  <line x1="900" y1="260" x2="812" y2="260" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
+
+  <!-- Step 7: LLM Recommendations -->
+  <rect x="550" y="220" width="260" height="80" rx="10" fill="url(#step1)" filter="url(#sh2)"/>
+  <text x="680" y="248" text-anchor="middle" fill="#fff" font-size="24">🧠</text>
+  <text x="680" y="270" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">LLM Generates Next-Best-Actions</text>
+  <text x="680" y="286" text-anchor="middle" fill="#ddd6fe" font-size="9">Bilingual (Arabic + English) via Groq / Llama 3.3</text>
+
+  <!-- Arrow left -->
+  <line x1="550" y1="260" x2="462" y2="260" stroke="#a78bfa" stroke-width="2" marker-end="url(#arr2p)"/>
+
+  <!-- Step 8: WhatsApp Alert (branch) -->
+  <rect x="550" y="320" width="260" height="60" rx="10" fill="url(#step5)" filter="url(#sh2)"/>
+  <text x="680" y="348" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🚨 Auto WhatsApp Alert</text>
+  <text x="680" y="366" text-anchor="middle" fill="#fecaca" font-size="9">If deal > $50K and prob &lt; 45% OR prob > 85%</text>
+  <!-- Arrow down from LLM -->
+  <line x1="680" y1="300" x2="680" y2="318" stroke="#f87171" stroke-width="1.5" marker-end="url(#arr2r)" stroke-dasharray="5,3"/>
+
+  <!-- ═══ ROW 3: Dashboard & Analysis ═══ -->
+  <!-- Step 9: Dashboard -->
+  <rect x="200" y="220" width="260" height="80" rx="10" fill="url(#step4)" filter="url(#sh2)"/>
+  <text x="330" y="248" text-anchor="middle" fill="#fff" font-size="24">📊</text>
+  <text x="330" y="270" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">View Dashboard</text>
+  <text x="330" y="286" text-anchor="middle" fill="#fef3c7" font-size="9">KPIs + AI Score Scatter Plot + Account Rankings</text>
+
+  <!-- Arrow down -->
+  <line x1="330" y1="300" x2="330" y2="338" stroke="#fbbf24" stroke-width="2" marker-end="url(#arr2a)"/>
+
+  <!-- Step 10: Ranked Deals -->
+  <rect x="200" y="340" width="260" height="80" rx="10" fill="url(#stepTeal)" filter="url(#sh2)"/>
+  <text x="330" y="368" text-anchor="middle" fill="#fff" font-size="24">📋</text>
+  <text x="330" y="390" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Browse Ranked Deals</text>
+  <text x="330" y="406" text-anchor="middle" fill="#ccfbf1" font-size="9">Sorted by AI Score / Priority Tier</text>
+
+  <!-- Arrow down -->
+  <line x1="330" y1="420" x2="330" y2="458" stroke="#5eead4" stroke-width="2" marker-end="url(#arr2t)"/>
+
+  <!-- Step 11: Deal Drawer -->
+  <rect x="200" y="460" width="260" height="80" rx="10" fill="url(#stepIndigo)" filter="url(#sh2)"/>
+  <text x="330" y="488" text-anchor="middle" fill="#fff" font-size="24">🔍</text>
+  <text x="330" y="510" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Open Deal Drawer</text>
+  <text x="330" y="526" text-anchor="middle" fill="#c7d2fe" font-size="9">Full Detail + AI Recommendation + Risk Flag</text>
+
+  <!-- ═══ ROW 4: Action Choices ═══ -->
+  <!-- Arrow right from Deal Drawer -->
+  <line x1="460" y1="500" x2="518" y2="500" stroke="#818cf8" stroke-width="2" marker-end="url(#arr2p)"/>
+  <text x="480" y="492" fill="#c7d2fe" font-size="10" font-weight="600">Take Action?</text>
+
+  <!-- Action: Call Client -->
+  <rect x="520" y="440" width="195" height="55" rx="10" fill="url(#step3)" filter="url(#sh2)"/>
+  <text x="617" y="464" text-anchor="middle" fill="#fff" font-size="18">📞</text>
+  <text x="617" y="483" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">Call Client</text>
+
+  <!-- Action: WhatsApp Outreach -->
+  <rect x="520" y="505" width="195" height="55" rx="10" fill="url(#step2)" filter="url(#sh2)"/>
+  <text x="617" y="529" text-anchor="middle" fill="#fff" font-size="18">💬</text>
+  <text x="617" y="548" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">WhatsApp Outreach</text>
+
+  <!-- Action: Escalate -->
+  <rect x="520" y="570" width="195" height="55" rx="10" fill="url(#step5)" filter="url(#sh2)"/>
+  <text x="617" y="594" text-anchor="middle" fill="#fff" font-size="18">🚨</text>
+  <text x="617" y="613" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">Escalate to Manager</text>
+
+  <!-- ═══ FEEDBACK LOOP ═══ -->
+  <!-- Arrow from Call → Mark Actioned -->
+  <line x1="715" y1="468" x2="768" y2="468" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
+
+  <rect x="770" y="440" width="200" height="55" rx="10" fill="#1e293b" stroke="#22c55e" stroke-width="2" filter="url(#sh2)"/>
+  <text x="870" y="464" text-anchor="middle" fill="#22c55e" font-size="18">✅</text>
+  <text x="870" y="483" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="600">Mark as Actioned</text>
+
+  <!-- Arrow from WhatsApp → Mark -->
+  <line x1="715" y1="532" x2="750" y2="532" stroke="#60a5fa" stroke-width="1.5" fill="none"/>
+  <path d="M 750 532 Q 760 532 760 510 L 760 480 Q 760 470 770 470" stroke="#60a5fa" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+
+  <!-- Arrow from Escalate → Flag -->
+  <line x1="715" y1="598" x2="768" y2="598" stroke="#f87171" stroke-width="2" marker-end="url(#arr2r)"/>
+
+  <rect x="770" y="570" width="200" height="55" rx="10" fill="#1e293b" stroke="#ef4444" stroke-width="2" filter="url(#sh2)"/>
+  <text x="870" y="594" text-anchor="middle" fill="#ef4444" font-size="18">⬆️</text>
+  <text x="870" y="613" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">Flagged for Mgmt Review</text>
+
+  <!-- Feedback Loop Arrow (back to Ranked Deals) -->
+  <path d="M 970 468 L 1020 468 Q 1040 468 1040 448 L 1040 400 Q 1040 380 1020 380 L 460 380" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arr2g)" stroke-dasharray="6,3"/>
+  <text x="750" y="393" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="500">🔄 Feedback Loop — return to deal pipeline</text>
+
+  <!-- Bottom caption -->
+  <rect x="40" y="640" width="1120" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="600" y="659" text-anchor="middle" fill="#94a3b8" font-size="11">Complete user journey: Authentication → CRM Sync → AI Analysis → Dashboard Review → Action → Feedback Loop</text>
+</svg>

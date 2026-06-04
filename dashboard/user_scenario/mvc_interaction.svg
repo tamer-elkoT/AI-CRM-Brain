@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 750" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="viewGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4c1d95"/>
+      <stop offset="100%" style="stop-color:#2e1065"/>
+    </linearGradient>
+    <linearGradient id="ctrlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#064e3b"/>
+      <stop offset="100%" style="stop-color:#022c22"/>
+    </linearGradient>
+    <linearGradient id="modelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#78350f"/>
+      <stop offset="100%" style="stop-color:#451a03"/>
+    </linearGradient>
+    <linearGradient id="infraGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7f1d1d"/>
+      <stop offset="100%" style="stop-color:#450a0a"/>
+    </linearGradient>
+    <linearGradient id="nPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="nGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669"/>
+      <stop offset="100%" style="stop-color:#047857"/>
+    </linearGradient>
+    <linearGradient id="nAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d97706"/>
+      <stop offset="100%" style="stop-color:#b45309"/>
+    </linearGradient>
+    <linearGradient id="nBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="nRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626"/>
+      <stop offset="100%" style="stop-color:#b91c1c"/>
+    </linearGradient>
+    <linearGradient id="nTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d9488"/>
+      <stop offset="100%" style="stop-color:#0f766e"/>
+    </linearGradient>
+    <filter id="sh3">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <marker id="a3p" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+    </marker>
+    <marker id="a3g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="a3a" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
+    </marker>
+    <marker id="a3b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
+    </marker>
+    <marker id="a3r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f87171"/>
+    </marker>
+    <marker id="a3gray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="750" fill="url(#bg3)" rx="16"/>
+
+  <!-- Title -->
+  <text x="550" y="38" text-anchor="middle" fill="#f8fafc" font-size="22" font-weight="700">AI CRM Brain — MVC Architecture Interaction</text>
+  <text x="550" y="60" text-anchor="middle" fill="#94a3b8" font-size="12">How Views (React), Controllers (FastAPI), and Models (Data + AI) interact</text>
+
+  <!-- ╔═══════════════════════════════════════╗ -->
+  <!-- ║           VIEWS LAYER                  ║ -->
+  <!-- ╚═══════════════════════════════════════╝ -->
+  <rect x="30" y="80" width="1040" height="130" rx="12" fill="url(#viewGrad)" stroke="#8b5cf6" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
+  <text x="50" y="105" fill="#c4b5fd" font-size="14" font-weight="700">👁️  VIEWS — React 18 + TypeScript Frontend (Port 5173)</text>
+
+  <!-- View boxes -->
+  <rect x="50" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="120" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🔐 Auth Page</text>
+  <text x="120" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Login / Signup</text>
+  <text x="120" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">OTP Verification</text>
+
+  <rect x="210" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="280" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🏠 Home Page</text>
+  <text x="280" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Deal Pipeline</text>
+  <text x="280" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">Search + Sort</text>
+
+  <rect x="370" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="440" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">📊 Dashboard</text>
+  <text x="440" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">KPIs + Charts</text>
+  <text x="440" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">Account Rankings</text>
+
+  <rect x="530" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="600" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🔍 Deal Drawer</text>
+  <text x="600" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Full Detail</text>
+  <text x="600" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">AI Recommendation</text>
+
+  <rect x="690" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="760" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🔗 Integrations</text>
+  <text x="760" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">CRM Sync</text>
+  <text x="760" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">CSV Upload</text>
+
+  <rect x="850" y="118" width="195" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="947" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">⚙️ Settings</text>
+  <text x="947" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Profile + Templates</text>
+  <text x="947" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">WhatsApp / Email</text>
+
+  <!-- HTTP Layer label -->
+  <rect x="350" y="215" width="300" height="24" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
+  <text x="500" y="232" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="500">⬇️  Axios HTTP Requests (api.ts)  ⬇️</text>
+
+  <!-- View → Controller arrows -->
+  <line x1="120" y1="190" x2="120" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+  <line x1="280" y1="190" x2="280" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+  <line x1="440" y1="190" x2="440" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+  <line x1="600" y1="190" x2="600" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+  <line x1="760" y1="190" x2="760" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+  <line x1="947" y1="190" x2="947" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+
+  <!-- API Route labels on arrows -->
+  <text x="125" y="240" fill="#c4b5fd" font-size="7" font-weight="500">POST /auth/login</text>
+  <text x="285" y="240" fill="#c4b5fd" font-size="7" font-weight="500">GET /deals</text>
+  <text x="445" y="240" fill="#c4b5fd" font-size="7" font-weight="500">GET /deals/ranked</text>
+  <text x="605" y="240" fill="#c4b5fd" font-size="7" font-weight="500">GET /deals/:id</text>
+  <text x="765" y="240" fill="#c4b5fd" font-size="7" font-weight="500">POST /ingest/deals</text>
+  <text x="952" y="240" fill="#c4b5fd" font-size="7" font-weight="500">PATCH /users/me</text>
+
+  <!-- ╔═══════════════════════════════════════╗ -->
+  <!-- ║        CONTROLLERS LAYER               ║ -->
+  <!-- ╚═══════════════════════════════════════╝ -->
+  <rect x="30" y="250" width="1040" height="130" rx="12" fill="url(#ctrlGrad)" stroke="#10b981" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
+  <text x="50" y="275" fill="#6ee7b7" font-size="14" font-weight="700">🎮  CONTROLLERS — FastAPI Routers (Port 8000, /api/v1)</text>
+
+  <!-- Controller boxes -->
+  <rect x="50" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="120" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">auth_controller</text>
+  <text x="120" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/auth/login</text>
+  <text x="120" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/auth/signup, /verify-otp</text>
+
+  <rect x="210" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="280" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">dashboard_controller</text>
+  <text x="280" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/deals, /deals/ranked</text>
+  <text x="280" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/deals/:id, /analytics</text>
+
+  <rect x="370" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="440" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">ingestion_controller</text>
+  <text x="440" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/ingest/deals</text>
+  <text x="440" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/ingestion/upload</text>
+
+  <rect x="530" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="600" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">ml_controller</text>
+  <text x="600" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/predict/deals</text>
+  <text x="600" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/jobs/run-predictions</text>
+
+  <rect x="690" y="290" width="160" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="770" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">recommendation_controller</text>
+  <text x="770" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/recommendations/generate</text>
+  <text x="770" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/recommendations/batch</text>
+
+  <rect x="870" y="290" width="175" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="957" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">action_controller</text>
+  <text x="957" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/batch/trigger (orchestrator)</text>
+  <text x="957" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">mark-actioned, escalate</text>
+
+  <!-- Controller → Model arrows -->
+  <line x1="120" y1="360" x2="120" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <line x1="280" y1="360" x2="280" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <line x1="440" y1="360" x2="440" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <line x1="600" y1="360" x2="600" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <line x1="770" y1="360" x2="770" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <line x1="957" y1="360" x2="957" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+
+  <!-- Interaction labels -->
+  <text x="125" y="400" fill="#6ee7b7" font-size="7">Query User</text>
+  <text x="285" y="400" fill="#6ee7b7" font-size="7">JOIN queries</text>
+  <text x="445" y="400" fill="#6ee7b7" font-size="7">Upsert Deal</text>
+  <text x="605" y="400" fill="#6ee7b7" font-size="7">Read + Predict</text>
+  <text x="775" y="400" fill="#6ee7b7" font-size="7">Fuse + LLM</text>
+  <text x="962" y="400" fill="#6ee7b7" font-size="7">Orchestrate</text>
+
+  <!-- Pydantic Validation bar -->
+  <rect x="200" y="385" width="600" height="20" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="500" y="399" text-anchor="middle" fill="#94a3b8" font-size="9">📋 Pydantic Schemas (api_schemas.py) validate all data flowing between layers</text>
+
+  <!-- ╔═══════════════════════════════════════╗ -->
+  <!-- ║          MODELS LAYER                  ║ -->
+  <!-- ╚═══════════════════════════════════════╝ -->
+  <rect x="30" y="415" width="1040" height="170" rx="12" fill="url(#modelGrad)" stroke="#f59e0b" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
+  <text x="50" y="440" fill="#fcd34d" font-size="14" font-weight="700">🧩  MODELS — Data Layer + AI Subsystems</text>
+
+  <!-- ORM -->
+  <rect x="50" y="455" width="245" height="110" rx="8" fill="url(#nAmber)" filter="url(#sh3)"/>
+  <text x="172" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">SQLAlchemy ORM (schema.py)</text>
+  <text x="172" y="498" text-anchor="middle" fill="#fef3c7" font-size="9">User  |  OTPCode  |  ZohoDeal</text>
+  <text x="172" y="515" text-anchor="middle" fill="#fef3c7" font-size="9">MLPrediction  |  LLMRecommendation</text>
+  <rect x="65" y="530" width="215" height="24" rx="5" fill="#92400e"/>
+  <text x="172" y="546" text-anchor="middle" fill="#fef3c7" font-size="9">database.py: Engine, SessionLocal, Base</text>
+
+  <!-- ML Engine -->
+  <rect x="315" y="455" width="235" height="110" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
+  <text x="432" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">ML Engine</text>
+  <rect x="330" y="490" width="205" height="28" rx="5" fill="#065f46"/>
+  <text x="432" y="509" text-anchor="middle" fill="#a7f3d0" font-size="9">inference.py: Preprocess + Random Forest</text>
+  <rect x="330" y="525" width="205" height="28" rx="5" fill="#065f46"/>
+  <text x="432" y="544" text-anchor="middle" fill="#a7f3d0" font-size="9">data_fusion.py: Merge ML + CRM context</text>
+
+  <!-- AI Agents -->
+  <rect x="570" y="455" width="235" height="110" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
+  <text x="687" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">AI Agents</text>
+  <rect x="585" y="490" width="205" height="28" rx="5" fill="#4c1d95"/>
+  <text x="687" y="509" text-anchor="middle" fill="#c4b5fd" font-size="9">recommender.py: LLM API + Retry + Validate</text>
+  <rect x="585" y="525" width="205" height="28" rx="5" fill="#4c1d95"/>
+  <text x="687" y="544" text-anchor="middle" fill="#c4b5fd" font-size="9">prompts.py: System + Few-shot Examples</text>
+
+  <!-- Notification Service -->
+  <rect x="825" y="455" width="220" height="110" rx="8" fill="url(#nRed)" filter="url(#sh3)"/>
+  <text x="935" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Services</text>
+  <rect x="840" y="490" width="190" height="28" rx="5" fill="#7f1d1d"/>
+  <text x="935" y="509" text-anchor="middle" fill="#fecaca" font-size="9">notification_service.py</text>
+  <rect x="840" y="525" width="190" height="28" rx="5" fill="#7f1d1d"/>
+  <text x="935" y="544" text-anchor="middle" fill="#fecaca" font-size="9">WhatsApp OTP + Deal Alerts</text>
+
+  <!-- ╔═══════════════════════════════════════╗ -->
+  <!-- ║       INFRASTRUCTURE LAYER             ║ -->
+  <!-- ╚═══════════════════════════════════════╝ -->
+  <rect x="30" y="600" width="1040" height="130" rx="12" fill="url(#infraGrad)" stroke="#ef4444" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
+  <text x="50" y="625" fill="#fca5a5" font-size="14" font-weight="700">🗄️  INFRASTRUCTURE — External Services + Storage</text>
+
+  <!-- PostgreSQL -->
+  <rect x="50" y="640" width="250" height="70" rx="8" fill="url(#nAmber)" filter="url(#sh3)"/>
+  <text x="175" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🐘 PostgreSQL 16</text>
+  <text x="175" y="688" text-anchor="middle" fill="#fef3c7" font-size="9">Port 5433 | Docker Compose | JSONB</text>
+  <text x="175" y="702" text-anchor="middle" fill="#fde68a" font-size="9">4 Tables + Computed Columns</text>
+
+  <!-- ML Artifacts -->
+  <rect x="330" y="640" width="200" height="70" rx="8" fill="url(#nTeal)" filter="url(#sh3)"/>
+  <text x="430" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">📦 ML Artifacts</text>
+  <text x="430" y="688" text-anchor="middle" fill="#ccfbf1" font-size="9">random_forest_v1.pkl (16MB)</text>
+  <text x="430" y="702" text-anchor="middle" fill="#ccfbf1" font-size="9">Scaler + Encoders + Feature Maps</text>
+
+  <!-- Groq LLM -->
+  <rect x="560" y="640" width="200" height="70" rx="8" fill="url(#nBlue)" filter="url(#sh3)"/>
+  <text x="660" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🧠 Groq LLM API</text>
+  <text x="660" y="688" text-anchor="middle" fill="#bfdbfe" font-size="9">Llama 3.3 70B Versatile</text>
+  <text x="660" y="702" text-anchor="middle" fill="#bfdbfe" font-size="9">OpenAI-compatible + JSON mode</text>
+
+  <!-- WhatsApp -->
+  <rect x="790" y="640" width="250" height="70" rx="8" fill="url(#nRed)" filter="url(#sh3)"/>
+  <text x="915" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">📱 WhatsApp + Google</text>
+  <text x="915" y="688" text-anchor="middle" fill="#fecaca" font-size="9">Twilio/Meta Business API (Alerts)</text>
+  <text x="915" y="702" text-anchor="middle" fill="#fecaca" font-size="9">Google OAuth 2.0 (SSO)</text>
+
+  <!-- Model → Infrastructure arrows -->
+  <line x1="172" y1="565" x2="172" y2="638" stroke="#fbbf24" stroke-width="2" marker-end="url(#a3a)"/>
+  <text x="180" y="607" fill="#fcd34d" font-size="8">Read/Write</text>
+
+  <line x1="432" y1="565" x2="432" y2="638" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <text x="440" y="607" fill="#6ee7b7" font-size="8">Load .pkl</text>
+
+  <line x1="687" y1="565" x2="660" y2="638" stroke="#60a5fa" stroke-width="2" marker-end="url(#a3b)"/>
+  <text x="685" y="607" fill="#93c5fd" font-size="8">API Call</text>
+
+  <line x1="935" y1="565" x2="915" y2="638" stroke="#f87171" stroke-width="2" marker-end="url(#a3r)"/>
+  <text x="940" y="607" fill="#fca5a5" font-size="8">Send Msg</text>
+</svg>
