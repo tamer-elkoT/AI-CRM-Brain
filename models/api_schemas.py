@@ -117,12 +117,25 @@ class UserCreate(BaseModel):
     password: str
     name: Optional[str] = None
     business_field: Optional[str] = None
+    role: str = "Sales"             # "Sales" or "Client"
+    phone_number: Optional[str] = None
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    business_field: Optional[str] = None
+    whatsapp_template: Optional[str] = None
+    email_template: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: str
     email: str
     name: Optional[str]
     is_active: bool
+    role: str = "Sales"
+    phone_number: Optional[str] = None
+    is_whatsapp_verified: bool = False
+    whatsapp_template: Optional[str] = None
+    email_template: Optional[str] = None
 
 class LoginRequest(BaseModel):
     email: str
@@ -134,3 +147,13 @@ class GoogleLoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+class OTPVerifyRequest(BaseModel):
+    phone_number: str
+    otp_code: str
+
+class SignupPendingResponse(BaseModel):
+    """Returned from POST /signup — user created but not yet verified."""
+    status: str
+    message: str
+    phone_number: str   # echoed back so the OTP modal knows which phone

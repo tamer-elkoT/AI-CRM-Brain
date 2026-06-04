@@ -23,11 +23,32 @@ class User(Base):
     __tablename__ = "users"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=True) # Null for OAuth users
+    hashed_password = Column(String(255), nullable=True)  # Null for OAuth users
     name = Column(String(255), nullable=True)
     business_field = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+    # --- Role & Phone ---
+    role = Column(String(20), nullable=False, default="Sales")  # "Sales" or "Client"
+    phone_number = Column(String(30), nullable=True, unique=False)  # with country code
+    is_whatsapp_verified = Column(Boolean, default=False)
+    # --- Custom outreach templates ---
+    whatsapp_template = Column(Text, nullable=True)
+    email_template = Column(Text, nullable=True)
+
+class OTPCode(Base):
+    """
+    Stores one-time passwords for WhatsApp phone verification.
+    Each signup generates a new OTP; verified ones are deleted.
+    """
+    __tablename__ = "otp_codes"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    phone_number = Column(String(30), nullable=False)
+    otp_code = Column(String(6), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+
 
 class ZohoDeal(Base):
     __tablename__ = "zoho_deals"

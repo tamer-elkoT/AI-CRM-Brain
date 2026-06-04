@@ -13,6 +13,8 @@ export interface SignupRequest {
   password: string;
   name?: string;
   business_field?: string;
+  role: string;             // "Sales" or "Client"
+  phone_number: string;     // required, with country code
 }
 
 export interface TokenResponse {
@@ -20,9 +22,38 @@ export interface TokenResponse {
   token_type: string;
 }
 
+export interface SignupPendingResponse {
+  status: string;
+  message: string;
+  phone_number: string;
+}
+
+export interface OTPVerifyRequest {
+  phone_number: string;
+  otp_code: string;
+}
+
 export interface DecodedToken {
   sub: string;
   exp: number;
+}
+
+// --- User Profile ---
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string | null;
+  is_active: boolean;
+  role: string;
+  phone_number: string | null;
+  is_whatsapp_verified: boolean;
+  whatsapp_template: string | null;
+  email_template: string | null;
+}
+
+export interface TemplateUpdateRequest {
+  whatsapp_template?: string;
+  email_template?: string;
 }
 
 // --- Dashboard ---

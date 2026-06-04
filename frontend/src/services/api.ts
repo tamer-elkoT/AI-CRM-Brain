@@ -3,6 +3,10 @@ import type {
   LoginRequest,
   SignupRequest,
   TokenResponse,
+  SignupPendingResponse,
+  OTPVerifyRequest,
+  UserProfile,
+  TemplateUpdateRequest,
   DashboardResponse,
   DealDetail,
   ActionResponse,
@@ -62,6 +66,13 @@ export const ingestionApi = {
 
 export const authApi = {
   login: (data: LoginRequest): Promise<TokenResponse> => api.post('/auth/login', data).then((res) => res.data),
-  signup: (data: SignupRequest): Promise<TokenResponse> => api.post('/auth/signup', data).then((res) => res.data),
+  signup: (data: SignupRequest): Promise<SignupPendingResponse> => api.post('/auth/signup', data).then((res) => res.data),
+  verifyOtp: (data: OTPVerifyRequest): Promise<TokenResponse> => api.post('/auth/verify-otp', data).then((res) => res.data),
   googleLogin: (credential: string): Promise<TokenResponse> => api.post('/auth/google', { credential }).then((res) => res.data),
 };
+
+export const userApi = {
+  getMe: (): Promise<UserProfile> => api.get('/auth/users/me').then((res) => res.data),
+  updateTemplates: (data: TemplateUpdateRequest): Promise<UserProfile> => api.patch('/auth/users/me/templates', data).then((res) => res.data),
+};
+

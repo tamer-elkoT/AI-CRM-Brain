@@ -1,10 +1,43 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeProvider';
+import { userApi } from '../services/api';
 
 export default function Settings() {
-  const { logout } = useAuth();
+  const { logout, user, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  // Template management state
+  const [waTemplate, setWaTemplate] = useState('');
+  const [emailTpl, setEmailTpl] = useState('');
+  const [templateSaving, setTemplateSaving] = useState(false);
+  const [templateSaved, setTemplateSaved] = useState(false);
+
+  // Load templates from user profile
+  useEffect(() => {
+    if (user) {
+      setWaTemplate(user.whatsapp_template || '');
+      setEmailTpl(user.email_template || '');
+    }
+  }, [user]);
+
+  const handleSaveTemplates = async () => {
+    setTemplateSaving(true);
+    setTemplateSaved(false);
+    try {
+      await userApi.updateTemplates({
+        whatsapp_template: waTemplate,
+        email_template: emailTpl,
+      });
+      await refreshUser();
+      setTemplateSaved(true);
+      setTimeout(() => setTemplateSaved(false), 3000);
+    } catch (err) {
+      console.error('Failed to save templates', err);
+    } finally {
+      setTemplateSaving(false);
+    }
+  };
 
   // Notification preferences (persisted in localStorage for MVP)
   const [whatsappAlerts, setWhatsappAlerts] = useState(() => {
@@ -160,6 +193,85 @@ export default function Settings() {
               )}
             </div>
           </div>
+
+          {/* 📝 Outreach Templates Card — Sales users only */}
+          {(!user || user.role === 'Sales') && (
+            <div className="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-6 lg:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined">edit_note</span>
+                </div>
+                <div>
+                  <h3 className="font-headline-md text-headline-md text-on-surface">📝 Outreach Templates</h3>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Customize your WhatsApp and Email intro/outro for client outreach</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* WhatsApp Template */}
+                <div>
+                  <label className="block font-label-sm text-label-sm text-on-surface mb-2 flex items-center gap-1.5">
+                    <span className="text-[#25D366]">●</span>
+                    Custom WhatsApp Template
+                  </label>
+                  <textarea
+                    rows={5}
+                    value={waTemplate}
+                    onChange={(e) => setWaTemplate(e.target.value)}
+                    placeholder={"Hi [Client Name],\n\nI'm reaching out regarding your deal. Here's what our AI recommends:\n\n[AI recommendation will be auto-inserted here]\n\nBest regards,\n[Your Name]"}
+                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-secondary transition-all resize-none"
+                  />
+                  <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+                    This template will be pre-filled when you contact clients via WhatsApp from a deal.
+                  </p>
+                </div>
+
+                {/* Email Template */}
+                <div>
+                  <label className="block font-label-sm text-label-sm text-on-surface mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[14px] text-secondary">mail</span>
+                    Custom Email Template
+                  </label>
+                  <textarea
+                    rows={5}
+                    value={emailTpl}
+                    onChange={(e) => setEmailTpl(e.target.value)}
+                    placeholder={"Dear [Client Name],\n\nI wanted to share some insights about your deal:\n\n[AI recommendation will be auto-inserted here]\n\nPlease let me know if you have any questions.\n\nBest regards,\n[Your Name]"}
+                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-secondary transition-all resize-none"
+                  />
+                  <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+                    This template will be pre-filled when you email clients from a deal.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-outline-variant">
+                {templateSaved && (
+                  <span className="font-label-sm text-label-sm text-secondary flex items-center gap-1 animate-in fade-in duration-200">
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    Templates saved!
+                  </span>
+                )}
+                <button
+                  onClick={handleSaveTemplates}
+                  disabled={templateSaving}
+                  className="px-6 py-2.5 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {templateSaving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[18px]">save</span>
+                      Save Templates
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Preferences Card */}
           <div className="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-6">

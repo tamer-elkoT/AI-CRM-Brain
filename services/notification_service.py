@@ -11,6 +11,62 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
+def send_whatsapp_otp(phone: str, otp_code: str) -> dict:
+    """
+    Send a 6-digit OTP to a phone number via WhatsApp.
+
+    Args:
+        phone: The user's phone number (with country code, e.g. "+966501234567")
+        otp_code: The 6-digit OTP string
+
+    In production, this would call the Twilio/Meta WhatsApp Business API:
+        client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            from_='whatsapp:+14155238886',
+            body=message_body,
+            to=f'whatsapp:{phone}'
+        )
+    """
+    sanitized_phone = "".join(c for c in phone if c.isdigit()) if phone else "N/A"
+
+    message_body = (
+        f"🔐 *AI CRM Brain — Verification Code*\n"
+        f"━━━━━━━━━━━━━━━━━━━\n"
+        f"Your one-time verification code is:\n\n"
+        f"    *{otp_code}*\n\n"
+        f"This code expires in 10 minutes.\n"
+        f"━━━━━━━━━━━━━━━━━━━\n"
+        f"If you didn't request this code, please ignore this message."
+    )
+
+    # ─── MOCK: Log the OTP for local development ───
+    logger.warning(
+        "\n"
+        "╔══════════════════════════════════════════════════════════════╗\n"
+        f"║  🔐 WhatsApp OTP → +{sanitized_phone}                      \n"
+        "╠══════════════════════════════════════════════════════════════╣\n"
+        f"║  OTP Code: {otp_code}                                       \n"
+        "╠══════════════════════════════════════════════════════════════╣\n"
+        f"{message_body}\n"
+        "╚══════════════════════════════════════════════════════════════╝"
+    )
+
+    # TODO: In production, uncomment and configure:
+    # from twilio.rest import Client
+    # client = Client(os.getenv("TWILIO_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
+    # client.messages.create(
+    #     from_=f'whatsapp:{os.getenv("TWILIO_WHATSAPP_FROM")}',
+    #     body=message_body,
+    #     to=f'whatsapp:+{sanitized_phone}'
+    # )
+
+    return {
+        "status": "sent",
+        "to": sanitized_phone,
+        "message_type": "otp",
+    }
+
+
 def send_whatsapp_alert(
     rep_phone: str,
     rep_name: str,

@@ -10,7 +10,7 @@ import asyncio
 import logging
 
 from models.database import SessionLocal
-from models.schema import ZohoDeal, MLPrediction, LLMRecommendation
+from models.schema import ZohoDeal, MLPrediction, LLMRecommendation, User
 from models.ml_engine.data_fusion import fuse_deal_payload
 from models.ml_engine.inference import preprocess_new_deal, predict_batch
 from models.ai_agents.recommender import create_recommender_service
@@ -229,6 +229,14 @@ async def generate_all_recommendations(
                 
                 if is_urgent:
                     urgent_count += 1
+                    # Look up the deal owner's verified phone from the User table
+                    owner_name = fused_payload.get("owner_name", "Unknown")
+                    owner_user = db.query(User).filter(
+                        User.name == owner_name,
+                        User.is_whatsapp_verified == True,
+                    ).first()
+                    owner_phone = owner_user.phone_number if owner_user else fused_payload.get("client_phone")
+
                     background_tasks.add_task(
                         evaluate_and_notify,
                         deal_name=fused_payload.get("deal_name", "Unknown"),
@@ -236,8 +244,8 @@ async def generate_all_recommendations(
                         amount=deal_amount,
                         adjusted_probability=adj_prob,
                         risk_flag=risk_flag,
-                        owner_name=fused_payload.get("owner_name", "Unknown"),
-                        owner_phone=fused_payload.get("client_phone"),
+                        owner_name=owner_name,
+                        owner_phone=owner_phone,
                         recommendation_ar=recommendation_data.get("recommendation_ar", ""),
                     )
                     # Keep legacy manager notification for backwards compatibility
