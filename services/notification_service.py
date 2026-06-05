@@ -137,39 +137,14 @@ def send_whatsapp_alert(
         "╚══════════════════════════════════════════════════════════════╝"
     )
 
-    # Send message using pywhatkit if phone is available, with webbrowser fallback
+    # Send truly headless message using CallMeBot API
     if sanitized_phone and sanitized_phone != "N/A":
-        phone_to_use = f"+{sanitized_phone}" if not sanitized_phone.startswith("+") else sanitized_phone
-        sent = False
-
-        # Attempt 1: pywhatkit
-        try:
-            import pywhatkit
-            pywhatkit.sendwhatmsg_instantly(phone_to_use, message_body, wait_time=15, tab_close=True)
-            logger.info(f"Sent pywhatkit WhatsApp alert to {rep_name} ({phone_to_use})")
-            sent = True
-        except Exception as e:
-            logger.warning(f"pywhatkit failed for {rep_name} ({phone_to_use}): {e}")
-
-        # Attempt 2: webbrowser fallback (opens WhatsApp Web in default browser)
-        if not sent:
-            try:
-                import platform
-                import subprocess
-                import webbrowser
-                from urllib.parse import quote
-                
-                wa_url = f"https://wa.me/{sanitized_phone}?text={quote(message_body)}"
-                
-                if 'microsoft' in platform.uname().release.lower():
-                    safe_link = wa_url.replace('&', '^&')
-                    subprocess.run(['cmd.exe', '/c', 'start', '""', safe_link], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                else:
-                    webbrowser.open(wa_url)
-                    
-                logger.info(f"Opened WhatsApp Web fallback for {rep_name} ({phone_to_use})")
-            except Exception as e2:
-                logger.error(f"Both pywhatkit and webbrowser failed for {rep_name}: {e2}")
+        from utils.whatsapp_sender import send_headless_whatsapp
+        sent = send_headless_whatsapp(sanitized_phone, message_body)
+        if sent:
+            logger.info(f"✅ Headless automated alert sent to {rep_name}")
+        else:
+            logger.warning(f"⚠️ Failed to send headless alert to {rep_name}. Check Twilio credentials or limits.")
     else:
         logger.warning(f"Cannot send WhatsApp alert to {rep_name}: no valid phone number")
 

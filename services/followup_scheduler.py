@@ -124,27 +124,11 @@ def _send_deferred_whatsapp(phone: str, rep_name: str, deal, ai_score: float):
             f"Open AI CRM Brain → {deal_link}"
         )
 
-        try:
-            import pywhatkit
-            pywhatkit.sendwhatmsg_instantly(sanitized, message, wait_time=15, tab_close=True)
-            logger.info(f"Deferred WhatsApp alert sent to {rep_name} ({sanitized})")
-        except Exception as e:
-            logger.warning(f"pywhatkit failed for deferred WhatsApp alert: {e}")
-            try:
-                import platform
-                import subprocess
-                import webbrowser
-                import urllib.parse
-                
-                encoded = urllib.parse.quote(message)
-                wa_link = f"https://wa.me/{sanitized.replace('+', '')}?text={encoded}"
-                
-                if 'microsoft' in platform.uname().release.lower():
-                    safe_link = wa_link.replace('&', '^&')
-                    subprocess.run(['cmd.exe', '/c', 'start', '""', safe_link], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                else:
-                    webbrowser.open(wa_link)
-                    
-                logger.info(f"Opened WhatsApp Web fallback for deferred alert to {rep_name} ({sanitized})")
-            except Exception as e2:
-                logger.error(f"Both pywhatkit and webbrowser failed for deferred alert: {e2}")
+        from utils.whatsapp_sender import send_headless_whatsapp
+        sent = send_headless_whatsapp(phone, message)
+        if sent:
+            logger.info(f"✅ Headless deferred WhatsApp alert sent to {rep_name}")
+        else:
+            logger.warning(f"⚠️ Failed to send headless deferred alert to {rep_name}. Check Twilio credentials or limits.")
+    except Exception as e:
+        logger.error(f"Error in _send_deferred_whatsapp: {e}")

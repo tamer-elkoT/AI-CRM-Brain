@@ -208,47 +208,12 @@ def _log_whatsapp_alert(deal: ZohoDeal, ai_score: float, owner: User):
     )
 
     if rep_phone:
-        import urllib.parse
-        sanitized = "".join(c for c in rep_phone if c.isdigit() or c == "+")
-        
-        # Handle Egyptian local numbers (010, 011, 012, 015)
-        if sanitized.startswith("01") and len(sanitized) == 11:
-            sanitized = f"+20{sanitized[1:]}"
-        elif not sanitized.startswith("+"):
-            sanitized = f"+{sanitized}"
-
-        logger.info(f"Attempting to send automatic WhatsApp alert to {rep_name} at {sanitized}...")
-        try:
-            import pywhatkit
-            # Send message and close tab after 15 seconds to prevent opening too many tabs
-            pywhatkit.sendwhatmsg_instantly(sanitized, message, wait_time=15, tab_close=True)
-            logger.info(f"✅ WhatsApp alert successfully sent to {rep_name} ({sanitized})")
-        except Exception as e:
-            logger.error(f"❌ Failed to send automatic WhatsApp message via pywhatkit (likely running in headless Linux/WSL): {e}")
-            
-            # Fallback to logging wa.me link and opening it if pywhatkit fails
-            encoded = urllib.parse.quote(message)
-            wa_link = f"https://wa.me/{sanitized.replace('+', '')}?text={encoded}"
-            logger.warning(
-                f"[WA ALERT FALLBACK] Could not auto-send. Opening manual link: {wa_link}"
-            )
-            try:
-                import platform
-                import subprocess
-                import webbrowser
-                
-                # Check if running in WSL
-                if 'microsoft' in platform.uname().release.lower():
-                    # In WSL, cmd.exe /c start works better than xdg-open which fails looking for linux browsers
-                    # Replace & with ^& for cmd.exe
-                    safe_link = wa_link.replace('&', '^&')
-                    subprocess.run(['cmd.exe', '/c', 'start', '""', safe_link], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                else:
-                    webbrowser.open(wa_link)
-                    
-                logger.info(f"Opened WhatsApp Web fallback for {rep_name} ({sanitized})")
-            except Exception as e2:
-                logger.error(f"Both pywhatkit and webbrowser failed for {rep_name}: {e2}")
+        from utils.whatsapp_sender import send_headless_whatsapp
+        sent = send_headless_whatsapp(rep_phone, message)
+        if sent:
+            logger.info(f"✅ Headless automatic WhatsApp alert successfully sent to {rep_name}")
+        else:
+            logger.warning(f"⚠️ Failed to send headless WhatsApp alert to {rep_name}. Check Twilio credentials or limits.")
     else:
         logger.warning(
             f"[WA ALERT] ⚠️ No phone for rep '{rep_name}' on deal '{deal.deal_name}' — skipping WhatsApp alert. "
