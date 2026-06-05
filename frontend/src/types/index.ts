@@ -83,6 +83,12 @@ export interface RankedDeal {
   closing_date?: string;
   client_phone?: string | null;
   client_email?: string | null;
+  // Sprint 5
+  action_status?: string;
+  followup_count?: number;
+  last_followup_date?: string | null;
+  owner_name?: string | null;
+  followup_days_override?: number;
 }
 
 export interface DashboardResponse {
@@ -126,6 +132,12 @@ export interface DealDetail {
   priority_tier: string | null;
   client_phone: string | null;
   client_email: string | null;
+  // Sprint 5
+  action_status?: string;
+  followup_count?: number;
+  last_followup_date?: string | null;
+  owner_name?: string | null;
+  followup_days_override?: number;
 }
 
 // --- Actions ---
@@ -167,4 +179,55 @@ export interface CreateDealResponse {
   status: string;
   message: string;
   deal_id: string;
+}
+
+// ============================================================
+// Sprint 5: Follow-up, Notifications, Stage Editing
+// ============================================================
+
+export interface CrmNotification {
+  id: number;
+  user_id: string;
+  deal_id?: string | null;
+  type: 'follow_up_due' | 'deal_updated' | 'score_changed' | 'system';
+  title: string;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  items: CrmNotification[];
+  unread_count: number;
+  total: number;
+}
+
+export interface FollowupMarkRequest {
+  channel?: string;
+  message_sent?: string;
+  notes?: string;
+}
+
+export interface FollowupMarkResponse {
+  status: string;
+  message: string;
+  deal_id: string;
+  followup_count: number;
+  followed_up_at: string;
+}
+
+export interface GenerateMessageResponse {
+  status: string;
+  generated_message: string;
+  deal_name: string;
+  account_name: string;
+  client_phone?: string | null;
+}
+
+export interface StageUpdateResponse {
+  status: string;
+  message: string;
+  deal_id: string;
+  old_stage: string;
+  new_stage: string;
 }

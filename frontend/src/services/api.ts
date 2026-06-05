@@ -16,6 +16,11 @@ import type {
   AllDealsResponse,
   DealCreate,
   CreateDealResponse,
+  NotificationListResponse,
+  FollowupMarkRequest,
+  FollowupMarkResponse,
+  GenerateMessageResponse,
+  StageUpdateResponse,
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -39,12 +44,14 @@ api.interceptors.request.use((config) => {
 export const dashboardApi = {
   getRankedDeals: (sortBy: string = 'ai_score', limit?: number): Promise<DashboardResponse> => 
     api.get('/deals/ranked', { params: { sort_by: sortBy, limit } }).then((res) => res.data),
-  getAllDeals: (page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score'): Promise<AllDealsResponse> =>
-    api.get('/deals', { params: { page, page_size: pageSize, search: search || undefined, sort_by: sortBy } }).then((res) => res.data),
+  getAllDeals: (page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score', includeClosed: boolean = false): Promise<AllDealsResponse> =>
+    api.get('/deals', { params: { page, page_size: pageSize, search: search || undefined, sort_by: sortBy, include_closed: includeClosed } }).then((res) => res.data),
   getAccountRanking: (): Promise<AccountRankingResponse> => api.get('/analytics/accounts/ranked').then((res) => res.data),
   getDealDetail: (id: string): Promise<DealDetail> => api.get(`/deals/${id}`).then((res) => res.data),
   createDeal: (data: DealCreate): Promise<CreateDealResponse> => api.post('/deals', data).then((res) => res.data),
   getAccountNames: (): Promise<string[]> => api.get('/accounts/names').then((res) => res.data),
+  updateStage: (dealId: string, newStage: string): Promise<StageUpdateResponse> =>
+    api.patch(`/deals/${dealId}/stage`, { new_stage: newStage }).then((res) => res.data),
 };
 
 export const actionApi = {
@@ -74,5 +81,29 @@ export const authApi = {
 export const userApi = {
   getMe: (): Promise<UserProfile> => api.get('/auth/users/me').then((res) => res.data),
   updateTemplates: (data: TemplateUpdateRequest): Promise<UserProfile> => api.patch('/auth/users/me/templates', data).then((res) => res.data),
+};
+
+// Sprint 5: Follow-up APIs
+export const followupApi = {
+  markFollowedUp: (dealId: string, data?: FollowupMarkRequest): Promise<FollowupMarkResponse> =>
+    api.post(`/followups/${dealId}/mark`, data || {}).then((res) => res.data),
+  generateMessage: (dealId: string, salesRepName?: string): Promise<GenerateMessageResponse> =>
+    api.post(`/followups/${dealId}/generate-message`, { sales_rep_name: salesRepName }).then((res) => res.data),
+  updateDays: (dealId: string, days: number): Promise<ActionResponse> =>
+    api.patch(`/followups/${dealId}/days`, { days }).then((res) => res.data),
+  scheduleFollowups: (): Promise<ActionResponse> =>
+    api.post('/followups/schedule').then((res) => res.data),
+};
+
+// Sprint 5: Notification APIs
+export const notificationApi = {
+  getNotifications: (page: number = 1, pageSize: number = 20): Promise<NotificationListResponse> =>
+    api.get('/notifications', { params: { page, page_size: pageSize } }).then((res) => res.data),
+  getUnreadCount: (): Promise<{ unread_count: number }> =>
+    api.get('/notifications/unread-count').then((res) => res.data),
+  markRead: (notificationId: number): Promise<ActionResponse> =>
+    api.patch(`/notifications/${notificationId}/read`).then((res) => res.data),
+  markAllRead: (): Promise<ActionResponse> =>
+    api.patch('/notifications/read-all').then((res) => res.data),
 };
 

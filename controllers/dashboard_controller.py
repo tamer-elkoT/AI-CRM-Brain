@@ -4,7 +4,7 @@ from sqlalchemy import func
 from typing import List, Optional
 
 from models.database import SessionLocal
-from models.schema import ZohoDeal, MLPrediction, LLMRecommendation
+from models.schema import ZohoDeal, MLPrediction, LLMRecommendation, FollowupLog, Notification, User
 import math
 
 from models.api_schemas import (
@@ -17,7 +17,16 @@ from models.api_schemas import (
     AccountRanking,
     PaginatedDealsResponse,
     DealCreate,
+    StageUpdateRequest,
 )
+
+CLOSED_STAGES = ['Closed Won', 'Closed Lost']
+
+ALLOWED_STAGES = [
+    'Qualification', 'Needs Analysis', 'Value Proposition',
+    'Identify Decision Makers', 'Proposal/Price Quote',
+    'Negotiation/Review', 'Closed Won', 'Closed Lost',
+]
 
 router = APIRouter()
 
@@ -29,21 +38,37 @@ def get_db():
         db.close()
 
 
+def _get_followup_stats(db: Session, deal_id: str):
+    """Helper: get followup count and last date for a deal."""
+    count = db.query(func.count(FollowupLog.id)).filter(FollowupLog.deal_id == deal_id).scalar() or 0
+    last = db.query(func.max(FollowupLog.followed_up_at)).filter(FollowupLog.deal_id == deal_id).scalar()
+    last_str = str(last)[:10] if last else None
+    return count, last_str
+
+
 @router.get("/deals", response_model=PaginatedDealsResponse)
 def get_all_deals(
     page: int = 1,
     page_size: int = 20,
     search: Optional[str] = None,
     sort_by: str = "ai_score",
+    include_closed: bool = False,
     db: Session = Depends(get_db),
 ):
     """
-    Returns ALL deals with pagination, search, and sorting.
-    Used by the Home pipeline table.
+    Returns deals with pagination, search, and sorting.
+    By default, filters out 'Closed Won' and 'Closed Lost' deals (Feature 1).
+    Set include_closed=true to show only closed deals.
     """
     query = db.query(ZohoDeal, MLPrediction, LLMRecommendation)\
         .outerjoin(MLPrediction, ZohoDeal.id == MLPrediction.deal_id)\
         .outerjoin(LLMRecommendation, ZohoDeal.id == LLMRecommendation.deal_id)
+
+    # Feature 1: Filter closed deals from active pipeline
+    if include_closed:
+        query = query.filter(ZohoDeal.stage.in_(CLOSED_STAGES))
+    else:
+        query = query.filter(ZohoDeal.stage.notin_(CLOSED_STAGES))
 
     # Search filter
     if search:
@@ -56,12 +81,13 @@ def get_all_deals(
     all_results = query.all()
     total = len(all_results)
 
-    # Build ranked deals
+    # Build ranked deals with Sprint 5 enrichment
     deals = []
     for deal, pred, rec in all_results:
         ai_score = rec.adjusted_score_pct if rec else 0.0
         ml_score = round(pred.base_probability * 100, 1) if pred and pred.base_probability <= 1 else (pred.base_probability if pred else 0.0)
         priority = rec.priority_tier if rec else "LOW"
+        followup_count, last_followup_date = _get_followup_stats(db, deal.id)
 
         deals.append(RankedDeal(
             deal_id=deal.id,
@@ -75,6 +101,11 @@ def get_all_deals(
             closing_date=str(deal.closing_date)[:10] if deal.closing_date else "N/A",
             client_phone=deal.client_phone,
             client_email=deal.client_email,
+            action_status=deal.action_status or "no_action",
+            followup_count=followup_count,
+            last_followup_date=last_followup_date,
+            owner_name=deal.owner_name,
+            followup_days_override=deal.followup_days_override or 3,
         ))
 
     # Sort
@@ -153,6 +184,7 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
     Returns KPIs, ranked deals table, and scatter plot points.
     Uses a subquery to get only the LATEST recommendation per deal,
     preventing duplicate rows when a deal has multiple batch recommendations.
+    Feature 1: Excludes closed deals from dashboard.
     """
 
     # Subquery: latest recommendation id per deal
@@ -166,8 +198,10 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
     )
 
     # Main query: all deals, left-joined to their latest recommendation only
+    # Feature 1: Exclude closed deals from dashboard
     recs = (
         db.query(ZohoDeal, MLPrediction, LLMRecommendation)
+        .filter(ZohoDeal.stage.notin_(CLOSED_STAGES))
         .outerjoin(MLPrediction, ZohoDeal.id == MLPrediction.deal_id)
         .outerjoin(
             latest_rec_subq,
@@ -278,6 +312,8 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
     ml_prob = pred.base_probability if pred else 0.0
     ml_score = round(ml_prob, 1) if ml_prob > 1 else round(ml_prob * 100, 1)
 
+    followup_count, last_followup_date = _get_followup_stats(db, deal.id)
+
     return DealDetailResponse(
         deal_id=deal.id,
         deal_name=deal.deal_name,
@@ -295,6 +331,12 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
         # Dynamic contact fields — populated after re-sync from Zoho
         client_phone=deal.client_phone,
         client_email=deal.client_email,
+        # Sprint 5: Follow-up & Action fields
+        action_status=deal.action_status or "no_action",
+        followup_count=followup_count,
+        last_followup_date=last_followup_date,
+        owner_name=deal.owner_name,
+        followup_days_override=deal.followup_days_override or 3,
     )
 
 
@@ -369,3 +411,58 @@ def get_account_names(db: Session = Depends(get_db)):
         .all()
 
     return [row[0] for row in results if row[0]]
+
+
+# ============================================================
+# Sprint 5: Inline Stage Editing (Feature 9)
+# ============================================================
+@router.patch("/deals/{deal_id}/stage")
+def update_deal_stage(
+    deal_id: str,
+    request: StageUpdateRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Feature 9: Update a deal's stage inline from the pipeline table.
+    Creates a notification when the stage changes.
+    """
+    deal = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id).first()
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found")
+
+    if request.new_stage not in ALLOWED_STAGES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid stage. Allowed: {', '.join(ALLOWED_STAGES)}"
+        )
+
+    old_stage = deal.stage
+    deal.stage = request.new_stage
+
+    # If moved to closed, clear action status
+    if request.new_stage in CLOSED_STAGES:
+        deal.action_status = "no_action"
+
+    # Create notification for stage change
+    # Find the deal owner in the users table
+    if deal.owner_name:
+        owner = db.query(User).filter(User.name == deal.owner_name).first()
+        if owner:
+            notification = Notification(
+                user_id=owner.id,
+                deal_id=deal.id,
+                type="deal_updated",
+                title=f"Stage Changed: {deal.deal_name}",
+                body=f"Deal stage changed from '{old_stage}' to '{request.new_stage}'.",
+            )
+            db.add(notification)
+
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Deal stage updated from '{old_stage}' to '{request.new_stage}'.",
+        "deal_id": deal_id,
+        "old_stage": old_stage,
+        "new_stage": request.new_stage,
+    }

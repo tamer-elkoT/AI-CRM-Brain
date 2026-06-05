@@ -71,12 +71,26 @@ class ZohoDeal(Base):
     custom_fields = Column(JSONB)
     is_escalated = Column(Boolean, default=False)
 
+    # --- Sprint 5: Follow-up & Action Tracking ---
+    action_status = Column(
+        String(30), nullable=True, default="no_action"
+    )  # need_action_now, need_action_3days, followed_up, no_action
+    followup_days_override = Column(
+        Integer, nullable=True, default=3
+    )  # Sales rep can customize deferred follow-up period
+
     # Relationships
     predictions = relationship(
         "MLPrediction", back_populates="deal", cascade="all, delete-orphan"
     )
     recommendations = relationship(
         "LLMRecommendation", back_populates="deal", cascade="all, delete-orphan"
+    )
+    followups = relationship(
+        "DealFollowup", back_populates="deal", cascade="all, delete-orphan"
+    )
+    followup_logs = relationship(
+        "FollowupLog", back_populates="deal", cascade="all, delete-orphan"
     )
 
 
@@ -193,3 +207,57 @@ class LLMRecommendation(Base):
     deal = relationship("ZohoDeal", back_populates="recommendations")
     # Uncomment if you have the MLPrediction model defined:
     prediction = relationship("MLPrediction", back_populates="llm_recommendation")
+
+
+class DealFollowup(Base):
+    """
+    Stores follow-up scheduling metadata.
+    Created when AI scoring triggers a follow-up (immediate or deferred).
+    """
+    __tablename__ = "deal_followups"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    deal_id = Column(String, ForeignKey("zoho_deals.id", ondelete="CASCADE"), nullable=False)
+    scheduled_at = Column(DateTime(timezone=True), nullable=False)
+    urgency = Column(String(20), nullable=False)  # 'immediate' or 'deferred'
+    followup_days = Column(Integer, default=3)  # Customizable deferred period
+    notified_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+
+    # Relationships
+    deal = relationship("ZohoDeal", back_populates="followups")
+
+
+class FollowupLog(Base):
+    """
+    Records each completed follow-up action by a sales rep.
+    """
+    __tablename__ = "followup_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    deal_id = Column(String, ForeignKey("zoho_deals.id", ondelete="CASCADE"), nullable=False)
+    sales_rep_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    followed_up_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+    channel = Column(String(30), default="whatsapp")  # whatsapp, email, phone, etc.
+    message_sent = Column(Text, nullable=True)
+    notes = Column(Text, nullable=True)
+
+    # Relationships
+    deal = relationship("ZohoDeal", back_populates="followup_logs")
+
+
+class Notification(Base):
+    """
+    In-app notifications for sales reps.
+    Tracks follow-up alerts, deal updates, score changes, and system messages.
+    """
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    deal_id = Column(String, nullable=True)
+    type = Column(String(30), nullable=False)  # follow_up_due, deal_updated, score_changed, system
+    title = Column(String(255), nullable=False)
+    body = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)

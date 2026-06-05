@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from models.database import SessionLocal
 from models.schema import ZohoDeal
-from models.data_ingestion.zoho_api import fetch_deals_schema
+from models.data_ingestion.zoho_api import fetch_deals_schema, fetch_contacts_by_ids
 from sqlalchemy.dialects.postgresql import insert
 
 router = APIRouter()
@@ -42,21 +42,35 @@ def ingest_zoho_deals():
 
         records_processed = 0
 
+        # ─── Enrich deals with Contact phone/email from Zoho Contacts API ───
+        # In Zoho CRM, Phone and Email are Contact-level fields, not Deal-level.
+        # Each Deal has Contact_Name: {name, id}. We use the id to fetch real data.
+        contact_ids = []
+        for deal in raw_deals:
+            cn = deal.get("Contact_Name")
+            if isinstance(cn, dict) and cn.get("id"):
+                contact_ids.append(cn["id"])
+
+        contacts_map = {}
+        if contact_ids:
+            try:
+                contacts_map = fetch_contacts_by_ids(contact_ids)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Contact enrichment failed (non-fatal): {e}")
+
         for deal in raw_deals:
             # ------------------------------------------------------------------
-            # Extract client_phone: try deal-level Phone, then Mobile
-            # Extract client_email: try deal-level Email, then Contact_Name.email
+            # Extract client_phone/email from the Contact record (not the Deal)
             # ------------------------------------------------------------------
-            client_phone = (
-                deal.get("Phone")
-                or deal.get("Mobile")
-                or None
-            )
-            client_email = deal.get("Email") or (
-                deal.get("Contact_Name", {}).get("email")
-                if isinstance(deal.get("Contact_Name"), dict)
-                else None
-            )
+            contact_id = None
+            cn = deal.get("Contact_Name")
+            if isinstance(cn, dict):
+                contact_id = cn.get("id")
+
+            contact_info = contacts_map.get(contact_id, {}) if contact_id else {}
+            client_phone = contact_info.get("phone") or None
+            client_email = contact_info.get("email") or None
 
             flattened_record = {
                 "id": deal.get("id"),
@@ -85,6 +99,7 @@ def ingest_zoho_deals():
                 ),
                 "client_phone": client_phone,
                 "client_email": client_email,
+                "custom_fields": deal.get("Custom_Fields") if deal.get("Custom_Fields") is not None else {},
             }
 
             stmt = insert(ZohoDeal).values(**flattened_record)
@@ -101,10 +116,20 @@ def ingest_zoho_deals():
 
         db.commit()
 
+        # Sprint 5: Classify all deals after sync
+        classify_result = {}
+        try:
+            from services.deal_classifier import classify_all_deals
+            classify_result = classify_all_deals(db)
+        except Exception as classify_err:
+            import logging
+            logging.getLogger(__name__).warning(f"Deal classification after sync failed (non-fatal): {classify_err}")
+
         return {
             "status": "success",
             "message": f"Pipeline successfully automated. Synced {records_processed} deals to PostgreSQL.",
             "source": "Zoho CRM REST API v3",
+            "classification": classify_result,
         }
 
     except Exception as e:

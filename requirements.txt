@@ -2,7 +2,7 @@
 requests==2.31.0          # To connect to the Zoho/HubSpot APIs
 pandas==2.2.0             # For data manipulation and flattening JSONs
 numpy==1.26.4             # For numerical operations
-matplotlib==3.7.2        # For basic plotting in EDA
+matplotlib==3.8.2        # For basic plotting in EDA (3.8+ has cp312 wheels)
 seaborn==0.12.2          # For enhanced visualizations in EDA
 
 # --- Database & Migrations (Added for Task 1.7) ---
@@ -36,3 +36,7 @@ python-jose[cryptography]==3.3.0
 email-validator==2.1.0
 google-auth==2.28.1
 python-multipart==0.0.9
+
+# --- Sprint 5: Follow-up & Notifications ---
+pywhatkit==5.4                # Free WhatsApp messaging (no API limits)
+apscheduler==3.10.4           # Background scheduler for deferred follow-ups

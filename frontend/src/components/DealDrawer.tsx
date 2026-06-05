@@ -1,9 +1,25 @@
 import { useState } from 'react';
-import { useDealDetail, useMarkActioned, useEscalateDeal } from '../hooks/useDeals';
+import { useDealDetail, useMarkActioned, useEscalateDeal, useMarkFollowedUp, useUpdateStage } from '../hooks/useDeals';
 import { useToast } from './ui/Toast';
 import { MessageCircle, Mail, AlertOctagon } from 'lucide-react';
 import type { DealDetail } from '../types';
 import OutreachModal from './OutreachModal';
+import MessageGeneratorModal from './MessageGeneratorModal';
+
+// ─── Feature 4: Action status display config ───
+const ACTION_STATUS_CONFIG: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+  need_action_now: { label: 'Need Action — Now', icon: '🔴', color: 'text-red-600', bg: 'bg-red-500/10' },
+  need_action_3days: { label: 'Need Action — 3 Days', icon: '🟡', color: 'text-amber-600', bg: 'bg-amber-500/10' },
+  followed_up: { label: 'Followed Up', icon: '✅', color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
+  no_action: { label: 'No Action', icon: '⬜', color: 'text-on-surface-variant', bg: 'bg-surface-container' },
+};
+
+// ─── Feature 9: Allowed pipeline stages ───
+const PIPELINE_STAGES = [
+  'Qualification', 'Needs Analysis', 'Value Proposition',
+  'Identify Decision Makers', 'Proposal/Price Quote',
+  'Negotiation/Review', 'Closed Won', 'Closed Lost',
+];
 
 interface DealDrawerProps {
   dealId: string;
@@ -103,14 +119,47 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
   const { data: deal, isLoading } = useDealDetail(dealId);
   const markActioned = useMarkActioned();
   const escalateDeal = useEscalateDeal();
+  const markFollowed = useMarkFollowedUp();
+  const updateStage = useUpdateStage();
   const { toast } = useToast();
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [factorsOpen, setFactorsOpen] = useState(false);
   const [showOutreachModal, setShowOutreachModal] = useState(false);
   const [outreachMode, setOutreachMode] = useState<'whatsapp' | 'email'>('whatsapp');
+  const [showMessageGen, setShowMessageGen] = useState(false);
+  const [editingStage, setEditingStage] = useState(false);
 
   const handleAction = () => {
     markActioned.mutate(dealId, { onSuccess: onClose });
+  };
+
+  const handleMarkFollowedUp = () => {
+    markFollowed.mutate(
+      { dealId, data: { channel: 'manual', notes: 'Marked from deal drawer' } },
+      {
+        onSuccess: (res) => {
+          toast({ title: '✅ Followed Up', description: res.message, variant: 'success' });
+        },
+        onError: (err) => {
+          toast({ title: 'Error', description: err.message || 'Failed to record follow-up', variant: 'destructive' });
+        },
+      }
+    );
+  };
+
+  const handleStageChange = (newStage: string) => {
+    setEditingStage(false);
+    updateStage.mutate(
+      { dealId, newStage },
+      {
+        onSuccess: (res) => {
+          toast({ title: '🔄 Stage Updated', description: res.message, variant: 'success' });
+        },
+        onError: (err) => {
+          toast({ title: 'Update Failed', description: err.message || 'Could not update stage', variant: 'destructive' });
+        },
+      }
+    );
   };
 
   if (isLoading || !deal) {
@@ -122,6 +171,8 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
       </div>
     );
   }
+
+  const actionCfg = ACTION_STATUS_CONFIG[deal.action_status || 'no_action'] || ACTION_STATUS_CONFIG.no_action;
 
   return (
     <div className="fixed inset-0 bg-primary-container/20 backdrop-blur-layer z-40 flex justify-end" onClick={onClose}>
@@ -136,7 +187,14 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
               <span className="material-symbols-outlined text-secondary fill">monetization_on</span>
               {deal.deal_name}
             </h2>
-            <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">ID: #{deal.deal_id}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="font-body-sm text-body-sm text-on-surface-variant">ID: #{deal.deal_id}</p>
+              {/* Feature 4: Action status badge in header */}
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-xs ${actionCfg.bg} ${actionCfg.color}`}>
+                <span className="text-[10px]">{actionCfg.icon}</span>
+                {actionCfg.label}
+              </span>
+            </div>
           </div>
           <button onClick={onClose} aria-label="Close" className="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
             <span className="material-symbols-outlined">close</span>
@@ -151,9 +209,11 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { icon: 'business', label: 'Account', value: deal.account_name },
-                { icon: 'step', label: 'Stage', value: deal.stage },
                 { icon: 'payments', label: 'Amount', value: `$${deal.amount.toLocaleString()}` },
                 { icon: 'event', label: 'Closing', value: deal.closing_date },
+                { icon: 'person', label: 'Owner', value: deal.owner_name || 'Unknown' },
+                { icon: 'phone', label: 'Client Phone', value: deal.client_phone || 'N/A' },
+                { icon: 'mail', label: 'Client Email', value: deal.client_email || 'N/A' },
               ].map(({ icon, label, value }) => (
                 <div key={label} className="bg-surface rounded-lg border border-outline-variant p-4 flex items-start gap-3">
                   <span className="material-symbols-outlined text-secondary mt-0.5">{icon}</span>
@@ -164,6 +224,49 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
                 </div>
               ))}
             </div>
+
+            {/* Feature 9: Stage with inline editing */}
+            <div className="mt-4 bg-surface rounded-lg border border-outline-variant p-4 flex items-center gap-3">
+              <span className="material-symbols-outlined text-secondary">step</span>
+              <div className="flex-1">
+                <p className="font-label-sm text-label-sm text-on-surface-variant">Stage</p>
+                {editingStage ? (
+                  <select
+                    autoFocus
+                    defaultValue={deal.stage}
+                    className="mt-1 w-full px-2 py-1.5 rounded-lg font-body-md text-body-md bg-surface border border-secondary text-on-surface focus:outline-none"
+                    onChange={(e) => handleStageChange(e.target.value)}
+                    onBlur={() => setEditingStage(false)}
+                  >
+                    {PIPELINE_STAGES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <button
+                    onClick={() => setEditingStage(true)}
+                    className="mt-1 font-body-md text-body-md text-on-surface font-medium flex items-center gap-1.5 hover:text-secondary transition-colors group"
+                  >
+                    {deal.stage}
+                    <span className="material-symbols-outlined text-[14px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Feature 7: Follow-up history */}
+            {(deal.followup_count ?? 0) > 0 && (
+              <div className="mt-4 bg-emerald-500/5 rounded-lg border border-emerald-500/20 p-4 flex items-center gap-3">
+                <span className="material-symbols-outlined text-emerald-600">history</span>
+                <div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Follow-up History</p>
+                  <p className="font-body-md text-body-md text-on-surface font-medium mt-0.5">
+                    Followed up {deal.followup_count} time{deal.followup_count !== 1 ? 's' : ''}
+                    {deal.last_followup_date && <span className="text-on-surface-variant"> · Last: {deal.last_followup_date}</span>}
+                  </p>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Quick Score Overview */}
@@ -259,20 +362,21 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
           <section>
             <h3 className="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              {deal.client_phone ? (
-                <button
-                  onClick={() => { setOutreachMode('whatsapp'); setShowOutreachModal(true); }}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg font-label-md text-sm transition-colors border border-[#25D366]/30"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp Client
-                </button>
-              ) : (
-                <div className="flex items-center justify-center gap-2 py-2.5 px-4 bg-surface-container-high text-on-surface-variant/50 rounded-lg font-label-md text-sm border border-outline-variant cursor-not-allowed" title="No phone number available for this deal">
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp (N/A)
-                </div>
-              )}
+              {/* Feature 6: Generate AI Message button */}
+              <button
+                onClick={() => setShowMessageGen(true)}
+                className="flex items-center justify-center gap-2 py-2.5 px-4 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 rounded-lg font-label-md text-sm transition-colors border border-purple-500/30"
+              >
+                <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                Generate AI Message
+              </button>
+              <button
+                onClick={() => { setOutreachMode('whatsapp'); setShowOutreachModal(true); }}
+                className="flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 rounded-lg font-label-md text-sm transition-colors border border-[#25D366]/30"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp Client
+              </button>
               {deal.client_email ? (
                 <button
                   onClick={() => { setOutreachMode('email'); setShowOutreachModal(true); }}
@@ -309,19 +413,33 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
           </section>
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-6 border-t border-outline-variant bg-surface-container-lowest sticky bottom-0 z-10 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors">
-            Dismiss
-          </button>
-          <button
-            onClick={handleAction}
-            disabled={markActioned.isPending}
-            className="bg-secondary text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-sm disabled:opacity-50"
-          >
-            <span className={`material-symbols-outlined text-[18px] ${markActioned.isPending ? 'animate-spin' : ''}`}>check_circle</span>
-            Mark Actioned
-          </button>
+        {/* Footer Actions — Feature 7: Mark Followed Up */}
+        <div className="p-6 border-t border-outline-variant bg-surface-container-lowest sticky bottom-0 z-10 flex justify-between gap-3">
+          <div className="flex gap-2">
+            {deal.action_status !== 'followed_up' && (
+              <button
+                onClick={handleMarkFollowedUp}
+                disabled={markFollowed.isPending}
+                className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                {markFollowed.isPending ? 'Saving...' : 'Mark Followed Up'}
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button onClick={onClose} className="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors">
+              Dismiss
+            </button>
+            <button
+              onClick={handleAction}
+              disabled={markActioned.isPending}
+              className="bg-secondary text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-sm disabled:opacity-50"
+            >
+              <span className={`material-symbols-outlined text-[18px] ${markActioned.isPending ? 'animate-spin' : ''}`}>check_circle</span>
+              Mark Actioned
+            </button>
+          </div>
         </div>
       </div>
       
@@ -330,6 +448,13 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
           deal={deal}
           mode={outreachMode}
           onClose={() => setShowOutreachModal(false)}
+        />
+      )}
+
+      {showMessageGen && deal && (
+        <MessageGeneratorModal
+          deal={deal}
+          onClose={() => setShowMessageGen(false)}
         />
       )}
     </div>

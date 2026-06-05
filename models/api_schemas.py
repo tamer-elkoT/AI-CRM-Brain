@@ -55,6 +55,12 @@ class RankedDeal(BaseModel):
     closing_date: Optional[str] = None
     client_phone: Optional[str] = None
     client_email: Optional[str] = None
+    # Sprint 5: Follow-up & Action fields
+    action_status: Optional[str] = "no_action"
+    followup_count: int = 0
+    last_followup_date: Optional[str] = None
+    owner_name: Optional[str] = None
+    followup_days_override: Optional[int] = 3
 
 class DashboardKPIs(BaseModel):
     total_active: int
@@ -97,6 +103,12 @@ class DealDetailResponse(BaseModel):
     priority_tier: Optional[str] = None
     client_phone: Optional[str] = None
     client_email: Optional[str] = None
+    # Sprint 5: Follow-up & Action fields
+    action_status: Optional[str] = "no_action"
+    followup_count: int = 0
+    last_followup_date: Optional[str] = None
+    owner_name: Optional[str] = None
+    followup_days_override: Optional[int] = 3
 
 class DealCreate(BaseModel):
     deal_name: str
@@ -157,3 +169,47 @@ class SignupPendingResponse(BaseModel):
     status: str
     message: str
     phone_number: str   # echoed back so the OTP modal knows which phone
+
+
+# ============================================================
+# Sprint 5: Follow-up, Notifications, Stage Editing Schemas
+# ============================================================
+
+class FollowupMarkRequest(BaseModel):
+    """Request body when marking a deal as followed up."""
+    channel: str = "whatsapp"
+    message_sent: Optional[str] = None
+    notes: Optional[str] = None
+
+class FollowupDaysUpdateRequest(BaseModel):
+    """Request body for updating the deferred follow-up period."""
+    days: int = 3  # Number of days for deferred follow-up
+
+class GenerateMessageRequest(BaseModel):
+    """Optional context overrides for Grok message generation."""
+    sales_rep_name: Optional[str] = None
+
+class GenerateMessageResponse(BaseModel):
+    status: str
+    generated_message: str
+    deal_name: str
+    account_name: str
+    client_phone: Optional[str] = None
+
+class NotificationResponse(BaseModel):
+    id: int
+    user_id: str
+    deal_id: Optional[str] = None
+    type: str
+    title: str
+    body: str
+    is_read: bool = False
+    created_at: str
+
+class NotificationListResponse(BaseModel):
+    items: List[NotificationResponse]
+    unread_count: int
+    total: int
+
+class StageUpdateRequest(BaseModel):
+    new_stage: str

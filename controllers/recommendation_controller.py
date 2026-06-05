@@ -232,7 +232,7 @@ async def generate_all_recommendations(
                     # Look up the deal owner's verified phone from the User table
                     owner_name = fused_payload.get("owner_name", "Unknown")
                     owner_user = db.query(User).filter(
-                        User.name == owner_name,
+                        User.name.ilike(owner_name),
                         User.is_whatsapp_verified == True,
                     ).first()
                     owner_phone = owner_user.phone_number if owner_user else fused_payload.get("client_phone")
@@ -263,6 +263,18 @@ async def generate_all_recommendations(
                 continue
         
         db.commit()
+
+        # Sprint 5: Auto-classify all deals after AI generation
+        try:
+            from services.deal_classifier import classify_all_deals
+            classify_db = SessionLocal()
+            try:
+                result = classify_all_deals(classify_db)
+                logger.info(f"Auto-classify result: {result}")
+            finally:
+                classify_db.close()
+        except Exception as fu_err:
+            logger.warning(f"Deal classification failed (non-fatal): {fu_err}")
         
         return {
             "status": "success",

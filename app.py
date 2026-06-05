@@ -5,6 +5,7 @@ import uvicorn
 # Import your routers (the controllers)
 from controllers import ingestion_controller, ml_controller, recommendation_controller
 from controllers import dashboard_controller, action_controller, auth_controller
+from controllers import followup_controller, notification_controller
 
 app = FastAPI(
     title="AI CRM Brain API",
@@ -38,11 +39,39 @@ app.include_router(dashboard_controller.router, prefix="/api/v1", tags=["Dashboa
 app.include_router(action_controller.router, prefix="/api/v1", tags=["Actions"])
 app.include_router(auth_controller.router, prefix="/api/v1/auth", tags=["Auth"])
 
+# Sprint 5: Follow-up & Notifications
+app.include_router(followup_controller.router, prefix="/api/v1", tags=["Follow-ups"])
+app.include_router(notification_controller.router, prefix="/api/v1", tags=["Notifications"])
+
 
 @app.get("/health")
 def health_check():
     """Simple endpoint to verify the service is up."""
-    return {"status": "online", "timestamp": "2026-05-25"}
+    return {"status": "online", "timestamp": "2026-06-05"}
+
+
+# Sprint 5: Start background follow-up scheduler
+@app.on_event("startup")
+def start_followup_scheduler():
+    """Start the APScheduler to check deferred follow-ups every 60 minutes."""
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        from services.followup_scheduler import check_deferred_followups
+
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            check_deferred_followups,
+            "interval",
+            minutes=60,
+            id="followup_checker",
+            replace_existing=True,
+        )
+        scheduler.start()
+        import logging
+        logging.getLogger(__name__).info("✅ Follow-up scheduler started (every 60 min)")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"⚠️ Could not start follow-up scheduler: {e}")
 
 
 if __name__ == "__main__":

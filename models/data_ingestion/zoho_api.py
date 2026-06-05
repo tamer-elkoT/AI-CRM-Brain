@@ -68,6 +68,8 @@ def fetch_deals_schema():
 
     # The fields we want to pull from Zoho API
     # THE FIX: Added Account_Name, Contact_Name, and Owner
+    # NOTE: Phone/Email do NOT exist on the Deals module — they live on Contacts.
+    # Contact enrichment is handled separately via fetch_contacts_by_ids().
     params = {
         "fields": "Deal_Name,Amount,Stage,Closing_Date,Probability,Expected_Revenue,Account_Name,Contact_Name,Owner"
     }
@@ -99,6 +101,54 @@ def fetch_deals_schema():
     else:
         print(f"❌ Error: {response.status_code}")
         print(response.text)
+
+
+def fetch_contacts_by_ids(contact_ids: list) -> dict:
+    """
+    Fetch Contact records from Zoho Contacts API using their IDs.
+    Returns a dict mapping contact_id -> {"phone": ..., "email": ...}
+
+    In Zoho CRM, Phone and Email live on the Contacts module, not Deals.
+    Each Deal has a Contact_Name lookup {name, id}. We use the id to
+    fetch the contact's actual Phone and Email.
+    """
+    if not contact_ids:
+        return {}
+
+    access_token = get_new_access_token()
+    if not access_token:
+        print("Failed to get access token for contacts fetch.")
+        return {}
+
+    headers = {"Authorization": f"Zoho-oauthtoken {access_token}"}
+    contacts_map = {}
+
+    # Zoho v3 allows fetching individual records by ID, or we can use
+    # the search/criteria approach. For simplicity, fetch one-by-one.
+    # For large volumes, batch using COQL or search endpoint.
+    unique_ids = list(set(cid for cid in contact_ids if cid))
+
+    for contact_id in unique_ids:
+        try:
+            url = f"https://www.zohoapis.com/crm/v3/Contacts/{contact_id}"
+            params = {"fields": "Phone,Mobile,Email,Full_Name"}
+            response = requests.get(url, headers=headers, params=params)
+
+            if response.status_code == 200:
+                data = response.json()
+                records = data.get("data", [])
+                if records:
+                    contact = records[0]
+                    contacts_map[contact_id] = {
+                        "phone": contact.get("Phone") or contact.get("Mobile") or None,
+                        "email": contact.get("Email") or None,
+                        "full_name": contact.get("Full_Name") or None,
+                    }
+        except Exception as e:
+            print(f"Warning: Could not fetch contact {contact_id}: {e}")
+            continue
+
+    return contacts_map
 
 
 def flatten_deals_to_csv(raw_deals, output_filename="historical_deals.csv"):

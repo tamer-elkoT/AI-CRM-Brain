@@ -37,9 +37,13 @@ export default function OutreachModal({ deal, mode, onClose }: OutreachModalProp
   const handleSend = () => {
     const encodedText = encodeURIComponent(message);
     
-    if (mode === 'whatsapp' && deal.client_phone) {
-      const sanitizedPhone = deal.client_phone.replace(/[^0-9]/g, '');
-      window.open(`https://wa.me/${sanitizedPhone}?text=${encodedText}`, '_blank');
+    if (mode === 'whatsapp') {
+      if (deal.client_phone) {
+        const sanitizedPhone = deal.client_phone.replace(/[^0-9]/g, '');
+        window.open(`https://wa.me/${sanitizedPhone}?text=${encodedText}`, '_blank');
+      } else {
+        window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+      }
     } else if (mode === 'email' && deal.client_email) {
       const subject = encodeURIComponent(`Regarding ${deal.deal_name}`);
       window.open(`mailto:${deal.client_email}?subject=${subject}&body=${encodedText}`, '_blank');
@@ -71,7 +75,7 @@ export default function OutreachModal({ deal, mode, onClose }: OutreachModalProp
                 {mode === 'whatsapp' ? 'Review WhatsApp Message' : 'Review Email Message'}
               </h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                To: {mode === 'whatsapp' ? deal.client_phone : deal.client_email} ({deal.account_name})
+                To: {mode === 'whatsapp' ? (deal.client_phone || 'Unknown') : (deal.client_email || 'Unknown')} ({deal.account_name})
               </p>
             </div>
           </div>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useAllDeals, useTriggerSync, useGenerateRecommendations } from '../hooks/useDeals';
+import { useAllDeals, useTriggerSync, useGenerateRecommendations, useMarkFollowedUp, useUpdateStage } from '../hooks/useDeals';
 import { useToast } from '../components/ui/Toast';
 import DealDrawer from '../components/DealDrawer';
 import CreateDealModal from '../components/CreateDealModal';
+import MessageGeneratorModal from '../components/MessageGeneratorModal';
 import { Select } from '../components/ui/Select';
 import { Flame, Hourglass, AlertTriangle, Search, Plus, RefreshCw } from 'lucide-react';
 import type { RankedDeal } from '../types';
@@ -13,6 +14,32 @@ const PRIORITY_STYLES: Record<string, string> = {
   LOW: 'bg-[#76777d10] text-outline border-outline/30',
 };
 
+// ─── Feature 2: Stage status badge styles ───
+const STAGE_BADGE_STYLES: Record<string, string> = {
+  'Closed Won': 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30',
+  'Closed Lost': 'bg-red-500/10 text-red-500 border-red-500/30',
+};
+
+// ─── Feature 4: Action status display config ───
+const ACTION_STATUS_CONFIG: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+  need_action_now: { label: 'Need Action — Now', icon: '🔴', color: 'text-red-600', bg: 'bg-red-500/10' },
+  need_action_3days: { label: 'Need Action — 3 Days', icon: '🟡', color: 'text-amber-600', bg: 'bg-amber-500/10' },
+  followed_up: { label: 'Followed Up', icon: '✅', color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
+  no_action: { label: 'No Action', icon: '⬜', color: 'text-on-surface-variant', bg: 'bg-surface-container' },
+};
+
+// ─── Feature 9: Allowed pipeline stages ───
+const PIPELINE_STAGES = [
+  'Qualification',
+  'Needs Analysis',
+  'Value Proposition',
+  'Identify Decision Makers',
+  'Proposal/Price Quote',
+  'Negotiation/Review',
+  'Closed Won',
+  'Closed Lost',
+];
+
 export default function Home() {
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -22,9 +49,21 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
 
+  // Feature 1: Active vs Closed tab
+  const [activeTab, setActiveTab] = useState<'active' | 'closed'>('active');
+  const includeClosed = activeTab === 'closed';
+
+  // Feature 6: Message generator modal
+  const [messageGenDeal, setMessageGenDeal] = useState<RankedDeal | null>(null);
+
+  // Feature 9: Inline stage editing
+  const [editingStageDealId, setEditingStageDealId] = useState<string | null>(null);
+
   const { toast } = useToast();
   const syncMutation = useTriggerSync();
   const generateMutation = useGenerateRecommendations();
+  const markFollowedUp = useMarkFollowedUp();
+  const updateStage = useUpdateStage();
 
   // Debounced search
   const handleSearchChange = (value: string) => {
@@ -79,7 +118,47 @@ export default function Home() {
     });
   };
 
-  const { data, isLoading } = useAllDeals(currentPage, pageSize, debouncedSearch, sortBy);
+  // Feature 7: Mark as Followed Up inline
+  const handleMarkFollowedUp = (e: React.MouseEvent, deal: RankedDeal) => {
+    e.stopPropagation();
+    markFollowedUp.mutate(
+      { dealId: deal.deal_id, data: { channel: 'manual', notes: 'Marked from pipeline table' } },
+      {
+        onSuccess: (res) => {
+          toast({ title: '✅ Followed Up', description: res.message, variant: 'success' });
+        },
+        onError: (err) => {
+          toast({ title: 'Error', description: err.message || 'Failed', variant: 'destructive' });
+        },
+      }
+    );
+  };
+
+  // Feature 9: Stage change handler
+  const handleStageChange = (dealId: string, newStage: string) => {
+    setEditingStageDealId(null);
+    updateStage.mutate(
+      { dealId, newStage },
+      {
+        onSuccess: (res) => {
+          toast({
+            title: '🔄 Stage Updated',
+            description: res.message,
+            variant: 'success',
+          });
+        },
+        onError: (err) => {
+          toast({
+            title: 'Update Failed',
+            description: err.message || 'Could not update stage.',
+            variant: 'destructive',
+          });
+        },
+      }
+    );
+  };
+
+  const { data, isLoading } = useAllDeals(currentPage, pageSize, debouncedSearch, sortBy, includeClosed);
 
   const deals = data?.items ?? [];
   const totalPages = data?.total_pages ?? 1;
@@ -154,6 +233,34 @@ export default function Home() {
       </header>
 
       <div className="p-margin-mobile md:p-margin-desktop max-w-max-width mx-auto w-full flex-1 flex flex-col pb-12">
+        {/* ─── Feature 1: Active / Closed Tabs ─── */}
+        <div className="flex items-center gap-1 mb-5 bg-surface-container-high rounded-xl p-1 w-fit">
+          <button
+            id="tab-active-pipeline"
+            onClick={() => { setActiveTab('active'); setCurrentPage(1); }}
+            className={`px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 flex items-center gap-2 ${
+              activeTab === 'active'
+                ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px]">trending_up</span>
+            Active Pipeline
+          </button>
+          <button
+            id="tab-closed-deals"
+            onClick={() => { setActiveTab('closed'); setCurrentPage(1); }}
+            className={`px-4 py-2 rounded-lg font-label-md text-label-md transition-all duration-200 flex items-center gap-2 ${
+              activeTab === 'closed'
+                ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+            Closed Deals
+          </button>
+        </div>
+
         {/* ─── Toolbar ─── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           {/* Search */}
@@ -199,15 +306,17 @@ export default function Home() {
               <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-4">search_off</span>
               <p className="font-headline-md text-headline-md text-on-surface mb-1">No deals found</p>
               <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">
-                {debouncedSearch ? `No results for "${debouncedSearch}"` : 'Sync your CRM data or create a deal to get started.'}
+                {debouncedSearch ? `No results for "${debouncedSearch}"` : activeTab === 'closed' ? 'No closed deals yet.' : 'Sync your CRM data or create a deal to get started.'}
               </p>
-              <button
-                onClick={() => setCreateModalOpen(true)}
-                className="bg-secondary text-on-secondary px-5 py-2.5 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Create Your First Deal
-              </button>
+              {activeTab === 'active' && (
+                <button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="bg-secondary text-on-secondary px-5 py-2.5 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Your First Deal
+                </button>
+              )}
             </div>
           ) : (
             <>
@@ -217,61 +326,141 @@ export default function Home() {
                     <tr className="bg-[#F1F5F9] border-b border-outline-variant">
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[180px]">Deal Name</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[130px]">Account</th>
-                      <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[100px]">Stage</th>
+                      <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[130px]">Stage</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[100px]">Amount</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant text-center">Vibe</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant">Priority</th>
+                      {/* Feature 4: Action Status column */}
+                      {activeTab === 'active' && (
+                        <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[150px]">Action</th>
+                      )}
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[80px]">ML</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[80px]">AI</th>
                       <th className="p-3 font-label-sm text-label-sm text-on-surface-variant">Closing</th>
-                      <th className="p-3 font-label-sm text-label-sm text-on-surface-variant text-right">Action</th>
+                      <th className="p-3 font-label-sm text-label-sm text-on-surface-variant text-right min-w-[180px]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {deals.map((deal: RankedDeal) => (
-                      <tr
-                        key={deal.deal_id}
-                        className="border-b border-outline-variant hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
-                        onClick={() => setSelectedDealId(deal.deal_id)}
-                      >
-                        <td className="p-3 font-body-md text-body-md font-medium">
-                          <span className="text-secondary hover:text-secondary-container hover:underline decoration-secondary underline-offset-2">
-                            {deal.deal_name}
-                          </span>
-                        </td>
-                        <td className="p-3 font-body-sm text-body-sm text-on-surface-variant">{deal.account_name}</td>
-                        <td className="p-3">
-                          <span className="inline-block px-2 py-1 rounded font-label-sm text-label-sm bg-surface-container-high text-on-surface-variant border border-outline-variant">
-                            {deal.stage || 'N/A'}
-                          </span>
-                        </td>
-                        <td className="p-3 font-mono-data text-mono-data text-on-surface-variant">${(deal.amount || 0).toLocaleString()}</td>
-                        <td className="p-3">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-surface mx-auto">
-                            {getStatusIcon(deal.ai_score)}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <span className={`inline-block px-2 py-1 rounded font-label-sm text-label-sm border ${PRIORITY_STYLES[deal.priority] ?? PRIORITY_STYLES.LOW}`}>
-                            {deal.priority}
-                          </span>
-                        </td>
-                        <td className="p-3 font-mono-data text-mono-data">{deal.ml_score}%</td>
-                        <td className="p-3 font-mono-data text-mono-data font-bold">{deal.ai_score}%</td>
-                        <td className="p-3 font-body-sm text-body-sm text-on-surface-variant">{deal.closing_date || 'N/A'}</td>
-                        <td className="p-3 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDealId(deal.deal_id);
-                            }}
-                            className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-variant transition-colors shadow-sm group-hover:bg-secondary group-hover:text-white"
-                          >
-                            Insights
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {deals.map((deal: RankedDeal) => {
+                      const actionCfg = ACTION_STATUS_CONFIG[deal.action_status || 'no_action'] || ACTION_STATUS_CONFIG.no_action;
+                      const stageBadgeStyle = STAGE_BADGE_STYLES[deal.stage || ''] || 'bg-surface-container-high text-on-surface-variant border-outline-variant';
+                      const isEditingStage = editingStageDealId === deal.deal_id;
+
+                      return (
+                        <tr
+                          key={deal.deal_id}
+                          className="border-b border-outline-variant hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
+                          onClick={() => setSelectedDealId(deal.deal_id)}
+                        >
+                          {/* Deal Name + Feature 2 status badge + Feature 7 follow-up info */}
+                          <td className="p-3">
+                            <div>
+                              <span className="font-body-md text-body-md font-medium text-secondary hover:text-secondary-container hover:underline decoration-secondary underline-offset-2">
+                                {deal.deal_name}
+                              </span>
+                              {/* Feature 7: Follow-up count */}
+                              {(deal.followup_count ?? 0) > 0 && (
+                                <p className="font-body-sm text-body-sm text-on-surface-variant/70 mt-0.5 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[12px]">history</span>
+                                  Followed up {deal.followup_count}× {deal.last_followup_date && `· Last: ${deal.last_followup_date}`}
+                                </p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-3 font-body-sm text-body-sm text-on-surface-variant">{deal.account_name}</td>
+
+                          {/* Feature 9: Inline stage editing — click badge to show dropdown */}
+                          <td className="p-3">
+                            {isEditingStage ? (
+                              <select
+                                autoFocus
+                                defaultValue={deal.stage || ''}
+                                className="px-2 py-1.5 rounded-lg font-label-sm text-label-sm bg-surface border border-secondary text-on-surface focus:outline-none cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => handleStageChange(deal.deal_id, e.target.value)}
+                                onBlur={() => setEditingStageDealId(null)}
+                              >
+                                {PIPELINE_STAGES.map((s) => (
+                                  <option key={s} value={s}>{s}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setEditingStageDealId(deal.deal_id); }}
+                                title="Click to change stage"
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded font-label-sm text-label-sm border transition-all hover:ring-2 hover:ring-secondary/30 ${stageBadgeStyle}`}
+                              >
+                                {deal.stage || 'N/A'}
+                                <span className="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
+                              </button>
+                            )}
+                          </td>
+
+                          <td className="p-3 font-mono-data text-mono-data text-on-surface-variant">${(deal.amount || 0).toLocaleString()}</td>
+                          <td className="p-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-surface mx-auto">
+                              {getStatusIcon(deal.ai_score)}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <span className={`inline-block px-2 py-1 rounded font-label-sm text-label-sm border ${PRIORITY_STYLES[deal.priority] ?? PRIORITY_STYLES.LOW}`}>
+                              {deal.priority}
+                            </span>
+                          </td>
+
+                          {/* Feature 4: Action Status label */}
+                          {activeTab === 'active' && (
+                            <td className="p-3">
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded font-label-sm text-label-sm ${actionCfg.bg} ${actionCfg.color}`}>
+                                <span className="text-xs">{actionCfg.icon}</span>
+                                {actionCfg.label}
+                              </span>
+                            </td>
+                          )}
+
+                          <td className="p-3 font-mono-data text-mono-data">{deal.ml_score}%</td>
+                          <td className="p-3 font-mono-data text-mono-data font-bold">{deal.ai_score}%</td>
+                          <td className="p-3 font-body-sm text-body-sm text-on-surface-variant">{deal.closing_date || 'N/A'}</td>
+
+                          {/* Actions column: Insights + Generate Message + Mark Followed Up */}
+                          <td className="p-3 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Feature 6: Generate AI Message */}
+                              {activeTab === 'active' && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setMessageGenDeal(deal); }}
+                                  title="Generate AI Message"
+                                  className="p-1.5 rounded-md text-on-surface-variant hover:bg-[#25D366]/10 hover:text-[#25D366] transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                                </button>
+                              )}
+                              {/* Feature 7: Mark as Followed Up */}
+                              {activeTab === 'active' && deal.action_status !== 'followed_up' && (
+                                <button
+                                  onClick={(e) => handleMarkFollowedUp(e, deal)}
+                                  disabled={markFollowedUp.isPending}
+                                  title="Mark as Followed Up"
+                                  className="p-1.5 rounded-md text-on-surface-variant hover:bg-emerald-500/10 hover:text-emerald-600 transition-colors disabled:opacity-40"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                </button>
+                              )}
+                              {/* Insights drawer */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedDealId(deal.deal_id);
+                                }}
+                                className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-variant transition-colors shadow-sm group-hover:bg-secondary group-hover:text-white"
+                              >
+                                Insights
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -324,6 +513,12 @@ export default function Home() {
 
       {selectedDealId && <DealDrawer dealId={selectedDealId} onClose={() => setSelectedDealId(null)} />}
       <CreateDealModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
+      {messageGenDeal && (
+        <MessageGeneratorModal
+          deal={messageGenDeal}
+          onClose={() => setMessageGenDeal(null)}
+        />
+      )}
     </>
   );
 }

@@ -123,3 +123,27 @@
 /* Red danger zone */
 .dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; }
 .dark .border-red-200 { border-color: rgba(239, 68, 68, 0.3) !important; }
+
+/* Sprint 5: Message Generator Modal */
+.dark .bg-purple-500\/10 { background-color: rgba(147, 51, 234, 0.15) !important; }
+.dark .border-purple-500\/30 { border-color: rgba(147, 51, 234, 0.3) !important; }
+
+/* Sprint 5: Emerald follow-up elements */
+.dark .bg-emerald-500\/5 { background-color: rgba(16, 185, 129, 0.08) !important; }
+.dark .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.15) !important; }
+.dark .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2) !important; }
+.dark .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3) !important; }
+
+/* Sprint 5: Inline select dropdowns */
+.dark select {
+  background-color: #141c2e !important;
+  border-color: #2d3a50 !important;
+  color: #e2e8f0 !important;
+}
+.dark select option {
+  background-color: #141c2e;
+  color: #e2e8f0;
+}
+
+/* Sprint 5: Modal backdrop */
+.dark .bg-black\/40 { background-color: rgba(0, 0, 0, 0.6) !important; }

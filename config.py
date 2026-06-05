@@ -9,6 +9,12 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
     LLM_MAX_TOKENS: int = 500
     LLM_TEMPERATURE: float = 0.3
+    GROK_BASE_URL: str = "https://api.x.ai/v1"
+    GROK_API_KEY: str
+    GROK_MODEL: str = "grok-3-latest"
+
+    # App Settings
+    APP_BASE_URL: str = "http://localhost:5173"
 
     # 2. Zoho Settings
     ZOHO_CLIENT_ID: str

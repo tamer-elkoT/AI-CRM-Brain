@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { dashboardApi, actionApi } from '../services/api';
-import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse, DealCreate, CreateDealResponse } from '../types';
+import { dashboardApi, actionApi, followupApi } from '../services/api';
+import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse, DealCreate, CreateDealResponse, FollowupMarkRequest, FollowupMarkResponse, GenerateMessageResponse, StageUpdateResponse } from '../types';
 
 export function useDashboard(sortBy: string = 'ai_score', limit?: number) {
   return useQuery<DashboardResponse>({
@@ -9,10 +9,10 @@ export function useDashboard(sortBy: string = 'ai_score', limit?: number) {
   });
 }
 
-export function useAllDeals(page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score') {
+export function useAllDeals(page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score', includeClosed: boolean = false) {
   return useQuery<AllDealsResponse>({
-    queryKey: ['all_deals', page, pageSize, search, sortBy],
-    queryFn: () => dashboardApi.getAllDeals(page, pageSize, search, sortBy),
+    queryKey: ['all_deals', page, pageSize, search, sortBy, includeClosed],
+    queryFn: () => dashboardApi.getAllDeals(page, pageSize, search, sortBy, includeClosed),
   });
 }
 
@@ -90,6 +90,51 @@ export function useGenerateRecommendations() {
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       void queryClient.invalidateQueries({ queryKey: ['account_ranking'] });
       void queryClient.invalidateQueries({ queryKey: ['deal'] });
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+    },
+  });
+}
+
+// ============================================================
+// Sprint 5: Follow-up & Stage Hooks
+// ============================================================
+
+export function useMarkFollowedUp() {
+  const queryClient = useQueryClient();
+  return useMutation<FollowupMarkResponse, Error, { dealId: string; data?: FollowupMarkRequest }>({
+    mutationFn: ({ dealId, data }) => followupApi.markFollowedUp(dealId, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+      void queryClient.invalidateQueries({ queryKey: ['deal'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+}
+
+export function useGenerateMessage() {
+  return useMutation<GenerateMessageResponse, Error, { dealId: string; salesRepName?: string }>({
+    mutationFn: ({ dealId, salesRepName }) => followupApi.generateMessage(dealId, salesRepName),
+  });
+}
+
+export function useUpdateStage() {
+  const queryClient = useQueryClient();
+  return useMutation<StageUpdateResponse, Error, { dealId: string; newStage: string }>({
+    mutationFn: ({ dealId, newStage }) => dashboardApi.updateStage(dealId, newStage),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+      void queryClient.invalidateQueries({ queryKey: ['deal'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+}
+
+export function useUpdateFollowupDays() {
+  const queryClient = useQueryClient();
+  return useMutation<ActionResponse, Error, { dealId: string; days: number }>({
+    mutationFn: ({ dealId, days }) => followupApi.updateDays(dealId, days),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
     },
   });
 }

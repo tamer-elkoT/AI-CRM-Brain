@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeProvider';
+import NotificationBell from './NotificationBell';
 
 interface NavItem {
   icon: string;
@@ -26,14 +27,17 @@ export default function AppLayout() {
   const sidebarContent = (
     <>
       <div>
-        <div className="mb-8 flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center">
-            <span className="material-symbols-outlined fill">analytics</span>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center">
+              <span className="material-symbols-outlined fill">analytics</span>
+            </div>
+            <div>
+              <h1 className="font-headline-md text-headline-md font-black text-on-surface leading-tight">AI CRM Brain</h1>
+              <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Enterprise Intelligence</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-headline-md text-headline-md font-black text-on-surface leading-tight">AI CRM Brain</h1>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Enterprise Intelligence</p>
-          </div>
+          <NotificationBell />
         </div>
 
         <div className="space-y-1">
@@ -97,12 +101,15 @@ export default function AppLayout() {
           </div>
           <span className="font-headline-md text-headline-md font-black text-on-surface text-sm">AI CRM Brain</span>
         </div>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2 rounded-lg hover:bg-surface-container transition-colors"
-        >
-          <span className="material-symbols-outlined">{mobileOpen ? 'close' : 'menu'}</span>
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2 rounded-lg hover:bg-surface-container transition-colors"
+          >
+            <span className="material-symbols-outlined">{mobileOpen ? 'close' : 'menu'}</span>
+          </button>
+        </div>
       </div>
 
       {/* ─── Mobile Drawer ─── */}
