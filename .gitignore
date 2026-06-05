@@ -83,3 +83,22 @@ data/raw data/
 data/raw data 2/
 data/sales_cleaned/
 data/Sales_Preprocessed/
+
+controllers/__pycache__/__init__.cpython-310.pyc
+models/__pycache__/database.cpython-310.pyc
+controllers/__pycache__/__init__.cpython-310.pyc
+models/__pycache__/database.cpython-310.pyc
+controllers/__pycache__/__init__.cpython-310.pyc
+models/__pycache__/database.cpython-310.pyc
+models/__pycache__/schema.cpython-310.pyc
+models/data_ingestion/__pycache__/__init__.cpython-310.pyc
+real_sample_deals.json
+models/__pycache__/database.cpython-310.pyc
+models/__pycache__/schema.cpython-310.pyc
+models/data_ingestion/__pycache__/__init__.cpython-310.pyc
+real_sample_deals.json
+models/data_ingestion/__pycache__/__init__.cpython-310.pyc
+real_sample_deals.json
+
+models/data_ingestion/__pycache__/__init__.cpython-310.pyc
+
