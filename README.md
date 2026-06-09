@@ -500,6 +500,7 @@ BATCH_INTERVAL_MINUTES=30
 3. Authorize with scope: `ZohoCRM.modules.deals.READ,ZohoCRM.modules.contacts.READ`
 4. Exchange the authorization code for a refresh token using the Zoho OAuth endpoint
 
+
 ---
 
 ## 🗄 Database Schema
