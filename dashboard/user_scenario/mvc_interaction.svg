@@ -1,271 +1,256 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 750" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 680" font-family="'Segoe UI', Arial, sans-serif">
   <defs>
-    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#1e293b"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#060d1a"/>
+      <stop offset="100%" style="stop-color:#0f1929"/>
     </linearGradient>
-    <linearGradient id="viewGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#4c1d95"/>
-      <stop offset="100%" style="stop-color:#2e1065"/>
+    <linearGradient id="gZoho" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c3a6e"/>
+      <stop offset="100%" style="stop-color:#0e2040"/>
     </linearGradient>
-    <linearGradient id="ctrlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#064e3b"/>
-      <stop offset="100%" style="stop-color:#022c22"/>
+    <linearGradient id="gIngest" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1d4ed8"/>
+      <stop offset="100%" style="stop-color:#1e40af"/>
     </linearGradient>
-    <linearGradient id="modelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#78350f"/>
-      <stop offset="100%" style="stop-color:#451a03"/>
+    <linearGradient id="gDB" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#b45309"/>
+      <stop offset="100%" style="stop-color:#78350f"/>
     </linearGradient>
-    <linearGradient id="infraGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#7f1d1d"/>
-      <stop offset="100%" style="stop-color:#450a0a"/>
+    <linearGradient id="gML" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#047857"/>
+      <stop offset="100%" style="stop-color:#065f46"/>
     </linearGradient>
-    <linearGradient id="nPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="gFusion" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0891b2"/>
+      <stop offset="100%" style="stop-color:#0e7490"/>
+    </linearGradient>
+    <linearGradient id="gLLM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#6d28d9"/>
+      <stop offset="100%" style="stop-color:#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="gStore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#b45309"/>
+      <stop offset="100%" style="stop-color:#92400e"/>
+    </linearGradient>
+    <linearGradient id="gFront" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" style="stop-color:#7c3aed"/>
-      <stop offset="100%" style="stop-color:#6d28d9"/>
+      <stop offset="100%" style="stop-color:#5b21b6"/>
     </linearGradient>
-    <linearGradient id="nGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#059669"/>
-      <stop offset="100%" style="stop-color:#047857"/>
+    <linearGradient id="gAlert" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#b91c1c"/>
+      <stop offset="100%" style="stop-color:#7f1d1d"/>
     </linearGradient>
-    <linearGradient id="nAmber" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#d97706"/>
-      <stop offset="100%" style="stop-color:#b45309"/>
-    </linearGradient>
-    <linearGradient id="nBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb"/>
-      <stop offset="100%" style="stop-color:#1d4ed8"/>
-    </linearGradient>
-    <linearGradient id="nRed" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#dc2626"/>
-      <stop offset="100%" style="stop-color:#b91c1c"/>
-    </linearGradient>
-    <linearGradient id="nTeal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0d9488"/>
-      <stop offset="100%" style="stop-color:#0f766e"/>
-    </linearGradient>
-    <filter id="sh3">
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.5"/>
     </filter>
-    <marker id="a3p" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
-    </marker>
-    <marker id="a3g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
-    </marker>
-    <marker id="a3a" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
-    </marker>
-    <marker id="a3b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
     </marker>
-    <marker id="a3r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <marker id="arrGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
+    </marker>
+    <marker id="arrPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+    </marker>
+    <marker id="arrAmber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#f87171"/>
     </marker>
-    <marker id="a3gray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/>
+    <marker id="arrTeal" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="1100" height="750" fill="url(#bg3)" rx="16"/>
+  <rect width="1300" height="680" fill="url(#bg)" rx="16"/>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0f172a" stroke-width="0.8"/>
+  </pattern>
+  <rect width="1300" height="680" fill="url(#grid)" rx="16" opacity="0.6"/>
 
   <!-- Title -->
-  <text x="550" y="38" text-anchor="middle" fill="#f8fafc" font-size="22" font-weight="700">AI CRM Brain — MVC Architecture Interaction</text>
-  <text x="550" y="60" text-anchor="middle" fill="#94a3b8" font-size="12">How Views (React), Controllers (FastAPI), and Models (Data + AI) interact</text>
+  <text x="650" y="38" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">🔄 Data &amp; API Flow — Zoho → PostgreSQL → ML → LLM → Dashboard</text>
+  <text x="650" y="58" text-anchor="middle" fill="#475569" font-size="11">Full lifecycle of a deal record: ingestion · prediction · AI recommendation · storage · UI render</text>
 
-  <!-- ╔═══════════════════════════════════════╗ -->
-  <!-- ║           VIEWS LAYER                  ║ -->
-  <!-- ╚═══════════════════════════════════════╝ -->
-  <rect x="30" y="80" width="1040" height="130" rx="12" fill="url(#viewGrad)" stroke="#8b5cf6" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
-  <text x="50" y="105" fill="#c4b5fd" font-size="14" font-weight="700">👁️  VIEWS — React 18 + TypeScript Frontend (Port 5173)</text>
+  <!-- ──────────── ROW 1: SOURCE ──────────── -->
+  <!-- Zoho CRM API -->
+  <rect x="30" y="78" width="185" height="118" rx="10" fill="url(#gZoho)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="122" y="102" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="700">🔗 Zoho CRM</text>
+  <text x="122" y="120" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">GET /crm/v3/Deals</text>
+  <text x="122" y="138" text-anchor="middle" fill="#bfdbfe" font-size="10">OAuth 2.0 refresh_token</text>
+  <text x="122" y="155" text-anchor="middle" fill="#bfdbfe" font-size="10">→ access_token (1h TTL)</text>
+  <text x="122" y="172" text-anchor="middle" fill="#bfdbfe" font-size="9">Nested JSON response:</text>
+  <text x="122" y="186" text-anchor="middle" fill="#bfdbfe" font-size="9">Deal + Contact + Owner objects</text>
 
-  <!-- View boxes -->
-  <rect x="50" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="120" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🔐 Auth Page</text>
-  <text x="120" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Login / Signup</text>
-  <text x="120" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">OTP Verification</text>
+  <!-- CSV Upload -->
+  <rect x="30" y="214" width="185" height="64" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" filter="url(#shadow)" stroke-dasharray="6,3"/>
+  <text x="122" y="238" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700">📄 CSV / XLSX Upload</text>
+  <text x="122" y="256" text-anchor="middle" fill="#64748b" font-size="10">POST /ingestion/upload</text>
+  <text x="122" y="270" text-anchor="middle" fill="#64748b" font-size="9">Custom CRM integration</text>
 
-  <rect x="210" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="280" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🏠 Home Page</text>
-  <text x="280" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Deal Pipeline</text>
-  <text x="280" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">Search + Sort</text>
+  <!-- ──────────── STEP 2: INGESTION ──────────── -->
+  <!-- Arrow from Zoho -->
+  <line x1="215" y1="137" x2="268" y2="137" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="240" y="130" text-anchor="middle" fill="#60a5fa" font-size="9">REST JSON</text>
 
-  <rect x="370" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="440" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">📊 Dashboard</text>
-  <text x="440" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">KPIs + Charts</text>
-  <text x="440" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">Account Rankings</text>
+  <!-- Arrow from CSV -->
+  <line x1="215" y1="245" x2="268" y2="210" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)" stroke-dasharray="5,3"/>
 
-  <rect x="530" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="600" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🔍 Deal Drawer</text>
-  <text x="600" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Full Detail</text>
-  <text x="600" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">AI Recommendation</text>
+  <rect x="270" y="78" width="195" height="200" rx="10" fill="url(#gIngest)" stroke="#60a5fa" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="367" y="102" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">📥 Ingestion Layer</text>
+  <text x="367" y="120" text-anchor="middle" fill="#bfdbfe" font-size="10" font-weight="600">zoho_api.py</text>
+  <text x="367" y="138" text-anchor="middle" fill="#bfdbfe" font-size="10">1. fetch_deals_schema()</text>
+  <text x="367" y="154" text-anchor="middle" fill="#bfdbfe" font-size="10">2. fetch_contacts_by_ids()</text>
+  <text x="367" y="172" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="600">ingestion_controller.py</text>
+  <text x="367" y="190" text-anchor="middle" fill="#bfdbfe" font-size="10">3. Enrich with phone/email</text>
+  <text x="367" y="208" text-anchor="middle" fill="#bfdbfe" font-size="10">4. Flatten nested JSON</text>
+  <text x="367" y="226" text-anchor="middle" fill="#bfdbfe" font-size="10">5. Build flattened_record {}</text>
+  <text x="367" y="244" text-anchor="middle" fill="#bfdbfe" font-size="10">6. INSERT ... ON CONFLICT</text>
+  <text x="367" y="262" text-anchor="middle" fill="#bfdbfe" font-size="9">DO UPDATE SET (upsert idempotent)</text>
 
-  <rect x="690" y="118" width="140" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="760" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🔗 Integrations</text>
-  <text x="760" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">CRM Sync</text>
-  <text x="760" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">CSV Upload</text>
+  <!-- ──────────── STEP 3: PostgreSQL (zoho_deals) ──────────── -->
+  <line x1="465" y1="178" x2="518" y2="178" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrAmber)"/>
+  <text x="490" y="170" text-anchor="middle" fill="#fbbf24" font-size="9">Upsert</text>
 
-  <rect x="850" y="118" width="195" height="72" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="947" y="143" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">⚙️ Settings</text>
-  <text x="947" y="159" text-anchor="middle" fill="#ddd6fe" font-size="8">Profile + Templates</text>
-  <text x="947" y="172" text-anchor="middle" fill="#ddd6fe" font-size="8">WhatsApp / Email</text>
+  <rect x="520" y="78" width="195" height="200" rx="10" fill="url(#gDB)" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="617" y="102" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="700">🐘 PostgreSQL</text>
+  <text x="617" y="120" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="600">Table: zoho_deals</text>
+  <text x="617" y="140" text-anchor="middle" fill="#fde68a" font-size="10">id, deal_name, stage, amount</text>
+  <text x="617" y="157" text-anchor="middle" fill="#fde68a" font-size="10">closing_date, account_name</text>
+  <text x="617" y="174" text-anchor="middle" fill="#fde68a" font-size="10">owner_name, contact_name</text>
+  <text x="617" y="191" text-anchor="middle" fill="#fde68a" font-size="10">client_phone, client_email</text>
+  <text x="617" y="208" text-anchor="middle" fill="#fde68a" font-size="10">custom_fields (JSONB)</text>
+  <text x="617" y="225" text-anchor="middle" fill="#fde68a" font-size="10">zoho_probability</text>
+  <text x="617" y="242" text-anchor="middle" fill="#fde68a" font-size="10">action_status · followup_days</text>
+  <text x="617" y="262" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="600">Index: id (PK), stage, closing_date</text>
 
-  <!-- HTTP Layer label -->
-  <rect x="350" y="215" width="300" height="24" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
-  <text x="500" y="232" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="500">⬇️  Axios HTTP Requests (api.ts)  ⬇️</text>
+  <!-- ──────────── STEP 4: ML Engine ──────────── -->
+  <line x1="715" y1="178" x2="768" y2="178" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrGreen)"/>
+  <text x="740" y="170" text-anchor="middle" fill="#34d399" font-size="9">Read deals</text>
 
-  <!-- View → Controller arrows -->
-  <line x1="120" y1="190" x2="120" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
-  <line x1="280" y1="190" x2="280" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
-  <line x1="440" y1="190" x2="440" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
-  <line x1="600" y1="190" x2="600" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
-  <line x1="760" y1="190" x2="760" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
-  <line x1="947" y1="190" x2="947" y2="265" stroke="#a78bfa" stroke-width="2" marker-end="url(#a3p)"/>
+  <rect x="770" y="78" width="195" height="200" rx="10" fill="url(#gML)" stroke="#10b981" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="867" y="102" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">⚙️ ML Engine</text>
+  <text x="867" y="120" text-anchor="middle" fill="#a7f3d0" font-size="10" font-weight="600">inference.py</text>
+  <text x="867" y="138" text-anchor="middle" fill="#a7f3d0" font-size="10">1. preprocess_new_deal()</text>
+  <text x="867" y="156" text-anchor="middle" fill="#a7f3d0" font-size="10">  ├ Date engineering (year/month/quarter)</text>
+  <text x="867" y="173" text-anchor="middle" fill="#a7f3d0" font-size="10">  ├ Freq encoding (Owner/Account)</text>
+  <text x="867" y="190" text-anchor="middle" fill="#a7f3d0" font-size="10">  └ StandardScaler.transform()</text>
+  <text x="867" y="208" text-anchor="middle" fill="#a7f3d0" font-size="10">2. predict_batch(X_scaled)</text>
+  <text x="867" y="226" text-anchor="middle" fill="#a7f3d0" font-size="10">  ├ rf_model.predict_proba()</text>
+  <text x="867" y="244" text-anchor="middle" fill="#a7f3d0" font-size="10">  └ base_probability → "Won" class [3]</text>
+  <text x="867" y="262" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="600">Artifacts: random_forest_v1.pkl + standard_scaler.pkl</text>
 
-  <!-- API Route labels on arrows -->
-  <text x="125" y="240" fill="#c4b5fd" font-size="7" font-weight="500">POST /auth/login</text>
-  <text x="285" y="240" fill="#c4b5fd" font-size="7" font-weight="500">GET /deals</text>
-  <text x="445" y="240" fill="#c4b5fd" font-size="7" font-weight="500">GET /deals/ranked</text>
-  <text x="605" y="240" fill="#c4b5fd" font-size="7" font-weight="500">GET /deals/:id</text>
-  <text x="765" y="240" fill="#c4b5fd" font-size="7" font-weight="500">POST /ingest/deals</text>
-  <text x="952" y="240" fill="#c4b5fd" font-size="7" font-weight="500">PATCH /users/me</text>
+  <!-- ──────────── STEP 5: DB (ml_predictions) ──────────── -->
+  <line x1="965" y1="178" x2="1018" y2="178" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrAmber)"/>
+  <text x="990" y="170" text-anchor="middle" fill="#fbbf24" font-size="9">Upsert</text>
 
-  <!-- ╔═══════════════════════════════════════╗ -->
-  <!-- ║        CONTROLLERS LAYER               ║ -->
-  <!-- ╚═══════════════════════════════════════╝ -->
-  <rect x="30" y="250" width="1040" height="130" rx="12" fill="url(#ctrlGrad)" stroke="#10b981" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
-  <text x="50" y="275" fill="#6ee7b7" font-size="14" font-weight="700">🎮  CONTROLLERS — FastAPI Routers (Port 8000, /api/v1)</text>
+  <rect x="1020" y="78" width="245" height="200" rx="10" fill="url(#gDB)" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1142" y="102" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="700">🐘 PostgreSQL</text>
+  <text x="1142" y="120" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="600">Table: ml_predictions</text>
+  <text x="1142" y="140" text-anchor="middle" fill="#fde68a" font-size="10">deal_id (FK → zoho_deals)</text>
+  <text x="1142" y="157" text-anchor="middle" fill="#fde68a" font-size="10">base_probability (float)</text>
+  <text x="1142" y="174" text-anchor="middle" fill="#fde68a" font-size="10">predicted_stage_encoded (int)</text>
+  <text x="1142" y="191" text-anchor="middle" fill="#fde68a" font-size="10">confidence_all_classes (JSONB)</text>
+  <text x="1142" y="208" text-anchor="middle" fill="#fde68a" font-size="10">batch_id (UUID)</text>
+  <text x="1142" y="225" text-anchor="middle" fill="#fde68a" font-size="10">prediction_date · updated_at</text>
+  <text x="1142" y="244" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="600">UNIQUE(deal_id) → ON CONFLICT DO UPDATE</text>
+  <text x="1142" y="262" text-anchor="middle" fill="#fcd34d" font-size="9">Linked via prediction_id → llm_recommendations</text>
 
-  <!-- Controller boxes -->
-  <rect x="50" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="120" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">auth_controller</text>
-  <text x="120" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/auth/login</text>
-  <text x="120" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/auth/signup, /verify-otp</text>
+  <!-- ──────────── ROW 2: DATA FUSION + LLM ──────────── -->
+  <!-- Arrow DOWN from ML Predictions to Data Fusion -->
+  <line x1="1142" y1="278" x2="1142" y2="322" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrTeal)"/>
+  <text x="1155" y="305" fill="#22d3ee" font-size="9">read prediction</text>
 
-  <rect x="210" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="280" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">dashboard_controller</text>
-  <text x="280" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/deals, /deals/ranked</text>
-  <text x="280" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/deals/:id, /analytics</text>
+  <!-- Arrow from zoho_deals DOWN to Data Fusion -->
+  <path d="M 617 278 L 617 305 Q 617 315 625 315 L 1065 315 Q 1075 315 1080 320" stroke="#22d3ee" stroke-width="2" fill="none" marker-end="url(#arrTeal)" stroke-dasharray="5,3"/>
+  <text x="840" y="310" fill="#22d3ee" font-size="9">read custom_fields (JSONB)</text>
 
-  <rect x="370" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="440" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">ingestion_controller</text>
-  <text x="440" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/ingest/deals</text>
-  <text x="440" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/ingestion/upload</text>
+  <!-- Data Fusion Box -->
+  <rect x="770" y="324" width="480" height="82" rx="10" fill="url(#gFusion)" stroke="#22d3ee" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1010" y="348" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🔗 Data Fusion  —  data_fusion.py  ·  fuse_deal_payload()</text>
+  <text x="1010" y="368" text-anchor="middle" fill="#cffafe" font-size="10">Combines: base_probability + deal metadata (stage, amount, days_to_close)</text>
+  <text x="1010" y="386" text-anchor="middle" fill="#cffafe" font-size="10">+ account/owner context + custom_fields (JSONB) → single structured JSON payload</text>
+  <text x="1010" y="400" text-anchor="middle" fill="#cffafe" font-size="9">Normalizes probability: raw_prob/100 if raw_prob &gt; 1 → ensures 0.0–1.0 range for LLM</text>
 
-  <rect x="530" y="290" width="140" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="600" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">ml_controller</text>
-  <text x="600" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/predict/deals</text>
-  <text x="600" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/jobs/run-predictions</text>
+  <!-- Arrow to LLM -->
+  <line x1="770" y1="365" x2="718" y2="365" stroke="#a78bfa" stroke-width="2.5" marker-end="url(#arrPurple)"/>
+  <text x="740" y="358" text-anchor="middle" fill="#a78bfa" font-size="9">fused JSON</text>
 
-  <rect x="690" y="290" width="160" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="770" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">recommendation_controller</text>
-  <text x="770" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/recommendations/generate</text>
-  <text x="770" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">/recommendations/batch</text>
+  <!-- LLM Agent Box -->
+  <rect x="380" y="324" width="340" height="106" rx="10" fill="url(#gLLM)" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="550" y="348" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🤖 LLM Agent  —  recommender.py</text>
+  <text x="550" y="368" text-anchor="middle" fill="#c4b5fd" font-size="10">1. build_llm_prompt(deal_data) → few-shot messages[]</text>
+  <text x="550" y="386" text-anchor="middle" fill="#c4b5fd" font-size="10">2. Groq API call (Llama 3.3 70B, json_object mode)</text>
+  <text x="550" y="402" text-anchor="middle" fill="#c4b5fd" font-size="10">3. Tenacity retry (3x, exponential backoff on RateLimitError)</text>
+  <text x="550" y="418" text-anchor="middle" fill="#c4b5fd" font-size="10">4. Pydantic validate → {adjusted_probability, recommendation_ar,</text>
+  <text x="550" y="430" text-anchor="middle" fill="#c4b5fd" font-size="9">   recommendation_en, risk_flag, risk_reasoning}</text>
 
-  <rect x="870" y="290" width="175" height="70" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="957" y="316" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">action_controller</text>
-  <text x="957" y="332" text-anchor="middle" fill="#a7f3d0" font-size="8">/batch/trigger (orchestrator)</text>
-  <text x="957" y="345" text-anchor="middle" fill="#a7f3d0" font-size="8">mark-actioned, escalate</text>
+  <!-- Arrow DOWN from LLM to Store -->
+  <line x1="550" y1="430" x2="550" y2="472" stroke="#a78bfa" stroke-width="2.5" marker-end="url(#arrPurple)"/>
+  <text x="564" y="456" fill="#a78bfa" font-size="9">validated JSON</text>
 
-  <!-- Controller → Model arrows -->
-  <line x1="120" y1="360" x2="120" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
-  <line x1="280" y1="360" x2="280" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
-  <line x1="440" y1="360" x2="440" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
-  <line x1="600" y1="360" x2="600" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
-  <line x1="770" y1="360" x2="770" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
-  <line x1="957" y1="360" x2="957" y2="425" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
+  <!-- LLM Recommendations DB -->
+  <rect x="270" y="474" width="740" height="96" rx="10" fill="url(#gStore)" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="640" y="498" text-anchor="middle" fill="#fef3c7" font-size="13" font-weight="700">🐘 PostgreSQL  —  Table: llm_recommendations</text>
+  <text x="640" y="518" text-anchor="middle" fill="#fde68a" font-size="10">adjusted_probability · adjusted_score_pct (computed) · score_delta (computed) · recommendation_ar (TEXT) · recommendation_en (TEXT)</text>
+  <text x="640" y="536" text-anchor="middle" fill="#fde68a" font-size="10">risk_flag · risk_reasoning · priority_tier (computed: HIGH/MEDIUM/LOW) · llm_model_id · prompt_version · llm_latency_ms · batch_id</text>
+  <text x="640" y="554" text-anchor="middle" fill="#fde68a" font-size="10">UNIQUE(deal_id, batch_id) · rep_action_taken · rep_feedback_at · base_probability · llm_payload (JSONB for debug)</text>
+  <text x="640" y="570" text-anchor="middle" fill="#fcd34d" font-size="9" font-weight="600">JOIN zoho_deals + llm_recommendations → Dashboard ranked list  ·  ON CONFLICT DO UPDATE (upsert)</text>
 
-  <!-- Interaction labels -->
-  <text x="125" y="400" fill="#6ee7b7" font-size="7">Query User</text>
-  <text x="285" y="400" fill="#6ee7b7" font-size="7">JOIN queries</text>
-  <text x="445" y="400" fill="#6ee7b7" font-size="7">Upsert Deal</text>
-  <text x="605" y="400" fill="#6ee7b7" font-size="7">Read + Predict</text>
-  <text x="775" y="400" fill="#6ee7b7" font-size="7">Fuse + LLM</text>
-  <text x="962" y="400" fill="#6ee7b7" font-size="7">Orchestrate</text>
+  <!-- Arrow to Frontend -->
+  <line x1="380" y1="570" x2="340" y2="570" stroke="#a78bfa" stroke-width="2.5" marker-end="url(#arrPurple)"/>
+  <text x="357" y="562" text-anchor="middle" fill="#a78bfa" font-size="9">JOIN query</text>
 
-  <!-- Pydantic Validation bar -->
-  <rect x="200" y="385" width="600" height="20" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1" stroke-dasharray="5,3"/>
-  <text x="500" y="399" text-anchor="middle" fill="#94a3b8" font-size="9">📋 Pydantic Schemas (api_schemas.py) validate all data flowing between layers</text>
+  <!-- React Frontend Box -->
+  <rect x="30" y="474" width="340" height="96" rx="10" fill="url(#gFront)" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="200" y="498" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">⚛️ React Dashboard  (Port 5173)</text>
+  <text x="200" y="518" text-anchor="middle" fill="#ddd6fe" font-size="10">GET /api/v1/deals → ranked deal list (by adjusted_probability DESC)</text>
+  <text x="200" y="536" text-anchor="middle" fill="#ddd6fe" font-size="10">Renders: Tier badges • ML Score bar • AI Score bar • Δ delta</text>
+  <text x="200" y="554" text-anchor="middle" fill="#ddd6fe" font-size="10">Arabic recommendation (RTL) • SHAP factors • Action buttons</text>
+  <text x="200" y="570" text-anchor="middle" fill="#ddd6fe" font-size="9">TanStack Query polling (30s) • Axios + JWT Bearer token</text>
 
-  <!-- ╔═══════════════════════════════════════╗ -->
-  <!-- ║          MODELS LAYER                  ║ -->
-  <!-- ╚═══════════════════════════════════════╝ -->
-  <rect x="30" y="415" width="1040" height="170" rx="12" fill="url(#modelGrad)" stroke="#f59e0b" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
-  <text x="50" y="440" fill="#fcd34d" font-size="14" font-weight="700">🧩  MODELS — Data Layer + AI Subsystems</text>
+  <!-- WhatsApp / Urgent alert -->
+  <line x1="380" y1="522" x2="1014" y2="450" stroke="#f87171" stroke-width="1.5" fill="none" marker-end="url(#arrRed)" stroke-dasharray="5,3"/>
+  <text x="720" y="480" fill="#f87171" font-size="9">urgent deal: adj_prob &lt; 0.45 OR risk_flag=HIGH_RISK</text>
 
-  <!-- ORM -->
-  <rect x="50" y="455" width="245" height="110" rx="8" fill="url(#nAmber)" filter="url(#sh3)"/>
-  <text x="172" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">SQLAlchemy ORM (schema.py)</text>
-  <text x="172" y="498" text-anchor="middle" fill="#fef3c7" font-size="9">User  |  OTPCode  |  ZohoDeal</text>
-  <text x="172" y="515" text-anchor="middle" fill="#fef3c7" font-size="9">MLPrediction  |  LLMRecommendation</text>
-  <rect x="65" y="530" width="215" height="24" rx="5" fill="#92400e"/>
-  <text x="172" y="546" text-anchor="middle" fill="#fef3c7" font-size="9">database.py: Engine, SessionLocal, Base</text>
+  <rect x="1020" y="430" width="245" height="80" rx="10" fill="url(#gAlert)" stroke="#f87171" stroke-width="1.5" filter="url(#shadow)" stroke-dasharray="5,3"/>
+  <text x="1142" y="454" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">📱 WhatsApp Alert</text>
+  <text x="1142" y="472" text-anchor="middle" fill="#fecaca" font-size="10">evaluate_and_notify() — BackgroundTask</text>
+  <text x="1142" y="490" text-anchor="middle" fill="#fecaca" font-size="10">Looks up verified owner phone in users table</text>
+  <text x="1142" y="506" text-anchor="middle" fill="#fecaca" font-size="9">pywhatkit → send alert to sales rep WhatsApp</text>
 
-  <!-- ML Engine -->
-  <rect x="315" y="455" width="235" height="110" rx="8" fill="url(#nGreen)" filter="url(#sh3)"/>
-  <text x="432" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">ML Engine</text>
-  <rect x="330" y="490" width="205" height="28" rx="5" fill="#065f46"/>
-  <text x="432" y="509" text-anchor="middle" fill="#a7f3d0" font-size="9">inference.py: Preprocess + Random Forest</text>
-  <rect x="330" y="525" width="205" height="28" rx="5" fill="#065f46"/>
-  <text x="432" y="544" text-anchor="middle" fill="#a7f3d0" font-size="9">data_fusion.py: Merge ML + CRM context</text>
+  <!-- Legend -->
+  <rect x="30" y="594" width="1240" height="66" rx="10" fill="#0a0f1e" stroke="#1e293b" stroke-width="1"/>
+  <text x="650" y="614" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600">— DATA FLOW LEGEND —</text>
 
-  <!-- AI Agents -->
-  <rect x="570" y="455" width="235" height="110" rx="8" fill="url(#nPurple)" filter="url(#sh3)"/>
-  <text x="687" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">AI Agents</text>
-  <rect x="585" y="490" width="205" height="28" rx="5" fill="#4c1d95"/>
-  <text x="687" y="509" text-anchor="middle" fill="#c4b5fd" font-size="9">recommender.py: LLM API + Retry + Validate</text>
-  <rect x="585" y="525" width="205" height="28" rx="5" fill="#4c1d95"/>
-  <text x="687" y="544" text-anchor="middle" fill="#c4b5fd" font-size="9">prompts.py: System + Few-shot Examples</text>
+  <line x1="52" y1="632" x2="90" y2="632" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="130" y="636" fill="#94a3b8" font-size="10">API / REST call</text>
 
-  <!-- Notification Service -->
-  <rect x="825" y="455" width="220" height="110" rx="8" fill="url(#nRed)" filter="url(#sh3)"/>
-  <text x="935" y="478" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Services</text>
-  <rect x="840" y="490" width="190" height="28" rx="5" fill="#7f1d1d"/>
-  <text x="935" y="509" text-anchor="middle" fill="#fecaca" font-size="9">notification_service.py</text>
-  <rect x="840" y="525" width="190" height="28" rx="5" fill="#7f1d1d"/>
-  <text x="935" y="544" text-anchor="middle" fill="#fecaca" font-size="9">WhatsApp OTP + Deal Alerts</text>
+  <line x1="220" y1="632" x2="258" y2="632" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrAmber)"/>
+  <text x="298" y="636" fill="#94a3b8" font-size="10">DB Upsert (idempotent)</text>
 
-  <!-- ╔═══════════════════════════════════════╗ -->
-  <!-- ║       INFRASTRUCTURE LAYER             ║ -->
-  <!-- ╚═══════════════════════════════════════╝ -->
-  <rect x="30" y="600" width="1040" height="130" rx="12" fill="url(#infraGrad)" stroke="#ef4444" stroke-width="1.5" opacity="0.9" filter="url(#sh3)"/>
-  <text x="50" y="625" fill="#fca5a5" font-size="14" font-weight="700">🗄️  INFRASTRUCTURE — External Services + Storage</text>
+  <line x1="430" y1="632" x2="468" y2="632" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrGreen)"/>
+  <text x="508" y="636" fill="#94a3b8" font-size="10">ML Inference</text>
 
-  <!-- PostgreSQL -->
-  <rect x="50" y="640" width="250" height="70" rx="8" fill="url(#nAmber)" filter="url(#sh3)"/>
-  <text x="175" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🐘 PostgreSQL 16</text>
-  <text x="175" y="688" text-anchor="middle" fill="#fef3c7" font-size="9">Port 5433 | Docker Compose | JSONB</text>
-  <text x="175" y="702" text-anchor="middle" fill="#fde68a" font-size="9">4 Tables + Computed Columns</text>
+  <line x1="600" y1="632" x2="638" y2="632" stroke="#a78bfa" stroke-width="2.5" marker-end="url(#arrPurple)"/>
+  <text x="678" y="636" fill="#94a3b8" font-size="10">LLM Pipeline</text>
 
-  <!-- ML Artifacts -->
-  <rect x="330" y="640" width="200" height="70" rx="8" fill="url(#nTeal)" filter="url(#sh3)"/>
-  <text x="430" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">📦 ML Artifacts</text>
-  <text x="430" y="688" text-anchor="middle" fill="#ccfbf1" font-size="9">random_forest_v1.pkl (16MB)</text>
-  <text x="430" y="702" text-anchor="middle" fill="#ccfbf1" font-size="9">Scaler + Encoders + Feature Maps</text>
+  <line x1="770" y1="632" x2="808" y2="632" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#arrTeal)"/>
+  <text x="848" y="636" fill="#94a3b8" font-size="10">Data Fusion (JOIN)</text>
 
-  <!-- Groq LLM -->
-  <rect x="560" y="640" width="200" height="70" rx="8" fill="url(#nBlue)" filter="url(#sh3)"/>
-  <text x="660" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🧠 Groq LLM API</text>
-  <text x="660" y="688" text-anchor="middle" fill="#bfdbfe" font-size="9">Llama 3.3 70B Versatile</text>
-  <text x="660" y="702" text-anchor="middle" fill="#bfdbfe" font-size="9">OpenAI-compatible + JSON mode</text>
+  <line x1="960" y1="626" x2="998" y2="626" stroke="#f87171" stroke-width="1.5" marker-end="url(#arrRed)" stroke-dasharray="5,3"/>
+  <text x="1038" y="630" fill="#94a3b8" font-size="10">Urgent alert (conditional)</text>
 
-  <!-- WhatsApp -->
-  <rect x="790" y="640" width="250" height="70" rx="8" fill="url(#nRed)" filter="url(#sh3)"/>
-  <text x="915" y="668" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">📱 WhatsApp + Google</text>
-  <text x="915" y="688" text-anchor="middle" fill="#fecaca" font-size="9">Twilio/Meta Business API (Alerts)</text>
-  <text x="915" y="702" text-anchor="middle" fill="#fecaca" font-size="9">Google OAuth 2.0 (SSO)</text>
+  <!-- Groq external -->
+  <path d="M 380 365 L 330 365 Q 320 365 320 355 L 320 78 Q 320 68 310 68 L 270 68 Q 260 68 260 78" stroke="#34d399" stroke-width="1.5" fill="none" marker-end="url(#arrGreen)" stroke-dasharray="5,3"/>
+  <text x="280" y="52" fill="#34d399" font-size="9">Groq LLM API (external)</text>
 
-  <!-- Model → Infrastructure arrows -->
-  <line x1="172" y1="565" x2="172" y2="638" stroke="#fbbf24" stroke-width="2" marker-end="url(#a3a)"/>
-  <text x="180" y="607" fill="#fcd34d" font-size="8">Read/Write</text>
-
-  <line x1="432" y1="565" x2="432" y2="638" stroke="#34d399" stroke-width="2" marker-end="url(#a3g)"/>
-  <text x="440" y="607" fill="#6ee7b7" font-size="8">Load .pkl</text>
-
-  <line x1="687" y1="565" x2="660" y2="638" stroke="#60a5fa" stroke-width="2" marker-end="url(#a3b)"/>
-  <text x="685" y="607" fill="#93c5fd" font-size="8">API Call</text>
-
-  <line x1="935" y1="565" x2="915" y2="638" stroke="#f87171" stroke-width="2" marker-end="url(#a3r)"/>
-  <text x="940" y="607" fill="#fca5a5" font-size="8">Send Msg</text>
+  <!-- Zoho arrow -->
+  <text x="30" y="70" fill="#60a5fa" font-size="9" font-weight="600">SOURCE</text>
+  <text x="270" y="70" fill="#60a5fa" font-size="9" font-weight="600">INGEST</text>
+  <text x="520" y="70" fill="#fbbf24" font-size="9" font-weight="600">STORE (raw)</text>
+  <text x="770" y="70" fill="#34d399" font-size="9" font-weight="600">PREDICT</text>
+  <text x="1020" y="70" fill="#fbbf24" font-size="9" font-weight="600">STORE (scores)</text>
 </svg>

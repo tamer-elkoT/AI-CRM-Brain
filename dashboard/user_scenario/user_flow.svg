@@ -1,226 +1,166 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1060" font-family="'Segoe UI', Arial, sans-serif">
   <defs>
-    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#1e293b"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0f1e"/>
+      <stop offset="100%" style="stop-color:#0f1a2e"/>
     </linearGradient>
-    <linearGradient id="step1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#7c3aed"/>
-      <stop offset="100%" style="stop-color:#6d28d9"/>
-    </linearGradient>
-    <linearGradient id="step2" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="stepBlue" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#2563eb"/>
       <stop offset="100%" style="stop-color:#1d4ed8"/>
     </linearGradient>
-    <linearGradient id="step3" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="stepGreen" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#059669"/>
       <stop offset="100%" style="stop-color:#047857"/>
     </linearGradient>
-    <linearGradient id="step4" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="stepPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="stepAmber" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#d97706"/>
       <stop offset="100%" style="stop-color:#b45309"/>
     </linearGradient>
-    <linearGradient id="step5" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="stepRed" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#dc2626"/>
       <stop offset="100%" style="stop-color:#b91c1c"/>
     </linearGradient>
     <linearGradient id="stepTeal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0d9488"/>
-      <stop offset="100%" style="stop-color:#0f766e"/>
+      <stop offset="0%" style="stop-color:#0891b2"/>
+      <stop offset="100%" style="stop-color:#0e7490"/>
     </linearGradient>
-    <linearGradient id="stepPink" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#db2777"/>
-      <stop offset="100%" style="stop-color:#be185d"/>
+    <linearGradient id="stepEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
     </linearGradient>
-    <linearGradient id="stepIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4f46e5"/>
-      <stop offset="100%" style="stop-color:#4338ca"/>
-    </linearGradient>
-    <filter id="sh2">
-      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.35"/>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.5"/>
     </filter>
-    <marker id="arr2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/>
     </marker>
-    <marker id="arr2g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <marker id="arrGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
-    </marker>
-    <marker id="arr2a" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
-    </marker>
-    <marker id="arr2r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#f87171"/>
-    </marker>
-    <marker id="arr2p" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
-    </marker>
-    <marker id="arr2t" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#5eead4"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="1200" height="680" fill="url(#bg2)" rx="16"/>
+  <rect width="900" height="1060" fill="url(#bg)" rx="16"/>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="900" height="1060" fill="url(#grid)" rx="16" opacity="0.3"/>
 
   <!-- Title -->
-  <text x="600" y="42" text-anchor="middle" fill="#f8fafc" font-size="22" font-weight="700">AI CRM Brain — User Flow Scenario (Sales Manager)</text>
-  <text x="600" y="65" text-anchor="middle" fill="#94a3b8" font-size="13">From login to taking action on AI-ranked deals</text>
+  <text x="450" y="42" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">👔 Sales Manager — User Flow</text>
+  <text x="450" y="62" text-anchor="middle" fill="#64748b" font-size="11">From Login to Executing an AI-Recommended Action</text>
 
-  <!-- ═══ ROW 1: Login Flow ═══ -->
-  <!-- Step 1: Open App -->
-  <rect x="40" y="95" width="160" height="80" rx="10" fill="url(#step1)" filter="url(#sh2)"/>
-  <text x="120" y="125" text-anchor="middle" fill="#fff" font-size="28">👤</text>
-  <text x="120" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Sales Manager</text>
-  <text x="120" y="164" text-anchor="middle" fill="#ddd6fe" font-size="9">Opens the App</text>
+  <!-- Timeline line -->
+  <line x1="450" y1="90" x2="450" y2="1010" stroke="#1e3a5f" stroke-width="2" stroke-dasharray="6,4"/>
 
-  <!-- Arrow -->
-  <line x1="200" y1="135" x2="238" y2="135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arr2p)"/>
+  <!-- ───────────────────────────────────────────── -->
+  <!-- STEP 1: Login -->
+  <rect x="240" y="94" width="420" height="74" rx="10" fill="url(#stepBlue)" filter="url(#shadow)"/>
+  <text x="450" y="120" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 1 — Login</text>
+  <text x="450" y="140" text-anchor="middle" fill="#bfdbfe" font-size="11">Navigate to React App (localhost:5173)</text>
+  <text x="450" y="156" text-anchor="middle" fill="#bfdbfe" font-size="10">Email/Password  ·  Google OAuth SSO  ·  Receives JWT Token (30-day)</text>
 
-  <!-- Step 2: Login -->
-  <rect x="240" y="95" width="180" height="80" rx="10" fill="url(#step2)" filter="url(#sh2)"/>
-  <text x="330" y="125" text-anchor="middle" fill="#fff" font-size="28">🔐</text>
-  <text x="330" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Authenticate</text>
-  <text x="330" y="164" text-anchor="middle" fill="#bfdbfe" font-size="9">Email/Password or Google SSO</text>
+  <!-- Connector -->
+  <line x1="450" y1="168" x2="450" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Arrow -->
-  <line x1="420" y1="135" x2="458" y2="135" stroke="#60a5fa" stroke-width="2" marker-end="url(#arr2)"/>
+  <!-- STEP 2: Dashboard loads -->
+  <rect x="240" y="192" width="420" height="74" rx="10" fill="url(#stepGreen)" filter="url(#shadow)"/>
+  <text x="450" y="218" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 2 — Dashboard Loads</text>
+  <text x="450" y="238" text-anchor="middle" fill="#a7f3d0" font-size="11">React calls GET /api/v1/deals (Axios + JWT header)</text>
+  <text x="450" y="254" text-anchor="middle" fill="#a7f3d0" font-size="10">Ranked deal list renders • KPI cards: Total | High Priority | Avg Score</text>
 
-  <!-- Step 3: Decision -->
-  <rect x="460" y="95" width="140" height="80" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="2" filter="url(#sh2)"/>
-  <text x="530" y="125" text-anchor="middle" fill="#fbbf24" font-size="22">❓</text>
-  <text x="530" y="148" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">First Time?</text>
-  <text x="530" y="164" text-anchor="middle" fill="#fde68a" font-size="9">Check if onboarding needed</text>
+  <!-- Connector -->
+  <line x1="450" y1="266" x2="450" y2="288" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Arrow YES (down) -->
-  <line x1="530" y1="175" x2="530" y2="208" stroke="#fbbf24" stroke-width="2" marker-end="url(#arr2a)"/>
-  <text x="548" y="197" fill="#fde68a" font-size="10" font-weight="600">YES</text>
+  <!-- STEP 3: Click Sync Now -->
+  <rect x="240" y="290" width="420" height="88" rx="10" fill="url(#stepAmber)" filter="url(#shadow)"/>
+  <text x="450" y="316" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 3 — Click "Sync Now"</text>
+  <text x="450" y="336" text-anchor="middle" fill="#fef3c7" font-size="11">POST /api/v1/ingest/deals  →  Zoho OAuth token refresh</text>
+  <text x="450" y="352" text-anchor="middle" fill="#fef3c7" font-size="10">Fetch all active deals from Zoho CRM API v3</text>
+  <text x="450" y="368" text-anchor="middle" fill="#fef3c7" font-size="10">Enrich with Contact phone/email  →  Upsert PostgreSQL  →  Auto-classify deals</text>
 
-  <!-- Step 3b: Onboarding -->
-  <rect x="460" y="210" width="140" height="70" rx="10" fill="url(#step4)" filter="url(#sh2)"/>
-  <text x="530" y="238" text-anchor="middle" fill="#fff" font-size="22">📋</text>
-  <text x="530" y="258" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Onboarding</text>
-  <text x="530" y="272" text-anchor="middle" fill="#fef3c7" font-size="9">Business, Templates</text>
+  <!-- Connector -->
+  <line x1="450" y1="378" x2="450" y2="400" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Arrow from Onboarding to Home -->
-  <path d="M 600 245 L 640 245 Q 650 245 650 235 L 650 135 Q 650 125 660 125 L 688 135" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arr2a)"/>
+  <!-- STEP 4: Generate AI Recommendations -->
+  <rect x="240" y="402" width="420" height="100" rx="10" fill="url(#stepPurple)" filter="url(#shadow)"/>
+  <text x="450" y="428" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 4 — AI Pipeline Runs</text>
+  <text x="450" y="448" text-anchor="middle" fill="#c4b5fd" font-size="11">POST /api/v1/recommendations/generate</text>
+  <text x="450" y="464" text-anchor="middle" fill="#c4b5fd" font-size="10">🔵 Random Forest → base_probability per deal</text>
+  <text x="450" y="480" text-anchor="middle" fill="#c4b5fd" font-size="10">🟣 data_fusion() → LLM prompt built (deal data + custom fields)</text>
+  <text x="450" y="496" text-anchor="middle" fill="#c4b5fd" font-size="10">🤖 Groq LLM → adjusted_probability + recommendation_ar + recommendation_en + risk_flag</text>
 
-  <!-- Arrow NO (right) -->
-  <line x1="600" y1="135" x2="688" y2="135" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
-  <text x="638" y="127" fill="#6ee7b7" font-size="10" font-weight="600">NO</text>
+  <!-- Connector -->
+  <line x1="450" y1="502" x2="450" y2="524" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Step 4: Home Page -->
-  <rect x="690" y="95" width="180" height="80" rx="10" fill="url(#step3)" filter="url(#sh2)"/>
-  <text x="780" y="125" text-anchor="middle" fill="#fff" font-size="28">🏠</text>
-  <text x="780" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Home Page</text>
-  <text x="780" y="164" text-anchor="middle" fill="#a7f3d0" font-size="9">Deal Pipeline Table</text>
+  <!-- STEP 5: View Ranked Deals -->
+  <rect x="240" y="526" width="420" height="74" rx="10" fill="url(#stepTeal)" filter="url(#shadow)"/>
+  <text x="450" y="552" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 5 — View Ranked Deal List</text>
+  <text x="450" y="572" text-anchor="middle" fill="#cffafe" font-size="11">Dashboard refreshes automatically</text>
+  <text x="450" y="588" text-anchor="middle" fill="#cffafe" font-size="10">Deals sorted by AI Score (%) • Tier badges: 🔴 HIGH / 🟡 MEDIUM / 🟢 LOW • Risk flags shown</text>
 
-  <!-- Arrow -->
-  <line x1="870" y1="135" x2="918" y2="135" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
+  <!-- Connector -->
+  <line x1="450" y1="600" x2="450" y2="622" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Step 5: Sync -->
-  <rect x="920" y="95" width="240" height="80" rx="10" fill="url(#step2)" filter="url(#sh2)"/>
-  <text x="1040" y="125" text-anchor="middle" fill="#fff" font-size="28">🔄</text>
-  <text x="1040" y="148" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Sync CRM Data</text>
-  <text x="1040" y="164" text-anchor="middle" fill="#bfdbfe" font-size="9">POST /api/v1/batch/trigger</text>
+  <!-- STEP 6: Click Deal Row -->
+  <rect x="240" y="624" width="420" height="88" rx="10" fill="url(#stepGreen)" filter="url(#shadow)"/>
+  <text x="450" y="650" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 6 — Click a Deal Row</text>
+  <text x="450" y="670" text-anchor="middle" fill="#a7f3d0" font-size="11">Detail drawer slides in (no page reload)</text>
+  <text x="450" y="686" text-anchor="middle" fill="#a7f3d0" font-size="10">Shows: ML Score | AI Score | Δ Delta badge</text>
+  <text x="450" y="702" text-anchor="middle" fill="#a7f3d0" font-size="10">Arabic recommendation (RTL) + English mirror + Risk reasoning</text>
 
-  <!-- ═══ ROW 2: AI Pipeline ═══ -->
-  <!-- Arrow down from Sync -->
-  <line x1="1040" y1="175" x2="1040" y2="218" stroke="#60a5fa" stroke-width="2" marker-end="url(#arr2)"/>
+  <!-- Connector -->
+  <line x1="450" y1="712" x2="450" y2="734" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Step 6: ML Prediction -->
-  <rect x="900" y="220" width="260" height="80" rx="10" fill="url(#step3)" filter="url(#sh2)"/>
-  <text x="1030" y="248" text-anchor="middle" fill="#fff" font-size="24">🤖</text>
-  <text x="1030" y="270" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">ML Engine Scores All Deals</text>
-  <text x="1030" y="286" text-anchor="middle" fill="#a7f3d0" font-size="9">Random Forest (1000 estimators, 93.6% accuracy)</text>
+  <!-- STEP 7: Click Follow Up -->
+  <rect x="240" y="736" width="420" height="100" rx="10" fill="url(#stepRed)" filter="url(#shadow)"/>
+  <text x="450" y="762" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 7 — Click "Follow Up" Button</text>
+  <text x="450" y="782" text-anchor="middle" fill="#fecaca" font-size="11">POST /api/v1/followups/{deal_id}/generate-message</text>
+  <text x="450" y="798" text-anchor="middle" fill="#fecaca" font-size="10">🔴 Grok LLM generates personalized WhatsApp message (primary)</text>
+  <text x="450" y="814" text-anchor="middle" fill="#fecaca" font-size="10">🟠 Groq fallback if Grok fails</text>
+  <text x="450" y="830" text-anchor="middle" fill="#fecaca" font-size="10">📱 POST /followups/{deal_id}/send-alert → pywhatkit sends to rep's verified WhatsApp</text>
 
-  <!-- Arrow left -->
-  <line x1="900" y1="260" x2="812" y2="260" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
+  <!-- Connector -->
+  <line x1="450" y1="836" x2="450" y2="858" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
 
-  <!-- Step 7: LLM Recommendations -->
-  <rect x="550" y="220" width="260" height="80" rx="10" fill="url(#step1)" filter="url(#sh2)"/>
-  <text x="680" y="248" text-anchor="middle" fill="#fff" font-size="24">🧠</text>
-  <text x="680" y="270" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">LLM Generates Next-Best-Actions</text>
-  <text x="680" y="286" text-anchor="middle" fill="#ddd6fe" font-size="9">Bilingual (Arabic + English) via Groq / Llama 3.3</text>
+  <!-- STEP 8: Mark as Done -->
+  <rect x="240" y="860" width="420" height="74" rx="10" fill="url(#stepEmerald)" filter="url(#shadow)"/>
+  <text x="450" y="886" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">STEP 8 — Mark as Followed Up</text>
+  <text x="450" y="906" text-anchor="middle" fill="#a7f3d0" font-size="11">POST /api/v1/followups/{deal_id}/mark</text>
+  <text x="450" y="922" text-anchor="middle" fill="#a7f3d0" font-size="10">Records FollowupLog • Updates deal.action_status = "followed_up" • Closes feedback loop</text>
 
-  <!-- Arrow left -->
-  <line x1="550" y1="260" x2="462" y2="260" stroke="#a78bfa" stroke-width="2" marker-end="url(#arr2p)"/>
+  <!-- Connector -->
+  <line x1="450" y1="934" x2="450" y2="956" stroke="#34d399" stroke-width="2" marker-end="url(#arrGreen)"/>
 
-  <!-- Step 8: WhatsApp Alert (branch) -->
-  <rect x="550" y="320" width="260" height="60" rx="10" fill="url(#step5)" filter="url(#sh2)"/>
-  <text x="680" y="348" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">🚨 Auto WhatsApp Alert</text>
-  <text x="680" y="366" text-anchor="middle" fill="#fecaca" font-size="9">If deal > $50K and prob &lt; 45% OR prob > 85%</text>
-  <!-- Arrow down from LLM -->
-  <line x1="680" y1="300" x2="680" y2="318" stroke="#f87171" stroke-width="1.5" marker-end="url(#arr2r)" stroke-dasharray="5,3"/>
+  <!-- FINAL: System captures data -->
+  <rect x="270" y="958" width="360" height="56" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+  <text x="450" y="982" text-anchor="middle" fill="#10b981" font-size="13" font-weight="700">✅ Deal Cycle Complete</text>
+  <text x="450" y="1002" text-anchor="middle" fill="#4ade80" font-size="10">rep_action_taken logged • Follow-up history recorded • Score delta preserved for model retraining</text>
 
-  <!-- ═══ ROW 3: Dashboard & Analysis ═══ -->
-  <!-- Step 9: Dashboard -->
-  <rect x="200" y="220" width="260" height="80" rx="10" fill="url(#step4)" filter="url(#sh2)"/>
-  <text x="330" y="248" text-anchor="middle" fill="#fff" font-size="24">📊</text>
-  <text x="330" y="270" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">View Dashboard</text>
-  <text x="330" y="286" text-anchor="middle" fill="#fef3c7" font-size="9">KPIs + AI Score Scatter Plot + Account Rankings</text>
+  <!-- LEFT sidebar labels -->
+  <text x="50" y="134" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">AUTH</text>
+  <text x="50" y="232" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">VIEW</text>
+  <text x="50" y="340" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">INGEST</text>
+  <text x="50" y="458" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">AI</text>
+  <text x="50" y="570" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">VIEW</text>
+  <text x="50" y="670" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">DETAIL</text>
+  <text x="50" y="790" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">ACTION</text>
+  <text x="50" y="900" text-anchor="middle" fill="#475569" font-size="10" font-weight="600">CLOSE</text>
 
-  <!-- Arrow down -->
-  <line x1="330" y1="300" x2="330" y2="338" stroke="#fbbf24" stroke-width="2" marker-end="url(#arr2a)"/>
+  <!-- Left vertical bracket lines -->
+  <rect x="68" y="94" width="3" height="74" rx="2" fill="#2563eb" opacity="0.6"/>
+  <rect x="68" y="192" width="3" height="74" rx="2" fill="#059669" opacity="0.6"/>
+  <rect x="68" y="290" width="3" height="88" rx="2" fill="#d97706" opacity="0.6"/>
+  <rect x="68" y="402" width="3" height="100" rx="2" fill="#7c3aed" opacity="0.6"/>
+  <rect x="68" y="526" width="3" height="74" rx="2" fill="#0891b2" opacity="0.6"/>
+  <rect x="68" y="624" width="3" height="88" rx="2" fill="#059669" opacity="0.6"/>
+  <rect x="68" y="736" width="3" height="100" rx="2" fill="#dc2626" opacity="0.6"/>
+  <rect x="68" y="860" width="3" height="74" rx="2" fill="#10b981" opacity="0.6"/>
 
-  <!-- Step 10: Ranked Deals -->
-  <rect x="200" y="340" width="260" height="80" rx="10" fill="url(#stepTeal)" filter="url(#sh2)"/>
-  <text x="330" y="368" text-anchor="middle" fill="#fff" font-size="24">📋</text>
-  <text x="330" y="390" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Browse Ranked Deals</text>
-  <text x="330" y="406" text-anchor="middle" fill="#ccfbf1" font-size="9">Sorted by AI Score / Priority Tier</text>
-
-  <!-- Arrow down -->
-  <line x1="330" y1="420" x2="330" y2="458" stroke="#5eead4" stroke-width="2" marker-end="url(#arr2t)"/>
-
-  <!-- Step 11: Deal Drawer -->
-  <rect x="200" y="460" width="260" height="80" rx="10" fill="url(#stepIndigo)" filter="url(#sh2)"/>
-  <text x="330" y="488" text-anchor="middle" fill="#fff" font-size="24">🔍</text>
-  <text x="330" y="510" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Open Deal Drawer</text>
-  <text x="330" y="526" text-anchor="middle" fill="#c7d2fe" font-size="9">Full Detail + AI Recommendation + Risk Flag</text>
-
-  <!-- ═══ ROW 4: Action Choices ═══ -->
-  <!-- Arrow right from Deal Drawer -->
-  <line x1="460" y1="500" x2="518" y2="500" stroke="#818cf8" stroke-width="2" marker-end="url(#arr2p)"/>
-  <text x="480" y="492" fill="#c7d2fe" font-size="10" font-weight="600">Take Action?</text>
-
-  <!-- Action: Call Client -->
-  <rect x="520" y="440" width="195" height="55" rx="10" fill="url(#step3)" filter="url(#sh2)"/>
-  <text x="617" y="464" text-anchor="middle" fill="#fff" font-size="18">📞</text>
-  <text x="617" y="483" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">Call Client</text>
-
-  <!-- Action: WhatsApp Outreach -->
-  <rect x="520" y="505" width="195" height="55" rx="10" fill="url(#step2)" filter="url(#sh2)"/>
-  <text x="617" y="529" text-anchor="middle" fill="#fff" font-size="18">💬</text>
-  <text x="617" y="548" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">WhatsApp Outreach</text>
-
-  <!-- Action: Escalate -->
-  <rect x="520" y="570" width="195" height="55" rx="10" fill="url(#step5)" filter="url(#sh2)"/>
-  <text x="617" y="594" text-anchor="middle" fill="#fff" font-size="18">🚨</text>
-  <text x="617" y="613" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">Escalate to Manager</text>
-
-  <!-- ═══ FEEDBACK LOOP ═══ -->
-  <!-- Arrow from Call → Mark Actioned -->
-  <line x1="715" y1="468" x2="768" y2="468" stroke="#34d399" stroke-width="2" marker-end="url(#arr2g)"/>
-
-  <rect x="770" y="440" width="200" height="55" rx="10" fill="#1e293b" stroke="#22c55e" stroke-width="2" filter="url(#sh2)"/>
-  <text x="870" y="464" text-anchor="middle" fill="#22c55e" font-size="18">✅</text>
-  <text x="870" y="483" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="600">Mark as Actioned</text>
-
-  <!-- Arrow from WhatsApp → Mark -->
-  <line x1="715" y1="532" x2="750" y2="532" stroke="#60a5fa" stroke-width="1.5" fill="none"/>
-  <path d="M 750 532 Q 760 532 760 510 L 760 480 Q 760 470 770 470" stroke="#60a5fa" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
-
-  <!-- Arrow from Escalate → Flag -->
-  <line x1="715" y1="598" x2="768" y2="598" stroke="#f87171" stroke-width="2" marker-end="url(#arr2r)"/>
-
-  <rect x="770" y="570" width="200" height="55" rx="10" fill="#1e293b" stroke="#ef4444" stroke-width="2" filter="url(#sh2)"/>
-  <text x="870" y="594" text-anchor="middle" fill="#ef4444" font-size="18">⬆️</text>
-  <text x="870" y="613" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="600">Flagged for Mgmt Review</text>
-
-  <!-- Feedback Loop Arrow (back to Ranked Deals) -->
-  <path d="M 970 468 L 1020 468 Q 1040 468 1040 448 L 1040 400 Q 1040 380 1020 380 L 460 380" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arr2g)" stroke-dasharray="6,3"/>
-  <text x="750" y="393" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="500">🔄 Feedback Loop — return to deal pipeline</text>
-
-  <!-- Bottom caption -->
-  <rect x="40" y="640" width="1120" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-  <text x="600" y="659" text-anchor="middle" fill="#94a3b8" font-size="11">Complete user journey: Authentication → CRM Sync → AI Analysis → Dashboard Review → Action → Feedback Loop</text>
+  <!-- Footer -->
+  <text x="450" y="1042" text-anchor="middle" fill="#1e293b" font-size="10">AI CRM Brain — MVP v1.0  ·  FastAPI + React  ·  Groq LLM (Llama 3.3 70B)  ·  Random Forest Classifier</text>
 </svg>
