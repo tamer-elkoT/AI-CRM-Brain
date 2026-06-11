@@ -138,3 +138,33 @@ export function useUpdateFollowupDays() {
     },
   });
 }
+
+// ============================================================
+// Epic 2: Delete Deal & Inline Contact Edit Hooks
+// ============================================================
+
+export function useDeleteDeal() {
+  const queryClient = useQueryClient();
+  return useMutation<{ status: string; message: string; deal_id: string }, Error, string>({
+    mutationFn: (dealId: string) => dashboardApi.deleteDeal(dealId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+}
+
+export function useUpdateDealContact() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    { status: string; message: string; deal_id: string; client_phone: string | null; client_email: string | null },
+    Error,
+    { dealId: string; client_phone?: string | null; client_email?: string | null }
+  >({
+    mutationFn: ({ dealId, ...data }) => dashboardApi.updateDealContact(dealId, data),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['deal', variables.dealId] });
+      void queryClient.invalidateQueries({ queryKey: ['all_deals'] });
+    },
+  });
+}

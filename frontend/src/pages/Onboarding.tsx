@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { actionApi } from '../services/api';
+import { authApi, ingestionApi } from '../services/api';
 import { Select } from '../components/ui/Select';
 
 type OnboardingStep = 'company' | 'connect' | 'syncing' | 'success';
@@ -9,9 +9,15 @@ const INDUSTRIES = ['Technology', 'Finance & Banking', 'Healthcare', 'Real Estat
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [step, setStep] = useState<OnboardingStep>('company');
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
+  const [uploadMethod, setUploadMethod] = useState<'zoho' | 'csv' | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [syncStatusMsg, setSyncStatusMsg] = useState('Authenticating...');
 
   const handleCompanyContinue = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +25,45 @@ export default function Onboarding() {
   };
 
   const handleConnect = async () => {
-    setStep('syncing');
-    try {
-      await actionApi.triggerSync();
-      setStep('success');
-    } catch {
-      // Fallback to success for MVP demo purposes if backend fails
-      setTimeout(() => setStep('success'), 3000);
+    if (uploadMethod === 'csv' && selectedFile) {
+      setStep('syncing');
+      setSyncStatusMsg('Uploading and processing CSV...');
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const result = await ingestionApi.uploadCustomData(formData, (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 100));
+          setUploadProgress(percentCompleted);
+        });
+
+        const mlCount = result?.ml_predictions?.predictions_generated ?? 0;
+        const llmCount = result?.llm_recommendations?.recommendations_generated ?? 0;
+        setSyncStatusMsg(`Running ML Predictions... ${mlCount} scored, ${llmCount} AI insights generated.`);
+        setTimeout(() => setStep('success'), 1500);
+      } catch (err) {
+        console.error('Upload failed', err);
+        setSyncStatusMsg('Upload failed. Please try again.');
+        setTimeout(() => setStep('connect'), 2000);
+      }
+    } else if (uploadMethod === 'zoho') {
+      setSyncStatusMsg('Redirecting to Zoho OAuth...');
+      try {
+        // ✅ FIXED: Call OAuth initiation, not data sync
+        const { auth_url } = await authApi.initiateZohoOAuth();
+        // Redirect the browser to Zoho's OAuth consent screen
+        window.location.href = auth_url;
+      } catch (err: any) {
+        const msg = err?.response?.data?.detail || 'Zoho OAuth setup failed. Check ZOHO_CLIENT_ID in .env.';
+        setSyncStatusMsg(msg);
+        setTimeout(() => setStep('connect'), 3000);
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
     }
   };
 
@@ -113,33 +151,130 @@ export default function Onboarding() {
           {/* Step 2: Connect CRM */}
           {step === 'connect' && (
             <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_10px_15px_rgba(15,23,42,0.05)] border border-outline-variant transition-all duration-300">
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Connect Your CRM</h3>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Data Source</h3>
               <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">
-                Integrate your existing data to power the AI Brain
-                {companyName ? ` for ${companyName}` : ''}.
+                Connect a CRM or upload a custom CSV to power the AI Brain.
               </p>
 
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="aspect-square flex flex-col items-center justify-center p-4 border-2 border-secondary rounded-xl bg-surface cursor-pointer relative">
-                  <span className="material-symbols-outlined text-secondary text-4xl mb-1">cloud_sync</span>
-                  <span className="font-label-sm text-label-sm text-on-surface">Zoho</span>
-                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-secondary flex items-center justify-center">
-                    <span className="material-symbols-outlined text-on-secondary text-xs">check</span>
-                  </div>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div 
+                  onClick={() => setUploadMethod('zoho')}
+                  className={`flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                    uploadMethod === 'zoho' 
+                      ? 'border-secondary bg-secondary/5' 
+                      : 'border-outline-variant bg-surface hover:border-secondary/50'
+                  }`}
+                >
+                  <span className={`material-symbols-outlined text-4xl mb-2 ${uploadMethod === 'zoho' ? 'text-secondary' : 'text-on-surface-variant'}`}>
+                    cloud_sync
+                  </span>
+                  <span className={`font-label-md ${uploadMethod === 'zoho' ? 'text-secondary font-bold' : 'text-on-surface'}`}>Zoho CRM</span>
+                  {uploadMethod === 'zoho' && (
+                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-secondary text-on-secondary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-xs font-bold">check</span>
+                    </div>
+                  )}
                 </div>
-                <div className="aspect-square flex flex-col items-center justify-center p-4 border border-outline-variant rounded-xl bg-surface opacity-50 grayscale cursor-not-allowed">
-                  <span className="material-symbols-outlined text-on-surface-variant text-4xl mb-1">cloud</span>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">Salesforce</span>
-                </div>
-                <div className="aspect-square flex flex-col items-center justify-center p-4 border border-outline-variant rounded-xl bg-surface opacity-50 grayscale cursor-not-allowed">
-                  <span className="material-symbols-outlined text-on-surface-variant text-4xl mb-1">hub</span>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">HubSpot</span>
+
+                <div 
+                  onClick={() => setUploadMethod('csv')}
+                  className={`flex flex-col items-center justify-center p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                    uploadMethod === 'csv' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-outline-variant bg-surface hover:border-primary/50'
+                  }`}
+                >
+                  <span className={`material-symbols-outlined text-4xl mb-2 ${uploadMethod === 'csv' ? 'text-primary' : 'text-on-surface-variant'}`}>
+                    upload_file
+                  </span>
+                  <span className={`font-label-md ${uploadMethod === 'csv' ? 'text-primary font-bold' : 'text-on-surface'}`}>Custom CSV</span>
+                  {uploadMethod === 'csv' && (
+                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-xs font-bold">check</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <button onClick={handleConnect} className="w-full py-4 bg-primary text-on-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-3 hover:opacity-90 transition-opacity">
-                <span className="material-symbols-outlined">link</span>
-                Connect Zoho via OAuth
+              {uploadMethod === 'csv' && (
+                <div className="mb-6 space-y-4">
+                  {/* ── Column Schema Guide ── */}
+                  <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="material-symbols-outlined text-primary text-lg">table_chart</span>
+                      <p className="font-label-md text-on-surface font-semibold">Required CSV Columns</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono mb-3">
+                      {[
+                        { col: 'Deal_Name', req: true },
+                        { col: 'Stage', req: true },
+                        { col: 'Amount', req: true },
+                        { col: 'Closing_Date', req: true },
+                        { col: 'Account_Name', req: false },
+                        { col: 'Contact_Name', req: false },
+                        { col: 'Owner_Name', req: false },
+                        { col: 'Phone', req: false },
+                        { col: 'Email', req: false },
+                        { col: 'Probability', req: false },
+                      ].map(({ col, req }) => (
+                        <div key={col} className="flex items-center gap-1.5">
+                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${req ? 'bg-error' : 'bg-secondary'}`} />
+                          <span className={`${req ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>{col}</span>
+                          {req && <span className="text-error text-[9px] font-bold">REQ</span>}
+                        </div>
+                      ))}
+                    </div>
+                    <a
+                      href="/sample_test_deals.csv"
+                      download="sample_test_deals.csv"
+                      className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                    >
+                      <span className="material-symbols-outlined text-sm">download</span>
+                      Download sample_test_deals.csv
+                    </a>
+                  </div>
+
+                  {/* ── File Drop Zone ── */}
+                  <div className="p-4 border border-outline-variant rounded-lg bg-surface text-center border-dashed">
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx"
+                      className="hidden"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                    {selectedFile ? (
+                      <div className="flex items-center justify-between bg-surface-container p-3 rounded-md">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <span className="material-symbols-outlined text-primary">csv</span>
+                          <span className="font-body-sm text-on-surface truncate">{selectedFile.name}</span>
+                        </div>
+                        <button
+                          onClick={() => setSelectedFile(null)}
+                          className="text-on-surface-variant hover:text-error transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-sm">close</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="text-primary font-label-md hover:underline flex items-center justify-center gap-2 mx-auto"
+                      >
+                        <span className="material-symbols-outlined">upload</span>
+                        Select CSV or Excel File
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <button 
+                onClick={handleConnect} 
+                disabled={!uploadMethod || (uploadMethod === 'csv' && !selectedFile)}
+                className="w-full py-3.5 bg-primary text-on-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-3 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploadMethod === 'csv' ? 'Upload & Process Data' : 'Connect and Sync'}
               </button>
               <button onClick={() => setStep('company')} className="w-full mt-3 py-2 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">
                 ← Back
@@ -150,18 +285,25 @@ export default function Onboarding() {
           {/* Step 3: Syncing */}
           {step === 'syncing' && (
             <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_10px_15px_rgba(15,23,42,0.05)] border border-outline-variant transition-all duration-300">
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-8">Syncing Records</h3>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-8">Processing Data</h3>
               <div className="space-y-8 relative">
                 <div className="absolute left-[15px] top-2 bottom-2 w-px bg-outline-variant" />
                 <div className="flex items-center gap-4 relative">
                   <div className="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center z-10">
                     <span className="material-symbols-outlined text-lg">check</span>
                   </div>
-                  <div><p className="font-label-md text-label-md text-on-surface">Authenticating...</p></div>
+                  <div><p className="font-label-md text-label-md text-on-surface">{uploadMethod === 'csv' ? 'File verified' : 'Authenticated'}</p></div>
                 </div>
                 <div className="flex items-center gap-4 relative">
                   <div className="w-8 h-8 rounded-full bg-surface-container border-2 border-secondary border-t-transparent animate-spin z-10" />
-                  <div><p className="font-label-md text-label-md text-on-surface">Fetching Deal Schemas...</p></div>
+                  <div>
+                    <p className="font-label-md text-label-md text-on-surface">{syncStatusMsg}</p>
+                    {uploadMethod === 'csv' && uploadProgress > 0 && uploadProgress < 100 && (
+                      <div className="w-full bg-outline-variant rounded-full h-1.5 mt-2 overflow-hidden">
+                        <div className="bg-primary h-1.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

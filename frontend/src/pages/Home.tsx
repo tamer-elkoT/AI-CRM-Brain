@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { useAllDeals, useTriggerSync, useGenerateRecommendations, useMarkFollowedUp, useUpdateStage } from '../hooks/useDeals';
+import { useAllDeals, useTriggerSync, useGenerateRecommendations, useMarkFollowedUp, useUpdateStage, useDeleteDeal } from '../hooks/useDeals';
 import { useToast } from '../components/ui/Toast';
 import DealDrawer from '../components/DealDrawer';
 import CreateDealModal from '../components/CreateDealModal';
 import MessageGeneratorModal from '../components/MessageGeneratorModal';
 import { Select } from '../components/ui/Select';
-import { Flame, Hourglass, AlertTriangle, Search, Plus, RefreshCw } from 'lucide-react';
+import { Flame, Hourglass, AlertTriangle, Search, Plus, RefreshCw, UserPlus, X } from 'lucide-react';
 import type { RankedDeal } from '../types';
+import { authApi, userApi, dashboardApi } from '../services/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const PRIORITY_STYLES: Record<string, string> = {
   HIGH: 'bg-[#006a6110] text-secondary border-secondary/30',
@@ -59,11 +61,88 @@ export default function Home() {
   // Feature 9: Inline stage editing
   const [editingStageDealId, setEditingStageDealId] = useState<string | null>(null);
 
+  // Epic 3: Inline amount and date editing
+  const [editingAmountDealId, setEditingAmountDealId] = useState<string | null>(null);
+  const [editingDateDealId, setEditingDateDealId] = useState<string | null>(null);
+
   const { toast } = useToast();
   const syncMutation = useTriggerSync();
   const generateMutation = useGenerateRecommendations();
   const markFollowedUp = useMarkFollowedUp();
   const updateStage = useUpdateStage();
+  const deleteDeal = useDeleteDeal();
+  const queryClient = useQueryClient();
+
+  // Epic 3: Inline edit details mutation
+  const updateDetails = useMutation({
+    mutationFn: ({ dealId, data }: { dealId: string; data: { amount?: number; closing_date?: string } }) =>
+      dashboardApi.updateDealDetails(dealId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['deals'] });
+      toast({ title: '✅ Details Updated', description: 'Deal updated successfully.', variant: 'success' });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Update Failed', description: err.message || 'Could not update deal details.', variant: 'destructive' });
+    },
+  });
+
+  const handleAmountChange = (dealId: string, value: string) => {
+    setEditingAmountDealId(null);
+    const amount = parseFloat(value);
+    if (!isNaN(amount)) {
+      updateDetails.mutate({ dealId, data: { amount } });
+    }
+  };
+
+  const handleDateChange = (dealId: string, value: string) => {
+    setEditingDateDealId(null);
+    if (value) {
+      updateDetails.mutate({ dealId, data: { closing_date: value } });
+    }
+  };
+
+  // ── Invite Team modal state (admin only) ──
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('rep');
+  const [inviteLoading, setInviteLoading] = useState(false);
+
+  // Fetch current user to gate the Invite button
+  const { data: currentUser } = useQuery({
+    queryKey: ['user_me'],
+    queryFn: userApi.getMe,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    try {
+      const result = await authApi.invite({ email: inviteEmail, role: inviteRole });
+      const statusLabel = result.email_status === 'sent'
+        ? '📧 Email sent!'
+        : result.email_status === 'mocked'
+        ? '📋 Mock mode — check server log for link'
+        : '⚠️ Email failed — check SMTP config';
+
+      toast({
+        title: `✅ Invite created for ${inviteEmail}`,
+        description: `Role: ${inviteRole} · ${statusLabel}`,
+        variant: result.email_status === 'sent' ? 'success' : 'default',
+      });
+      setInviteModalOpen(false);
+      setInviteEmail('');
+      setInviteRole('rep');
+    } catch (err: any) {
+      toast({
+        title: 'Invite Failed',
+        description: err?.response?.data?.detail || 'Could not create invite.',
+        variant: 'destructive',
+      });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   // Debounced search
   const handleSearchChange = (value: string) => {
@@ -196,6 +275,17 @@ export default function Home() {
             <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">خط أنابيب جميع الصفقات</p>
           </div>
           <div className="flex items-center space-x-3">
+            {/* ── Invite Team button (admin only) ── */}
+            {currentUser?.role === 'admin' && (
+              <button
+                id="btn-invite-team"
+                onClick={() => setInviteModalOpen(true)}
+                className="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center space-x-2 shadow-sm"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span className="hidden sm:inline">Invite Team</span>
+              </button>
+            )}
             <button
               onClick={handleSync}
               disabled={syncMutation.isPending}
@@ -396,7 +486,33 @@ export default function Home() {
                             )}
                           </td>
 
-                          <td className="p-3 font-mono-data text-mono-data text-on-surface-variant">${(deal.amount || 0).toLocaleString()}</td>
+                          {/* Epic 3: Inline Amount Editing */}
+                          <td className="p-3 font-mono-data text-mono-data text-on-surface-variant group/cell">
+                            {editingAmountDealId === deal.deal_id ? (
+                              <input
+                                autoFocus
+                                type="number"
+                                defaultValue={deal.amount || 0}
+                                className="w-24 px-2 py-1 rounded bg-surface border border-secondary text-on-surface focus:outline-none"
+                                onClick={(e) => e.stopPropagation()}
+                                onBlur={(e) => handleAmountChange(deal.deal_id, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleAmountChange(deal.deal_id, e.currentTarget.value);
+                                  if (e.key === 'Escape') setEditingAmountDealId(null);
+                                }}
+                              />
+                            ) : (
+                              <div
+                                onClick={(e) => { e.stopPropagation(); setEditingAmountDealId(deal.deal_id); }}
+                                className="cursor-pointer hover:bg-surface-container rounded px-1 -ml-1 transition-colors flex items-center gap-1"
+                                title="Click to edit amount"
+                              >
+                                ${(deal.amount || 0).toLocaleString()}
+                                <span className="material-symbols-outlined text-[14px] opacity-0 group-hover/cell:opacity-100 transition-opacity">edit</span>
+                              </div>
+                            )}
+                          </td>
+
                           <td className="p-3">
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-surface mx-auto">
                               {getStatusIcon(deal.ai_score)}
@@ -420,7 +536,33 @@ export default function Home() {
 
                           <td className="p-3 font-mono-data text-mono-data">{deal.ml_score}%</td>
                           <td className="p-3 font-mono-data text-mono-data font-bold">{deal.ai_score}%</td>
-                          <td className="p-3 font-body-sm text-body-sm text-on-surface-variant">{deal.closing_date || 'N/A'}</td>
+
+                          {/* Epic 3: Inline Closing Date Editing */}
+                          <td className="p-3 font-body-sm text-body-sm text-on-surface-variant group/cell">
+                            {editingDateDealId === deal.deal_id ? (
+                              <input
+                                autoFocus
+                                type="date"
+                                defaultValue={deal.closing_date || ''}
+                                className="w-32 px-2 py-1 rounded bg-surface border border-secondary text-on-surface focus:outline-none"
+                                onClick={(e) => e.stopPropagation()}
+                                onBlur={(e) => handleDateChange(deal.deal_id, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleDateChange(deal.deal_id, e.currentTarget.value);
+                                  if (e.key === 'Escape') setEditingDateDealId(null);
+                                }}
+                              />
+                            ) : (
+                              <div
+                                onClick={(e) => { e.stopPropagation(); setEditingDateDealId(deal.deal_id); }}
+                                className="cursor-pointer hover:bg-surface-container rounded px-1 -ml-1 transition-colors flex items-center gap-1"
+                                title="Click to edit date"
+                              >
+                                {deal.closing_date || 'N/A'}
+                                <span className="material-symbols-outlined text-[14px] opacity-0 group-hover/cell:opacity-100 transition-opacity">edit</span>
+                              </div>
+                            )}
+                          </td>
 
                           {/* Actions column: Insights + Generate Message + Mark Followed Up */}
                           <td className="p-3 text-right">
@@ -455,6 +597,27 @@ export default function Home() {
                                 className="px-3 py-1.5 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-variant transition-colors shadow-sm group-hover:bg-secondary group-hover:text-white"
                               >
                                 Insights
+                              </button>
+                              {/* Epic 2: Delete deal */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(`Delete "${deal.deal_name}"? This action cannot be undone.`)) {
+                                    deleteDeal.mutate(deal.deal_id, {
+                                      onSuccess: (res) => {
+                                        toast({ title: '🗑️ Deal Deleted', description: res.message, variant: 'success' });
+                                        if (selectedDealId === deal.deal_id) setSelectedDealId(null);
+                                      },
+                                      onError: (err) => {
+                                        toast({ title: 'Delete Failed', description: err.message || 'Could not delete deal.', variant: 'destructive' });
+                                      },
+                                    });
+                                  }
+                                }}
+                                title="Delete deal"
+                                className="p-1.5 rounded-md text-on-surface-variant hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
                               </button>
                             </div>
                           </td>
@@ -518,6 +681,82 @@ export default function Home() {
           deal={messageGenDeal}
           onClose={() => setMessageGenDeal(null)}
         />
+      )}
+
+      {/* ── Invite Team Modal ── */}
+      {inviteModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setInviteModalOpen(false)}
+        >
+          <div
+            className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-md mx-4 p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setInviteModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <h3 className="font-title-lg text-on-surface">Invite Team Member</h3>
+                <p className="font-body-sm text-on-surface-variant text-sm">A signup link will be emailed to them</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleInvite} className="space-y-4">
+              <div>
+                <label className="block font-label-sm text-on-surface-variant mb-1.5" htmlFor="invite-email">
+                  Email address
+                </label>
+                <input
+                  id="invite-email"
+                  type="email"
+                  required
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="colleague@company.com"
+                  className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg font-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-secondary/40 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block font-label-sm text-on-surface-variant mb-1.5" htmlFor="invite-role">
+                  Role
+                </label>
+                <Select
+                  value={inviteRole}
+                  onChange={setInviteRole}
+                  options={[
+                    { value: 'rep', label: 'Sales Rep' },
+                    { value: 'manager', label: 'Sales Manager' },
+                    { value: 'admin', label: 'Admin' },
+                  ]}
+                />
+              </div>
+
+              <button
+                id="btn-invite-submit"
+                type="submit"
+                disabled={inviteLoading}
+                className="w-full py-3 bg-secondary text-on-secondary rounded-xl font-label-md hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              >
+                {inviteLoading ? (
+                  <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending...</>
+                ) : (
+                  <><UserPlus className="w-4 h-4" /> Send Invitation</>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );

@@ -33,6 +33,7 @@ def send_headless_whatsapp(phone: str, message: str) -> bool:
         
     try:
         from twilio.rest import Client
+        from twilio.base.exceptions import TwilioRestException
         client = Client(account_sid, auth_token)
 
         message_obj = client.messages.create(
@@ -40,9 +41,24 @@ def send_headless_whatsapp(phone: str, message: str) -> bool:
             from_=f"whatsapp:{from_number}",
             to=f"whatsapp:{sanitized_phone}"
         )
-        
+
         logger.info(f"✅ Headless WhatsApp alert sent to {sanitized_phone} via Twilio. SID: {message_obj.sid}")
         return True
+
+    except TwilioRestException as e:
+        # ── Epic 4: Twilio rate-limit graceful degradation ──────────────────
+        # Twilio free-tier: 5 messages/day. On 429 / 20429 → fall back to wa.me
+        if e.status == 429 or e.code == 20429:
+            encoded_msg = urllib.parse.quote(message[:300])
+            fallback_url = f"https://wa.me/{sanitized_phone.lstrip('+')}?text={encoded_msg}"
+            logger.warning(
+                f"⚠️  Twilio rate limit hit (429). Falling back to wa.me deep link.\n"
+                f"   Fallback URL: {fallback_url}"
+            )
+        else:
+            logger.error(f"❌ Twilio API error (status={e.status}, code={e.code}): {e.msg}")
+        return False
+
     except Exception as e:
         logger.error(f"❌ Failed to reach Twilio API: {e}")
         return False

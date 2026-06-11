@@ -1,7 +1,10 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { authApi, userApi } from '../services/api';
-import type { LoginRequest, SignupRequest, SignupPendingResponse, OTPVerifyRequest, DecodedToken, UserProfile } from '../types';
+import type { 
+  LoginRequest, SignupRequest, SignupPendingResponse, OTPVerifyRequest, 
+  DecodedToken, UserProfile, AdminSignupRequest, TeamSignupRequest 
+} from '../types';
 
 interface AuthState {
   token: string | null;
@@ -11,6 +14,8 @@ interface AuthState {
   user: UserProfile | null;
   login: (data: LoginRequest) => Promise<void>;
   signup: (data: SignupRequest) => Promise<SignupPendingResponse>;
+  signupAdmin: (data: AdminSignupRequest) => Promise<void>;
+  signupTeam: (data: TeamSignupRequest) => Promise<void>;
   verifyOtp: (data: OTPVerifyRequest) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
   logout: () => void;
@@ -96,6 +101,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res;
   }, []);
 
+  const signupAdmin = useCallback(async (data: AdminSignupRequest) => {
+    const res = await authApi.signupAdmin(data);
+    persistToken(res.access_token);
+    setIsNewUser(true);
+  }, [persistToken]);
+
+  const signupTeam = useCallback(async (data: TeamSignupRequest) => {
+    const res = await authApi.signupTeam(data);
+    persistToken(res.access_token);
+    setIsNewUser(true);
+  }, [persistToken]);
+
   /**
    * Step 2 of signup: verify OTP and receive JWT.
    */
@@ -125,11 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     login,
     signup,
+    signupAdmin,
+    signupTeam,
     verifyOtp,
     googleLogin,
     logout,
     refreshUser,
-  }), [token, userId, isAuthenticated, isNewUser, user, login, signup, verifyOtp, googleLogin, logout, refreshUser]);
+  }), [token, userId, isAuthenticated, isNewUser, user, login, signup, signupAdmin, signupTeam, verifyOtp, googleLogin, logout, refreshUser]);
 
   return (
     <AuthContext.Provider value={value}>

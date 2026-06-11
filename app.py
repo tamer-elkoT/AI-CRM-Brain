@@ -6,6 +6,8 @@ import uvicorn
 from controllers import ingestion_controller, ml_controller, recommendation_controller
 from controllers import dashboard_controller, action_controller, auth_controller
 from controllers import followup_controller, notification_controller
+# Epic 2: analytics endpoint
+from controllers import analytics_controller
 
 app = FastAPI(
     title="AI CRM Brain API",
@@ -42,6 +44,9 @@ app.include_router(auth_controller.router, prefix="/api/v1/auth", tags=["Auth"])
 # Sprint 5: Follow-up & Notifications
 app.include_router(followup_controller.router, prefix="/api/v1", tags=["Follow-ups"])
 app.include_router(notification_controller.router, prefix="/api/v1", tags=["Notifications"])
+
+# Epic 2: Analytics
+app.include_router(analytics_controller.router, prefix="/api/v1", tags=["Analytics"])
 
 
 @app.get("/health")

@@ -4,17 +4,20 @@ from datetime import timedelta, datetime, timezone
 import uuid
 import random
 import logging
+import os
 
 from models.database import SessionLocal
-from models.schema import User, OTPCode
+from models.schema import User, OTPCode, Company
 from models.api_schemas import (
     LoginRequest, TokenResponse, UserCreate, UserUpdate, UserResponse,
     GoogleLoginRequest, OTPVerifyRequest, SignupPendingResponse,
+    AdminSignupRequest, InviteRequest, TeamSignupRequest, InviteResponse
 )
 from utils.security import (
     verify_password, get_password_hash,
     create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES,
 )
+from utils.email_sender import send_invite_email
 from services.notification_service import send_whatsapp_otp
 
 from google.oauth2 import id_token
@@ -113,7 +116,164 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 
 # ─────────────────────────────────────────────
-# POST /signup — now returns SignupPendingResponse
+# POST /signup/admin — Epic 2 Multi-Tenant
+# ─────────────────────────────────────────────
+@router.post("/signup/admin", response_model=TokenResponse)
+def signup_admin(request: AdminSignupRequest, db: Session = Depends(get_db)):
+    """
+    Creates a new Company Workspace and an Admin user.
+    Bypasses OTP for immediate JWT token return (per Epic 2 spec).
+    """
+    existing = db.query(User).filter(User.email == request.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Create Company
+    new_company = Company(
+        id=uuid.uuid4(),
+        name=request.company_name,
+        industry=request.industry,
+    )
+    db.add(new_company)
+    db.flush()
+
+    # Create Admin User
+    new_user = User(
+        id=uuid.uuid4(),
+        email=request.email,
+        hashed_password=get_password_hash(request.password),
+        name=request.name,
+        role="admin",
+        company_id=new_company.id,
+        phone_number=request.phone_number,
+        is_whatsapp_verified=True,  # Bypassed
+    )
+    db.add(new_user)
+    db.commit()
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(new_user.id)}, expires_delta=access_token_expires
+    )
+    return TokenResponse(access_token=access_token, token_type="bearer")
+
+
+# ─────────────────────────────────────────────
+# POST /invite — Epic 2 Multi-Tenant
+# ─────────────────────────────────────────────
+@router.post("/invite", response_model=InviteResponse)
+def invite_user(
+    request: InviteRequest,
+    current_user: User = Depends(get_current_user_dep),
+    db: Session = Depends(get_db)
+):
+    """
+    Generates a secure invite token for a specific role within the admin's company.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can invite users.")
+
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User is not associated with a company.")
+
+    expires_delta = timedelta(hours=48)
+    expire = datetime.now(timezone.utc) + expires_delta
+    
+    to_encode = {
+        "type": "invite",
+        "company_id": str(current_user.company_id),
+        "role": request.role,
+        "email": request.email,
+        "exp": expire
+    }
+    
+    invite_token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    
+    # Send email via SMTP
+    app_base_url = os.getenv("APP_BASE_URL", "http://localhost:5173")
+    magic_link = f"{app_base_url}/signup/team?token={invite_token}"
+    
+    # We fetch the company name safely
+    company_name = "your company"
+    if current_user.company_id:
+        company = db.query(Company).filter(Company.id == current_user.company_id).first()
+        if company:
+            company_name = company.name
+
+    email_result = send_invite_email(
+        to_email=request.email,
+        invite_link=magic_link,
+        role=request.role,
+        company_name=company_name
+    )
+    
+    return InviteResponse(
+        invite_token=invite_token,
+        role=request.role,
+        email=request.email,
+        expires_in="48 hours",
+        email_status=email_result.get("status", "failed"),
+        email_error=email_result.get("error"),
+    )
+
+
+# ─────────────────────────────────────────────
+# POST /signup/team — Epic 2 Multi-Tenant
+# ─────────────────────────────────────────────
+@router.post("/signup/team", response_model=TokenResponse)
+def signup_team(request: TeamSignupRequest, db: Session = Depends(get_db)):
+    """
+    Signs up a team member using a valid invite token.
+    """
+    try:
+        # Epic 3 Fix: Handle users pasting the full magic link
+        token_str = request.invite_token.strip()
+        if "token=" in token_str:
+            token_str = token_str.split("token=")[-1].split("&")[0]
+
+        payload = jwt.decode(token_str, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "invite":
+            raise HTTPException(status_code=400, detail="Invalid token type")
+        
+        company_id = payload.get("company_id")
+        role = payload.get("role")
+        token_email = payload.get("email")
+        
+        if not company_id or not role:
+            raise HTTPException(status_code=400, detail="Malformed invite token")
+            
+        if token_email and token_email != request.email:
+            raise HTTPException(status_code=400, detail="Email does not match the invitation")
+            
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired invite token")
+
+    existing = db.query(User).filter(User.email == request.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_user = User(
+        id=uuid.uuid4(),
+        email=request.email,
+        hashed_password=get_password_hash(request.password),
+        name=request.name,
+        role=role,
+        company_id=uuid.UUID(company_id),
+        phone_number=request.phone_number,
+        is_whatsapp_verified=True,  # Bypassed
+    )
+    db.add(new_user)
+    db.commit()
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(new_user.id)}, expires_delta=access_token_expires
+    )
+    return TokenResponse(access_token=access_token, token_type="bearer")
+
+
+# ─────────────────────────────────────────────
+# POST /signup — legacy
 # ─────────────────────────────────────────────
 @router.post("/signup", response_model=SignupPendingResponse)
 def signup(request: UserCreate, db: Session = Depends(get_db)):
@@ -269,16 +429,35 @@ def google_auth(request: GoogleLoginRequest, db: Session = Depends(get_db)):
 # GET /users/me — current user profile
 # ─────────────────────────────────────────────
 @router.get("/users/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_user_dep)):
+def get_me(
+    current_user: User = Depends(get_current_user_dep),
+    db: Session = Depends(get_db),
+):
     """
     Returns the authenticated user's profile.
+    Epic 3: Now includes username and account_name.
     """
+    # Resolve company name from relation
+    company_name = None
+    if current_user.company:
+        company_name = current_user.company.name
+    elif current_user.company_id:
+        # Lazy fallback if relationship not loaded
+        company = db.query(Company).filter(Company.id == current_user.company_id).first()
+        company_name = company.name if company else None
+
     return UserResponse(
         id=str(current_user.id),
         email=current_user.email,
+        company_id=str(current_user.company_id) if current_user.company_id else None,
+        company_name=company_name,
         name=current_user.name,
+        # Epic 3: new profile fields
+        username=current_user.username,
+        account_name=current_user.account_name,
+        business_field=current_user.business_field,
         is_active=current_user.is_active,
-        role=current_user.role or "Sales",
+        role=current_user.role or "rep",
         phone_number=current_user.phone_number,
         is_whatsapp_verified=current_user.is_whatsapp_verified or False,
         whatsapp_template=current_user.whatsapp_template,
@@ -287,30 +466,44 @@ def get_me(current_user: User = Depends(get_current_user_dep)):
 
 
 # ─────────────────────────────────────────────
-# PATCH /users/me/templates — save outreach templates
+# PATCH /users/me — update full profile (Epic 3 expanded)
 # ─────────────────────────────────────────────
-@router.patch("/users/me/templates", response_model=UserResponse)
-def update_templates(
+@router.patch("/users/me", response_model=UserResponse)
+@router.patch("/users/me/templates", response_model=UserResponse)  # backwards-compat alias
+def update_me(
     request: UserUpdate,
     current_user: User = Depends(get_current_user_dep),
     db: Session = Depends(get_db),
 ):
     """
-    Updates the current user's outreach templates (whatsapp_template, email_template).
+    Updates the current user's profile fields.
+    Epic 3: expanded to handle name, username, account_name, phone_number, templates.
     """
-    # We need to re-fetch the user in the *same* session the dependency uses
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Apply only the fields the caller provided
+    if request.name is not None:
+        user.name = request.name
+    if request.username is not None:
+        # Check uniqueness before saving
+        conflict = db.query(User).filter(
+            User.username == request.username, User.id != user.id
+        ).first()
+        if conflict:
+            raise HTTPException(status_code=409, detail="Username already taken")
+        user.username = request.username
+    if request.account_name is not None:
+        user.account_name = request.account_name
+    if request.business_field is not None:
+        user.business_field = request.business_field
+    if request.phone_number is not None:
+        user.phone_number = request.phone_number
     if request.whatsapp_template is not None:
         user.whatsapp_template = request.whatsapp_template
     if request.email_template is not None:
         user.email_template = request.email_template
-    if request.name is not None:
-        user.name = request.name
-    if request.business_field is not None:
-        user.business_field = request.business_field
 
     db.commit()
     db.refresh(user)
@@ -318,11 +511,116 @@ def update_templates(
     return UserResponse(
         id=str(user.id),
         email=user.email,
+        company_id=str(user.company_id) if user.company_id else None,
+        company_name=user.company.name if user.company else None,
         name=user.name,
+        username=user.username,
+        account_name=user.account_name,
+        business_field=user.business_field,
         is_active=user.is_active,
-        role=user.role or "Sales",
+        role=user.role or "rep",
         phone_number=user.phone_number,
         is_whatsapp_verified=user.is_whatsapp_verified or False,
         whatsapp_template=user.whatsapp_template,
         email_template=user.email_template,
     )
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /zoho/initiate — Start Zoho OAuth for a Company workspace
+# ─────────────────────────────────────────────────────────────────
+@router.get("/zoho/initiate")
+def zoho_oauth_initiate(
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Builds and returns the Zoho OAuth authorization URL.
+    The frontend receives this URL and does window.location.href = url.
+    The company_id is embedded in the 'state' param to identify the tenant on callback.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can connect Zoho.")
+    if not current_user.company_id:
+        raise HTTPException(status_code=400, detail="User is not associated with a company.")
+
+    client_id     = os.getenv("ZOHO_CLIENT_ID", "")
+    redirect_uri  = os.getenv("ZOHO_REDIRECT_URI", "http://localhost:8000/api/v1/auth/zoho/callback")
+    scope         = os.getenv("SCOPE_NAME", "ZohoCRM.modules.deals.READ,ZohoCRM.modules.contacts.READ")
+
+    if not client_id:
+        raise HTTPException(status_code=500, detail="ZOHO_CLIENT_ID not configured in .env")
+
+    state = str(current_user.company_id)
+
+    auth_url = (
+        f"https://accounts.zoho.com/oauth/v2/auth"
+        f"?response_type=code"
+        f"&client_id={client_id}"
+        f"&scope={scope}"
+        f"&redirect_uri={redirect_uri}"
+        f"&access_type=offline"
+        f"&state={state}"
+    )
+    return {"auth_url": auth_url}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GET /zoho/callback — Zoho exchanges code → tokens; we save them to Company
+# ─────────────────────────────────────────────────────────────────────────────
+@router.get("/zoho/callback")
+def zoho_oauth_callback(
+    code: str,
+    state: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Receives the OAuth callback from Zoho.
+    Exchanges the authorization code for access + refresh tokens
+    and persists them on the Company row identified by `state` (company_id).
+    Then redirects the browser back to the admin wizard.
+    """
+    import requests as http_requests
+    from fastapi.responses import RedirectResponse
+
+    client_id     = os.getenv("ZOHO_CLIENT_ID", "")
+    client_secret = os.getenv("ZOHO_CLIENT_SECRET", "")
+    redirect_uri  = os.getenv("ZOHO_REDIRECT_URI", "http://localhost:8000/api/v1/auth/zoho/callback")
+    app_base_url  = os.getenv("APP_BASE_URL", "http://localhost:5173")
+
+    # Exchange code for tokens
+    token_url = "https://accounts.zoho.com/oauth/v2/token"
+    payload = {
+        "grant_type": "authorization_code",
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": redirect_uri,
+        "code": code,
+    }
+    resp = http_requests.post(token_url, data=payload)
+    if resp.status_code != 200:
+        logger.error(f"Zoho token exchange failed: {resp.text}")
+        raise HTTPException(status_code=502, detail=f"Zoho token exchange failed: {resp.text}")
+
+    token_data     = resp.json()
+    access_token   = token_data.get("access_token")
+    refresh_token  = token_data.get("refresh_token")
+
+    # Persist tokens to the Company record
+    import uuid as _uuid
+    try:
+        company_id = _uuid.UUID(state)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid state param (company_id).")
+
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found.")
+
+    company.zoho_access_token  = access_token
+    company.zoho_refresh_token = refresh_token
+    db.commit()
+
+    logger.info(f"✅ Zoho connected for company {company.name} (id={company_id})")
+
+    # Redirect admin back to the invite wizard step
+    return RedirectResponse(url=f"{app_base_url}/auth?zoho=connected")

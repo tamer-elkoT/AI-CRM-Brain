@@ -17,6 +17,37 @@ export interface SignupRequest {
   phone_number: string;     // required, with country code
 }
 
+export interface AdminSignupRequest {
+  email: string;
+  password: string;
+  company_name: string;
+  industry?: string;
+  name?: string;
+  phone_number?: string;
+}
+
+export interface TeamSignupRequest {
+  invite_token: string;
+  email: string;
+  password: string;
+  name?: string;
+  phone_number?: string;
+}
+
+export interface InviteRequest {
+  role: string;
+  email: string;
+}
+
+export interface InviteResponse {
+  invite_token: string;
+  role: string;
+  email: string;
+  expires_in: string;
+  email_status: 'sent' | 'mocked' | 'failed';  // Epic 1: SMTP delivery status
+  email_error?: string | null;                   // Present only when status='failed'
+}
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;
@@ -43,6 +74,11 @@ export interface UserProfile {
   id: string;
   email: string;
   name: string | null;
+  username?: string | null;
+  account_name?: string | null;
+  business_field?: string | null;
+  company_id?: string | null;
+  company_name?: string | null;   // Epic 1.3: from Company relation
   is_active: boolean;
   role: string;
   phone_number: string | null;
@@ -52,6 +88,11 @@ export interface UserProfile {
 }
 
 export interface TemplateUpdateRequest {
+  name?: string;
+  username?: string;
+  account_name?: string;
+  business_field?: string;
+  phone_number?: string;
   whatsapp_template?: string;
   email_template?: string;
 }
@@ -230,4 +271,23 @@ export interface StageUpdateResponse {
   deal_id: string;
   old_stage: string;
   new_stage: string;
+}
+
+// ============================================================
+// Epic 2: Analytics
+// ============================================================
+
+export interface LeaderboardEntry {
+  rep_name: string;
+  closed_deals: number;
+  followup_count: number;
+  avg_ai_score: number;
+}
+
+export interface AnalyticsResponse {
+  period: { start: string; end: string };
+  active_deals: number;
+  closed_deals: number;
+  total_followups: number;
+  leaderboard?: LeaderboardEntry[];
 }

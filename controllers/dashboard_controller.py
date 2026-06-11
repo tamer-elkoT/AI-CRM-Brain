@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from models.database import SessionLocal
 from models.schema import ZohoDeal, MLPrediction, LLMRecommendation, FollowupLog, Notification, User
+from controllers.auth_controller import get_current_user_dep
 import math
 
 from models.api_schemas import (
@@ -46,6 +47,15 @@ def _get_followup_stats(db: Session, deal_id: str):
     return count, last_str
 
 
+def apply_rls(query, current_user: User):
+    """Applies Epic 2 multi-tenant and role-based filters to a ZohoDeal query."""
+    if current_user.company_id:
+        query = query.filter(ZohoDeal.company_id == current_user.company_id)
+    if current_user.role == "rep":
+        query = query.filter(ZohoDeal.owner_name == current_user.name)
+    return query
+
+
 @router.get("/deals", response_model=PaginatedDealsResponse)
 def get_all_deals(
     page: int = 1,
@@ -54,6 +64,7 @@ def get_all_deals(
     sort_by: str = "ai_score",
     include_closed: bool = False,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
 ):
     """
     Returns deals with pagination, search, and sorting.
@@ -63,6 +74,9 @@ def get_all_deals(
     query = db.query(ZohoDeal, MLPrediction, LLMRecommendation)\
         .outerjoin(MLPrediction, ZohoDeal.id == MLPrediction.deal_id)\
         .outerjoin(LLMRecommendation, ZohoDeal.id == LLMRecommendation.deal_id)
+
+    # Epic 2: Row-Level Security
+    query = apply_rls(query, current_user)
 
     # Feature 1: Filter closed deals from active pipeline
     if include_closed:
@@ -137,9 +151,14 @@ def get_all_deals(
 
 
 @router.post("/deals")
-def create_deal(deal_data: DealCreate, db: Session = Depends(get_db)):
+def create_deal(
+    deal_data: DealCreate, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep)
+):
     """
     Create a new deal manually (not from CRM sync).
+    Epic 1: explicitly sets expected_revenue and custom_fields={} to avoid nulls.
     """
     import uuid
     from datetime import datetime
@@ -160,11 +179,16 @@ def create_deal(deal_data: DealCreate, db: Session = Depends(get_db)):
         contact_name=deal_data.contact_name,
         owner_name=deal_data.owner_name,
         amount=deal_data.amount,
+        # Epic 1 fix: now read from schema (default 0.0), never null
+        expected_revenue=deal_data.expected_revenue,
         stage=deal_data.stage,
         zoho_probability=deal_data.zoho_probability,
         closing_date=closing_dt,
         client_phone=deal_data.client_phone,
         client_email=deal_data.client_email,
+        # Epic 1 fix: always start with empty dict, not null
+        custom_fields={},
+        company_id=current_user.company_id,
     )
 
     db.add(new_deal)
@@ -179,7 +203,12 @@ def create_deal(deal_data: DealCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/deals/ranked", response_model=DashboardResponse)
-def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None, db: Session = Depends(get_db)):
+def get_dashboard_summary(
+    sort_by: str = "ai_score", 
+    limit: Optional[int] = None, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep)
+):
     """
     Returns KPIs, ranked deals table, and scatter plot points.
     Uses a subquery to get only the LATEST recommendation per deal,
@@ -199,7 +228,8 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
 
     # Main query: all deals, left-joined to their latest recommendation only
     # Feature 1: Exclude closed deals from dashboard
-    recs = (
+    # Apply RLS
+    query = (
         db.query(ZohoDeal, MLPrediction, LLMRecommendation)
         .filter(ZohoDeal.stage.notin_(CLOSED_STAGES))
         .outerjoin(MLPrediction, ZohoDeal.id == MLPrediction.deal_id)
@@ -212,8 +242,9 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
             (LLMRecommendation.deal_id == latest_rec_subq.c.deal_id)
             & (LLMRecommendation.created_at == latest_rec_subq.c.max_created_at),
         )
-        .all()
     )
+    query = apply_rls(query, current_user)
+    recs = query.all()
 
     if not recs:
         return DashboardResponse(
@@ -286,14 +317,21 @@ def get_dashboard_summary(sort_by: str = "ai_score", limit: Optional[int] = None
 
 
 @router.get("/deals/{deal_id}", response_model=DealDetailResponse)
-def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
+def get_deal_detail(
+    deal_id: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep)
+):
     """
     Fetches full detail for the Right Drawer.
     Gets the LATEST recommendation for this deal to avoid stale data.
     """
-    deal = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id).first()
+    query = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id)
+    query = apply_rls(query, current_user)
+    deal = query.first()
+    
     if not deal:
-        raise HTTPException(status_code=404, detail="Deal not found")
+        raise HTTPException(status_code=404, detail="Deal not found or access denied")
 
     pred = (
         db.query(MLPrediction)
@@ -341,7 +379,10 @@ def get_deal_detail(deal_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/analytics/accounts/ranked", response_model=AccountRankingResponse)
-def get_account_ranking(db: Session = Depends(get_db)):
+def get_account_ranking(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep)
+):
     """
     Returns accounts ranked by highest average AI win probability.
     Uses outer join so accounts appear even without recommendations.
@@ -357,7 +398,7 @@ def get_account_ranking(db: Session = Depends(get_db)):
         .subquery()
     )
 
-    results = (
+    query = (
         db.query(
             ZohoDeal.account_name,
             func.avg(
@@ -375,6 +416,11 @@ def get_account_ranking(db: Session = Depends(get_db)):
             ZohoDeal.account_name.isnot(None),
             ZohoDeal.account_name != "Unknown",
         )
+    )
+    query = apply_rls(query, current_user)
+    
+    results = (
+        query
         .group_by(ZohoDeal.account_name)
         .order_by(
             func.avg(func.coalesce(LLMRecommendation.adjusted_score_pct, 0)).desc()
@@ -399,13 +445,19 @@ def get_account_ranking(db: Session = Depends(get_db)):
 
 
 @router.get("/accounts/names")
-def get_account_names(db: Session = Depends(get_db)):
+def get_account_names(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep)
+):
     """
     Returns a list of distinct account names from all deals.
     Used by the CreateDealModal dropdown.
     """
-    results = db.query(ZohoDeal.account_name)\
-        .filter(ZohoDeal.account_name.isnot(None))\
+    query = db.query(ZohoDeal.account_name)\
+        .filter(ZohoDeal.account_name.isnot(None))
+    query = apply_rls(query, current_user)
+    
+    results = query\
         .distinct()\
         .order_by(ZohoDeal.account_name)\
         .all()
@@ -421,14 +473,18 @@ def update_deal_stage(
     deal_id: str,
     request: StageUpdateRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
 ):
     """
     Feature 9: Update a deal's stage inline from the pipeline table.
     Creates a notification when the stage changes.
     """
-    deal = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id).first()
+    query = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id)
+    query = apply_rls(query, current_user)
+    deal = query.first()
+    
     if not deal:
-        raise HTTPException(status_code=404, detail="Deal not found")
+        raise HTTPException(status_code=404, detail="Deal not found or access denied")
 
     if request.new_stage not in ALLOWED_STAGES:
         raise HTTPException(
@@ -465,4 +521,123 @@ def update_deal_stage(
         "deal_id": deal_id,
         "old_stage": old_stage,
         "new_stage": request.new_stage,
+    }
+
+
+# ============================================================
+# Epic 2: Delete Deal (Feature 1)
+# ============================================================
+@router.delete("/deals/{deal_id}")
+def delete_deal(
+    deal_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Deletes a deal and all related records (cascades via FK).
+    RLS ensures reps can only delete their own deals; managers/admins can delete
+    any deal in their company.
+    """
+    query = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id)
+    query = apply_rls(query, current_user)
+    deal = query.first()
+
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found or access denied.")
+
+    db.delete(deal)
+    db.commit()
+
+    return {"status": "success", "message": f"Deal '{deal.deal_name}' deleted.", "deal_id": deal_id}
+
+
+# ============================================================
+# Epic 2: Inline Contact Info Editing (Feature 2)
+# ============================================================
+from pydantic import BaseModel as _BM
+
+class ContactUpdateRequest(_BM):
+    client_phone: str | None = None
+    client_email: str | None = None
+
+
+@router.patch("/deals/{deal_id}/contact")
+def update_deal_contact(
+    deal_id: str,
+    request: ContactUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Epic 2 Feature 2: Inline-edit a deal's client phone and/or email.
+    Respects RLS so reps can only edit their own deals.
+    """
+    query = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id)
+    query = apply_rls(query, current_user)
+    deal = query.first()
+
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found or access denied.")
+
+    if request.client_phone is not None:
+        deal.client_phone = request.client_phone
+    if request.client_email is not None:
+        deal.client_email = request.client_email
+
+    db.commit()
+    db.refresh(deal)
+
+    return {
+        "status": "success",
+        "message": "Contact info updated.",
+        "deal_id": deal_id,
+        "client_phone": deal.client_phone,
+        "client_email": deal.client_email,
+    }
+
+
+# ============================================================
+# Epic 3: Inline Deal Details Editing (Amount, Closing Date)
+# ============================================================
+class DealDetailsUpdateRequest(_BM):
+    amount: float | None = None
+    closing_date: str | None = None
+
+
+@router.patch("/deals/{deal_id}/details")
+def update_deal_details(
+    deal_id: str,
+    request: DealDetailsUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Epic 3: Inline-edit a deal's amount and closing date.
+    Respects RLS so reps can only edit their own deals.
+    """
+    query = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id)
+    query = apply_rls(query, current_user)
+    deal = query.first()
+
+    if not deal:
+        raise HTTPException(status_code=404, detail="Deal not found or access denied.")
+
+    if request.amount is not None:
+        deal.amount = request.amount
+    if request.closing_date is not None:
+        from datetime import datetime
+        try:
+            deal.closing_date = datetime.strptime(request.closing_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+
+    db.commit()
+    db.refresh(deal)
+
+    return {
+        "status": "success",
+        "message": "Deal details updated.",
+        "deal_id": deal_id,
+        "amount": deal.amount,
+        "closing_date": str(deal.closing_date) if deal.closing_date else None,
     }

@@ -16,7 +16,22 @@ from sqlalchemy.orm import relationship
 import datetime
 from models.database import Base
 import uuid
+import sqlalchemy as sa
 from sqlalchemy import UniqueConstraint
+
+
+class Company(Base):
+    __tablename__ = "companies"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False)
+    industry = Column(String(100), nullable=True)
+    zoho_access_token = Column(String, nullable=True)
+    zoho_refresh_token = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    
+    users = relationship("User", back_populates="company")
+    deals = relationship("ZohoDeal", back_populates="company")
 
 
 class User(Base):
@@ -25,11 +40,19 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=True)  # Null for OAuth users
     name = Column(String(255), nullable=True)
+    # --- Epic 3: New profile fields ---
+    username = Column(String(100), nullable=True, unique=True, index=True)
+    account_name = Column(String(255), nullable=True)
     business_field = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
+    # Epic 1 Multi-Tenant: company_id is nullable to support existing data migration
+    company_id = Column(UUID(as_uuid=True), ForeignKey("companies.id", ondelete="CASCADE"), nullable=True)
+    company = relationship("Company", back_populates="users")
+    
     # --- Role & Phone ---
-    role = Column(String(20), nullable=False, default="Sales")  # "Sales" or "Client"
+    # Epic 1: Updated roles: "admin", "manager", "rep"
+    role = Column(String(20), nullable=False, default="rep")
     phone_number = Column(String(30), nullable=True, unique=False)  # with country code
     is_whatsapp_verified = Column(Boolean, default=False)
     # --- Custom outreach templates ---
@@ -67,9 +90,20 @@ class ZohoDeal(Base):
     client_phone = Column(String, nullable=True)
     client_email = Column(String, nullable=True)
 
-    # JSONB is perfect for storing raw API data we might need later
-    custom_fields = Column(JSONB)
+    # Epic 1 Multi-Tenant
+    company_id = Column(UUID(as_uuid=True), ForeignKey("companies.id", ondelete="CASCADE"), nullable=True)
+    company = relationship("Company", back_populates="deals")
+
+    # Epic 1: server_default='{}' ensures manual inserts get {} not null
+    custom_fields = Column(JSONB, server_default='{}', nullable=True)
     is_escalated = Column(Boolean, default=False)
+
+    # Epic 2: created_at required for analytics date-range filtering
+    created_at = Column(
+        DateTime(timezone=True),
+        default=datetime.datetime.utcnow,
+        nullable=True,  # nullable so existing rows don't break
+    )
 
     # --- Sprint 5: Follow-up & Action Tracking ---
     action_status = Column(
@@ -142,7 +176,7 @@ class LLMRecommendation(Base):
     )
 
     # --- LLM Input Context ---
-    # Stores exactly what you sent to Claude so you can debug hallucinations
+    # Stores exactly what you sent to the LLM so you can debug hallucinations
     llm_payload = Column(JSONB, nullable=False)
 
     # --- LLM Output & Scores ---
@@ -178,11 +212,11 @@ class LLMRecommendation(Base):
         ),
     )
     risk_flag = Column(String(20), nullable=True)
-    risk_reasoning = Column(Text, nullable=True)
+    risk_reasoning = Column(Text, nullable=False, default="", server_default="")
 
     # --- LLM Provenance (Crucial for MLOps) ---
-    llm_model_id = Column(String(64), nullable=False)  # e.g., "claude-3-5-sonnet"
-    prompt_version = Column(String(16), nullable=False)  # e.g., "v1.2"
+    llm_model_id = Column(String(64), nullable=False)  # e.g., "llama-3.3-70b-versatile"
+    prompt_version = Column(String(16), nullable=False)  # e.g., "v1.0"
     llm_latency_ms = Column(Integer, nullable=True)
     llm_tokens_used = Column(Integer, nullable=True)
 
@@ -190,10 +224,11 @@ class LLMRecommendation(Base):
     batch_id = Column(UUID(as_uuid=True), nullable=True)
     generated_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
 
-    # --- Sales Rep Feedback Loop (For Streamlit UI) ---
-    rep_action_taken = Column(Boolean, default=None, nullable=True)
-    rep_feedback_at = Column(DateTime(timezone=True), nullable=True)
-    rep_feedback_text = Column(Text, nullable=True)
+    # --- Sales Rep Feedback Loop ---
+    # Epic 1 fix: default=False (not None) so boolean checks work correctly
+    rep_action_taken = Column(Boolean, default=False, nullable=False, server_default='false')
+    rep_feedback_at = Column(DateTime(timezone=True), nullable=False, default=datetime.datetime.utcnow, server_default=sa.func.now())
+    rep_feedback_text = Column(Text, nullable=False, default="", server_default="")
 
     # --- Audit ---
     created_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
@@ -205,7 +240,6 @@ class LLMRecommendation(Base):
 
     # --- Relationships ---
     deal = relationship("ZohoDeal", back_populates="recommendations")
-    # Uncomment if you have the MLPrediction model defined:
     prediction = relationship("MLPrediction", back_populates="llm_recommendation")
 
 
@@ -236,6 +270,7 @@ class FollowupLog(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     deal_id = Column(String, ForeignKey("zoho_deals.id", ondelete="CASCADE"), nullable=False)
+    # Epic 1 fix: sales_rep_id is populated by the controller via JWT
     sales_rep_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     followed_up_at = Column(DateTime(timezone=True), default=datetime.datetime.utcnow)
     channel = Column(String(30), default="whatsapp")  # whatsapp, email, phone, etc.

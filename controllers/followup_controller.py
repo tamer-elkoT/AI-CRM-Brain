@@ -23,6 +23,8 @@ from models.api_schemas import (
     GenerateMessageResponse,
 )
 from config import settings
+# Epic 1: import auth dependency so mark_followed_up can record the sales_rep_id
+from controllers.auth_controller import get_current_user_dep, get_db
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -181,18 +183,22 @@ def mark_followed_up(
     deal_id: str,
     request: FollowupMarkRequest,
     db: Session = Depends(get_db),
+    # Epic 1 fix: require auth so we can save the sales rep's user ID
+    current_user: User = Depends(get_current_user_dep),
 ):
     """
     Record a follow-up action for a deal.
     Updates action_status, creates a followup_log entry.
+    Epic 1: Now saves sales_rep_id from the authenticated user's JWT.
     """
     deal = db.query(ZohoDeal).filter(ZohoDeal.id == deal_id).first()
     if not deal:
         raise HTTPException(status_code=404, detail="Deal not found")
 
-    # Record the follow-up log
+    # Epic 1 fix: pass current_user.id so sales_rep_id is never null
     log = FollowupLog(
         deal_id=deal_id,
+        sales_rep_id=current_user.id,
         channel=request.channel,
         message_sent=request.message_sent,
         notes=request.notes,

@@ -10,18 +10,22 @@ load_dotenv()
 
 CLIENT_ID = os.getenv("ZOHO_CLIENT_ID")
 CLIENT_SECRET = os.getenv("ZOHO_CLIENT_SECRET")
-REFRESH_TOKEN = os.getenv("ZOHO_REFRESH_TOKEN")
+# Removed global REFRESH_TOKEN since it varies by tenant
 
 
-def get_new_access_token():
+def get_new_access_token(refresh_token: str):
     """Uses the refresh token to get a fresh access token.
     This function takes your permanent REFRESH_TOKEN and asks Zoho's server (https://accounts.zoho.com/oauth/v2/token) for a brand new, valid Access Token.
 
     It returns this new token so the rest of the script can use it to fetch data
     """
+    if not refresh_token:
+        print("❌ Error: No refresh token provided.")
+        return None
+
     url = "https://accounts.zoho.com/oauth/v2/token"
     payload = {
-        "refresh_token": REFRESH_TOKEN,
+        "refresh_token": refresh_token,
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
         "grant_type": "refresh_token",
@@ -44,7 +48,7 @@ def get_new_access_token():
 
 if __name__ == "__main__":
     print("=== TESTING TOKEN GENERATION ===")
-    test_token = get_new_access_token()
+    test_token = get_new_access_token(os.getenv("ZOHO_REFRESH_TOKEN"))
 
     if test_token:
         print(f"Your fresh Access Token is: {test_token}")
@@ -52,9 +56,9 @@ if __name__ == "__main__":
     print("================================")
 
 
-def fetch_deals_schema():
+def fetch_deals_schema(refresh_token: str):
     """Fetches the first 5 deals to analyze the JSON schema."""
-    access_token = get_new_access_token()
+    access_token = get_new_access_token(refresh_token)
 
     if not access_token:
         print("Failed to get access token.")
@@ -103,7 +107,7 @@ def fetch_deals_schema():
         print(response.text)
 
 
-def fetch_contacts_by_ids(contact_ids: list) -> dict:
+def fetch_contacts_by_ids(contact_ids: list, refresh_token: str) -> dict:
     """
     Fetch Contact records from Zoho Contacts API using their IDs.
     Returns a dict mapping contact_id -> {"phone": ..., "email": ...}
@@ -115,7 +119,7 @@ def fetch_contacts_by_ids(contact_ids: list) -> dict:
     if not contact_ids:
         return {}
 
-    access_token = get_new_access_token()
+    access_token = get_new_access_token(refresh_token)
     if not access_token:
         print("Failed to get access token for contacts fetch.")
         return {}
@@ -194,7 +198,7 @@ def flatten_deals_to_csv(raw_deals, output_filename="historical_deals.csv"):
 
 
 if __name__ == "__main__":
-    fetch_deals_schema()
+    fetch_deals_schema(os.getenv("ZOHO_REFRESH_TOKEN"))
     # Read my saved Zoho JSON file
 
     with open("real_sample_deals.json", "r") as f:

@@ -1,16 +1,18 @@
-from pydantic import BaseModel
-from typing import List
-from typing import Optional
+from pydantic import BaseModel, EmailStr
+from typing import List, Literal, Optional
+from datetime import date
 
 
-# --- Pydantic Schemas ---
+# ============================================================
+# Deal Schemas
+# ============================================================
+
 class ZohoDealResponse(BaseModel):
     Deal_ID: str
     Amount: float
     Closing_Date: str
     Owner_Name: str
     Account_Name: str
-    # Add other raw Zoho fields here as needed
 
 
 class DealPredictionResponse(BaseModel):
@@ -20,28 +22,28 @@ class DealPredictionResponse(BaseModel):
     confidence_all_classes: List[float]
 
 
-
-
-
 class RecommendationResponse(BaseModel):
     status: str
     message: str
     recommendations_generated: int
     predictions_processed: int
-
-    # These fields will be filled by the **recommendation_data unpacking
     adjusted_probability: float
     recommendation_ar: str
     recommendation_en: Optional[str] = None
     risk_flag: Optional[str] = None
 
-# --- Dashboard & UI Schemas ---
+
+# ============================================================
+# Dashboard & UI Schemas
+# ============================================================
+
 class ScatterPoint(BaseModel):
     deal_id: str
     deal_name: str
     amount: float
     ai_score: float
     priority: str
+
 
 class RankedDeal(BaseModel):
     deal_id: str
@@ -62,10 +64,12 @@ class RankedDeal(BaseModel):
     owner_name: Optional[str] = None
     followup_days_override: Optional[int] = 3
 
+
 class DashboardKPIs(BaseModel):
     total_active: int
     high_priority_count: int
     avg_ai_score: float
+
 
 class PaginatedDealsResponse(BaseModel):
     items: List[RankedDeal]
@@ -74,18 +78,22 @@ class PaginatedDealsResponse(BaseModel):
     page_size: int
     total_pages: int
 
+
 class DashboardResponse(BaseModel):
     kpis: DashboardKPIs
     scatter_points: List[ScatterPoint]
     ranked_deals: List[RankedDeal]
+
 
 class AccountRanking(BaseModel):
     account_name: str
     avg_score: float
     deal_count: int
 
+
 class AccountRankingResponse(BaseModel):
     accounts: List[AccountRanking]
+
 
 class DealDetailResponse(BaseModel):
     deal_id: str
@@ -110,59 +118,120 @@ class DealDetailResponse(BaseModel):
     owner_name: Optional[str] = None
     followup_days_override: Optional[int] = 3
 
+
 class DealCreate(BaseModel):
     deal_name: str
     account_name: Optional[str] = "Unknown"
     contact_name: Optional[str] = "Unknown"
     owner_name: Optional[str] = "Unknown"
     amount: float = 0.0
+    # Epic 1: exposed so the UI can prompt for it
+    expected_revenue: float = 0.0
     stage: str = "Qualification"
     zoho_probability: float = 0.0
     closing_date: Optional[str] = None
     client_phone: Optional[str] = None
     client_email: Optional[str] = None
 
-from pydantic import EmailStr
+
+# ============================================================
+# Auth & User Schemas
+# ============================================================
+
+# Epic 1 Multi-Tenant: allowed roles for workspace model
+VALID_ROLES = Literal["admin", "manager", "rep"]
+
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
     name: Optional[str] = None
+    # Epic 3: new fields
+    username: Optional[str] = None
+    account_name: Optional[str] = None
     business_field: Optional[str] = None
-    role: str = "Sales"             # "Sales" or "Client"
+    role: VALID_ROLES = "rep"
     phone_number: Optional[str] = None
 
-class UserUpdate(BaseModel):
+
+class AdminSignupRequest(BaseModel):
+    email: EmailStr
+    password: str
+    company_name: str
+    industry: Optional[str] = None
     name: Optional[str] = None
+    phone_number: Optional[str] = None
+
+
+class InviteRequest(BaseModel):
+    role: VALID_ROLES
+    email: EmailStr
+
+
+class InviteResponse(BaseModel):
+    invite_token: str
+    role: str
+    email: str
+    expires_in: str
+    email_status: str = "mocked"  # "sent", "mocked", or "failed"
+    email_error: Optional[str] = None
+
+
+class TeamSignupRequest(BaseModel):
+    invite_token: str
+    email: EmailStr
+    password: str
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+
+
+class UserUpdate(BaseModel):
+    """Used by PATCH /api/v1/auth/users/me"""
+    name: Optional[str] = None
+    username: Optional[str] = None
+    account_name: Optional[str] = None
     business_field: Optional[str] = None
+    phone_number: Optional[str] = None
     whatsapp_template: Optional[str] = None
     email_template: Optional[str] = None
+
 
 class UserResponse(BaseModel):
     id: str
     email: str
-    name: Optional[str]
+    company_id: Optional[str] = None
+    company_name: Optional[str] = None  # Epic 1.3: from Company relation
+    name: Optional[str] = None
+    # Epic 3: new profile fields
+    username: Optional[str] = None
+    account_name: Optional[str] = None
+    business_field: Optional[str] = None
     is_active: bool
-    role: str = "Sales"
+    role: str = "rep"
     phone_number: Optional[str] = None
     is_whatsapp_verified: bool = False
     whatsapp_template: Optional[str] = None
     email_template: Optional[str] = None
 
+
 class LoginRequest(BaseModel):
     email: str
     password: str
 
+
 class GoogleLoginRequest(BaseModel):
     credential: str
+
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
 
+
 class OTPVerifyRequest(BaseModel):
     phone_number: str
     otp_code: str
+
 
 class SignupPendingResponse(BaseModel):
     """Returned from POST /signup — user created but not yet verified."""
@@ -181,13 +250,16 @@ class FollowupMarkRequest(BaseModel):
     message_sent: Optional[str] = None
     notes: Optional[str] = None
 
+
 class FollowupDaysUpdateRequest(BaseModel):
     """Request body for updating the deferred follow-up period."""
     days: int = 3  # Number of days for deferred follow-up
 
+
 class GenerateMessageRequest(BaseModel):
     """Optional context overrides for Grok message generation."""
     sales_rep_name: Optional[str] = None
+
 
 class GenerateMessageResponse(BaseModel):
     status: str
@@ -195,6 +267,7 @@ class GenerateMessageResponse(BaseModel):
     deal_name: str
     account_name: str
     client_phone: Optional[str] = None
+
 
 class NotificationResponse(BaseModel):
     id: int
@@ -206,10 +279,38 @@ class NotificationResponse(BaseModel):
     is_read: bool = False
     created_at: str
 
+
 class NotificationListResponse(BaseModel):
     items: List[NotificationResponse]
     unread_count: int
     total: int
 
+
 class StageUpdateRequest(BaseModel):
     new_stage: str
+
+
+# ============================================================
+# Epic 2: Analytics Schemas
+# ============================================================
+
+class LeaderboardEntry(BaseModel):
+    """Performance stats for one sales rep (shown to managers only)."""
+    rep_name: str
+    closed_deals: int
+    followup_count: int
+    avg_ai_score: float
+
+
+class AnalyticsPeriod(BaseModel):
+    start: str
+    end: str
+
+
+class AnalyticsResponse(BaseModel):
+    period: AnalyticsPeriod
+    active_deals: int
+    closed_deals: int
+    total_followups: int
+    # Only included when the requesting user is a sales_manager
+    leaderboard: Optional[List[LeaderboardEntry]] = None

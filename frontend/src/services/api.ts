@@ -21,6 +21,11 @@ import type {
   FollowupMarkResponse,
   GenerateMessageResponse,
   StageUpdateResponse,
+  AnalyticsResponse,
+  AdminSignupRequest,
+  TeamSignupRequest,
+  InviteRequest,
+  InviteResponse,
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -32,7 +37,7 @@ export const api = axios.create({
   },
 });
 
-// Add a request interceptor to inject the token
+// Inject JWT automatically on every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token && config.headers) {
@@ -42,7 +47,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const dashboardApi = {
-  getRankedDeals: (sortBy: string = 'ai_score', limit?: number): Promise<DashboardResponse> => 
+  getRankedDeals: (sortBy: string = 'ai_score', limit?: number): Promise<DashboardResponse> =>
     api.get('/deals/ranked', { params: { sort_by: sortBy, limit } }).then((res) => res.data),
   getAllDeals: (page: number = 1, pageSize: number = 20, search?: string, sortBy: string = 'ai_score', includeClosed: boolean = false): Promise<AllDealsResponse> =>
     api.get('/deals', { params: { page, page_size: pageSize, search: search || undefined, sort_by: sortBy, include_closed: includeClosed } }).then((res) => res.data),
@@ -52,6 +57,15 @@ export const dashboardApi = {
   getAccountNames: (): Promise<string[]> => api.get('/accounts/names').then((res) => res.data),
   updateStage: (dealId: string, newStage: string): Promise<StageUpdateResponse> =>
     api.patch(`/deals/${dealId}/stage`, { new_stage: newStage }).then((res) => res.data),
+  // Epic 2: Delete deal
+  deleteDeal: (dealId: string): Promise<{ status: string; message: string; deal_id: string }> =>
+    api.delete(`/deals/${dealId}`).then((res) => res.data),
+  // Epic 2: Inline contact edit
+  updateDealContact: (dealId: string, data: { client_phone?: string | null; client_email?: string | null }) =>
+    api.patch(`/deals/${dealId}/contact`, data).then((res) => res.data),
+  // Epic 3: Inline detail edit
+  updateDealDetails: (dealId: string, data: { amount?: number | null; closing_date?: string | null }) =>
+    api.patch(`/deals/${dealId}/details`, data).then((res) => res.data),
 };
 
 export const actionApi = {
@@ -62,11 +76,9 @@ export const actionApi = {
 };
 
 export const ingestionApi = {
-  uploadCustomData: (formData: FormData, onUploadProgress?: (progressEvent: any) => void) => 
+  uploadCustomData: (formData: FormData, onUploadProgress?: (progressEvent: any) => void) =>
     api.post('/ingestion/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress,
     }).then((res) => res.data),
 };
@@ -74,13 +86,21 @@ export const ingestionApi = {
 export const authApi = {
   login: (data: LoginRequest): Promise<TokenResponse> => api.post('/auth/login', data).then((res) => res.data),
   signup: (data: SignupRequest): Promise<SignupPendingResponse> => api.post('/auth/signup', data).then((res) => res.data),
+  signupAdmin: (data: AdminSignupRequest): Promise<TokenResponse> => api.post('/auth/signup/admin', data).then((res) => res.data),
+  signupTeam: (data: TeamSignupRequest): Promise<TokenResponse> => api.post('/auth/signup/team', data).then((res) => res.data),
+  invite: (data: InviteRequest): Promise<InviteResponse> => api.post('/auth/invite', data).then((res) => res.data),
   verifyOtp: (data: OTPVerifyRequest): Promise<TokenResponse> => api.post('/auth/verify-otp', data).then((res) => res.data),
   googleLogin: (credential: string): Promise<TokenResponse> => api.post('/auth/google', { credential }).then((res) => res.data),
+  // Epic 1.1: Zoho OAuth — returns { auth_url } which the frontend redirects to
+  initiateZohoOAuth: (): Promise<{ auth_url: string }> => api.get('/auth/zoho/initiate').then((res) => res.data),
 };
 
 export const userApi = {
   getMe: (): Promise<UserProfile> => api.get('/auth/users/me').then((res) => res.data),
-  updateTemplates: (data: TemplateUpdateRequest): Promise<UserProfile> => api.patch('/auth/users/me/templates', data).then((res) => res.data),
+  // Epic 3: PATCH /users/me (full profile update)
+  updateMe: (data: TemplateUpdateRequest): Promise<UserProfile> => api.patch('/auth/users/me', data).then((res) => res.data),
+  // Legacy alias kept for existing callers
+  updateTemplates: (data: TemplateUpdateRequest): Promise<UserProfile> => api.patch('/auth/users/me', data).then((res) => res.data),
 };
 
 // Sprint 5: Follow-up APIs
@@ -107,3 +127,8 @@ export const notificationApi = {
     api.patch('/notifications/read-all').then((res) => res.data),
 };
 
+// Epic 2: Analytics API
+export const analyticsApi = {
+  getAnalytics: (startDate?: string, endDate?: string): Promise<AnalyticsResponse> =>
+    api.get('/analytics', { params: { start_date: startDate, end_date: endDate } }).then((res) => res.data),
+};
