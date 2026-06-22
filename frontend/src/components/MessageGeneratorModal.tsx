@@ -9,7 +9,7 @@ interface MessageGeneratorModalProps {
 }
 
 export default function MessageGeneratorModal({ deal, salesRepName, onClose }: MessageGeneratorModalProps) {
-  const dealId = 'deal_id' in deal ? deal.deal_id : deal.deal_id;
+  const dealId = (deal as any).deal_id ?? (deal as any).id ?? '';
   const generateMsg = useGenerateMessage();
   const markFollowed = useMarkFollowedUp();
 

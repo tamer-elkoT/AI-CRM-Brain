@@ -7,6 +7,8 @@ from models.data_ingestion.zoho_api import fetch_deals_schema, fetch_contacts_by
 from sqlalchemy.dialects.postgresql import insert
 from typing import Optional
 import logging
+import os
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -260,12 +262,25 @@ def ingest_zoho_deals(current_user: User = Depends(get_current_user_dep)):
     """
     db: Session = SessionLocal()
     try:
-        # Epic 1 Multi-Tenant: Get the user's company and refresh token
+        # Epic 1 Multi-Tenant: Get the user's company and its Zoho refresh token.
+        # Fall back to the global ZOHO_REFRESH_TOKEN from .env if the company hasn't
+        # completed the Zoho OAuth wizard yet (common for admin accounts).
         company = db.query(Company).filter(Company.id == current_user.company_id).first()
-        if not company or not company.zoho_refresh_token:
-            raise HTTPException(status_code=400, detail="Zoho is not connected for this workspace.")
+        if not company:
+            raise HTTPException(status_code=400, detail="User is not associated with a company workspace.")
 
-        raw_deals = fetch_deals_schema(refresh_token=company.zoho_refresh_token)
+        refresh_token = (
+            company.zoho_refresh_token
+            or os.getenv("ZOHO_REFRESH_TOKEN")
+        )
+        if not refresh_token:
+            raise HTTPException(
+                status_code=400,
+                detail="Zoho is not connected. Please connect Zoho CRM from the wizard or set ZOHO_REFRESH_TOKEN in .env."
+            )
+
+        raw_deals = fetch_deals_schema(refresh_token=refresh_token)
+
         if not raw_deals:
             return {
                 "status": "success",
@@ -286,7 +301,7 @@ def ingest_zoho_deals(current_user: User = Depends(get_current_user_dep)):
         contacts_map = {}
         if contact_ids:
             try:
-                contacts_map = fetch_contacts_by_ids(contact_ids, refresh_token=company.zoho_refresh_token)
+                contacts_map = fetch_contacts_by_ids(contact_ids, refresh_token=refresh_token)
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).warning(f"Contact enrichment failed (non-fatal): {e}")

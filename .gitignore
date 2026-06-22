@@ -109,3 +109,5 @@ controllers/__pycache__
 models/__pycache__
 models/data_ingestion/__pycache__
 models/ml_engine/__pycache__
+whatsapp-microservice/node_modules
+whatsapp-microservice/auth_info_baileys

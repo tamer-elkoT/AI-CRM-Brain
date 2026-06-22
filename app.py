@@ -5,7 +5,7 @@ import uvicorn
 # Import your routers (the controllers)
 from controllers import ingestion_controller, ml_controller, recommendation_controller
 from controllers import dashboard_controller, action_controller, auth_controller
-from controllers import followup_controller, notification_controller
+from controllers import followup_controller, notification_controller, team_controller
 # Epic 2: analytics endpoint
 from controllers import analytics_controller
 
@@ -15,13 +15,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Add CORS middleware
+# Add CORS middleware — use regex to match any localhost port (avoids 400 on OPTIONS preflight)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Vite default ports
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Register Routes (The "Glue")
@@ -47,6 +48,9 @@ app.include_router(notification_controller.router, prefix="/api/v1", tags=["Noti
 
 # Epic 2: Analytics
 app.include_router(analytics_controller.router, prefix="/api/v1", tags=["Analytics"])
+
+# Team management
+app.include_router(team_controller.router, prefix="/api/v1", tags=["Team"])
 
 
 @app.get("/health")
@@ -80,5 +84,5 @@ def start_followup_scheduler():
 
 
 if __name__ == "__main__":
-    # Run the server
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    # Run the server explicitly watching backend directories
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=["controllers", "models", "services", "utils", "."])

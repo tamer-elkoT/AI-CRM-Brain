@@ -29,6 +29,8 @@ from controllers.auth_controller import get_current_user_dep, get_db
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+BAILEYS_URL = "http://localhost:3000"
+
 
 def get_db():
     db = SessionLocal()
@@ -39,6 +41,86 @@ def get_db():
 
 
 CLOSED_STAGES = ['Closed Won', 'Closed Lost']
+
+
+# ============================================================
+# WhatsApp Connect: QR code + Status proxy endpoints
+# Each endpoint passes the authenticated user's ID so the
+# Baileys microservice maintains one session per CRM user.
+# ============================================================
+@router.get("/whatsapp/status")
+async def get_whatsapp_status(
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Proxy to Baileys microservice — returns THIS user's WhatsApp connection state.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"{BAILEYS_URL}/status",
+                params={"user_id": str(current_user.id)},
+            )
+            return resp.json()
+    except Exception:
+        return {"connected": False, "has_qr": False, "phone": None, "error": "WhatsApp microservice is not running"}
+
+
+@router.get("/whatsapp/qr")
+async def get_whatsapp_qr(
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Proxy to Baileys microservice — returns THIS user's current QR code as a base64 PNG.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                f"{BAILEYS_URL}/qr",
+                params={"user_id": str(current_user.id)},
+            )
+            return resp.json()
+    except Exception:
+        return {"status": "error", "qr": None, "message": "WhatsApp microservice is not running. Run: cd whatsapp-microservice && npm start"}
+
+
+@router.post("/whatsapp/disconnect")
+async def disconnect_whatsapp(
+    current_user: User = Depends(get_current_user_dep),
+):
+    """Log out THIS user's WhatsApp session and clear their saved auth."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(
+                f"{BAILEYS_URL}/disconnect",
+                params={"user_id": str(current_user.id)},
+            )
+            return resp.json()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"WhatsApp microservice error: {e}")
+
+
+
+# ============================================================
+# Trigger scheduler manually (admin/test)
+# ============================================================
+@router.post("/followups/trigger-scheduler")
+def trigger_scheduler_now(
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Admin-only: Immediately run the follow-up scheduler.
+    Useful for testing WhatsApp notifications without waiting 60 min.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can trigger the scheduler.")
+    try:
+        from services.followup_scheduler import check_deferred_followups
+        import threading
+        threading.Thread(target=check_deferred_followups, daemon=True).start()
+        return {"message": "Scheduler triggered. WhatsApp alerts are being sent (check your phone in ~60s)."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================
@@ -109,8 +191,8 @@ def schedule_followups(db: Session = Depends(get_db)):
         # Create in-app notification for the deal owner
         if deal.owner_name:
             owner = db.query(User).filter(
-                User.name == deal.owner_name,
-                User.role == "Sales",
+                User.name.ilike(deal.owner_name),
+                User.role.in_(["rep", "manager", "admin"]),
             ).first()
             if owner:
                 urgency_text = "immediately" if ai_score >= 90 else f"in {deal.followup_days_override or 3} days"
@@ -132,6 +214,53 @@ def schedule_followups(db: Session = Depends(get_db)):
         "immediate": immediate_count,
         "deferred": deferred_count,
     }
+
+
+def _schedule_all_followups(db) -> int:
+    """
+    Internal helper: Schedule follow-ups for all unscheduled active deals.
+    Called automatically after AI generation. Returns count of scheduled records.
+
+    IMPORTANT: always sets scheduled_at=now so _fire_whatsapp can deliver
+    the first notification immediately after Generate AI. The urgency field
+    (immediate vs deferred) is purely for categorisation, not timing.
+    """
+    now = datetime.now(timezone.utc)
+    deals_with_recs = (
+        db.query(ZohoDeal, LLMRecommendation)
+        .outerjoin(LLMRecommendation, ZohoDeal.id == LLMRecommendation.deal_id)
+        .filter(ZohoDeal.stage.notin_(CLOSED_STAGES))
+        .all()
+    )
+    scheduled_count = 0
+    for deal, rec in deals_with_recs:
+        if deal.action_status == "followed_up":
+            continue
+        existing = db.query(DealFollowup).filter(
+            DealFollowup.deal_id == deal.id,
+            DealFollowup.notified_at.is_(None),
+        ).first()
+        if existing:
+            continue
+        ai_score = rec.adjusted_score_pct if rec else 0.0
+        days = deal.followup_days_override or 3
+        urgency = "immediate" if ai_score >= 90 else "deferred"
+        # Always schedule NOW so the post-AI WhatsApp thread can find it.
+        # The urgency label tells the rep whether it's critical or routine.
+        followup = DealFollowup(
+            deal_id=deal.id,
+            scheduled_at=now,          # ← always now, not days in future
+            urgency=urgency,
+            followup_days=0 if urgency == "immediate" else days,
+        )
+        deal.action_status = "need_action_now" if urgency == "immediate" else f"need_action_{days}days"
+        db.add(followup)
+        scheduled_count += 1
+    db.commit()
+    return scheduled_count
+
+
+
 
 
 # ============================================================
@@ -314,7 +443,13 @@ Rules:
             )
             response.raise_for_status()
             data = response.json()
-            generated_message = data["choices"][0]["message"]["content"].strip()
+            choices = data.get("choices", [])
+            if not choices:
+                raise Exception(f"No choices in Grok response: {data}")
+            content = choices[0].get("message", {}).get("content")
+            if not content:
+                raise Exception("Empty or null content returned by Grok")
+            generated_message = str(content).strip()
 
     except Exception as grok_e:
         logger.warning(f"Grok API failed ({grok_e}), falling back to Groq...")
@@ -326,6 +461,8 @@ Rules:
                     headers={
                         "Authorization": f"Bearer {settings.LLM_API_KEY}",
                         "Content-Type": "application/json",
+                        "HTTP-Referer": "http://localhost:5173",
+                        "X-Title": "AI CRM Brain",
                     },
                     json={
                         "model": settings.LLM_MODEL_ID,
@@ -333,13 +470,19 @@ Rules:
                             {"role": "system", "content": "You are an expert B2B sales communication specialist."},
                             {"role": "user", "content": prompt},
                         ],
-                        "max_tokens": 300,
+                        "max_tokens": 2000,
                         "temperature": 0.7,
                     },
                 )
                 response.raise_for_status()
                 data = response.json()
-                generated_message = data["choices"][0]["message"]["content"].strip()
+                choices = data.get("choices", [])
+                if not choices:
+                    raise Exception(f"No choices in fallback LLM response: {data}")
+                content = choices[0].get("message", {}).get("content")
+                if not content:
+                    raise Exception("Empty or null content returned by fallback LLM")
+                generated_message = str(content).strip()
         except Exception as groq_e:
             logger.error(f"Both Grok and Groq generation failed. Groq error: {groq_e}")
             raise HTTPException(status_code=500, detail=f"Message generation failed on both providers. Groq error: {str(groq_e)}")

@@ -1,64 +1,101 @@
-import os
-import requests
-import urllib.parse
+import re
+import asyncio
+import random
+import httpx
 import logging
 
 logger = logging.getLogger(__name__)
 
-def send_headless_whatsapp(phone: str, message: str) -> bool:
+BAILEYS_URL = "http://localhost:3000"
+
+
+async def send_whatsapp_via_user_session(user_id: str, phone: str, message: str) -> bool:
     """
-    Sends a truly headless automated WhatsApp message using the Twilio API.
-    Requires TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_WHATSAPP_NUMBER in the environment.
+    Send a WhatsApp message via that specific user's own Baileys session.
+    The user receives the message on their own WhatsApp number (self-notification).
+
+    Args:
+        user_id: CRM User UUID — identifies which Baileys session to use
+        phone:   Recipient phone number (usually the same as the user's own number)
+        message: Text message to send
     """
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_number = os.getenv("TWILIO_WHATSAPP_NUMBER")
-    
-    if not all([account_sid, auth_token, from_number]):
-        logger.warning("Twilio credentials are not fully set in .env. Cannot send headless WhatsApp alert.")
-        return False
-        
-    if not phone:
-        logger.warning("No phone number provided for WhatsApp alert.")
+    if not user_id or not phone or not message:
+        logger.warning("send_whatsapp_via_user_session: missing user_id, phone, or message.")
         return False
 
-    # Format phone number: remove any non-digit characters except +
-    sanitized_phone = "".join(c for c in phone if c.isdigit() or c == "+")
-    
-    # Handle Egyptian local numbers (010, 011, 012, 015)
-    if sanitized_phone.startswith("01") and len(sanitized_phone) == 11:
-        sanitized_phone = f"+20{sanitized_phone[1:]}"
-    elif not sanitized_phone.startswith("+"):
-        sanitized_phone = f"+{sanitized_phone}"
-        
+    # Normalise phone: strip non-digits, add Egypt country code if local
+    sanitized = re.sub(r'\D', '', phone)
+    if sanitized.startswith('01') and len(sanitized) == 11:
+        sanitized = f'20{sanitized[1:]}'
+
+    if not sanitized:
+        logger.warning(f"Invalid phone number for user {user_id}: '{phone}'")
+        return False
+
+    # Anti-ban: random delay before sending
+    delay = random.uniform(3.0, 10.0)
+    logger.info(f"⏳ Anti-ban delay {delay:.1f}s before sending to {sanitized} (user {user_id})...")
+    await asyncio.sleep(delay)
+
+    payload = {"phone": sanitized, "message": message}
+
     try:
-        from twilio.rest import Client
-        from twilio.base.exceptions import TwilioRestException
-        client = Client(account_sid, auth_token)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{BAILEYS_URL}/send-message",
+                params={"user_id": user_id},
+                json=payload,
+                timeout=20.0,
+            )
+            response.raise_for_status()
 
-        message_obj = client.messages.create(
-            body=message,
-            from_=f"whatsapp:{from_number}",
-            to=f"whatsapp:{sanitized_phone}"
-        )
-
-        logger.info(f"✅ Headless WhatsApp alert sent to {sanitized_phone} via Twilio. SID: {message_obj.sid}")
+        logger.info(f"✅ WhatsApp sent to {sanitized} via user session {user_id}")
         return True
 
-    except TwilioRestException as e:
-        # ── Epic 4: Twilio rate-limit graceful degradation ──────────────────
-        # Twilio free-tier: 5 messages/day. On 429 / 20429 → fall back to wa.me
-        if e.status == 429 or e.code == 20429:
-            encoded_msg = urllib.parse.quote(message[:300])
-            fallback_url = f"https://wa.me/{sanitized_phone.lstrip('+')}?text={encoded_msg}"
+    except httpx.RequestError as e:
+        logger.error(f"❌ Cannot reach Baileys microservice for user {user_id}: {e}")
+        return False
+    except httpx.HTTPStatusError as e:
+        # 503 = user's WhatsApp not connected → log clearly
+        if e.response.status_code == 503:
             logger.warning(
-                f"⚠️  Twilio rate limit hit (429). Falling back to wa.me deep link.\n"
-                f"   Fallback URL: {fallback_url}"
+                f"⚠️ User {user_id} has not connected their WhatsApp yet. "
+                f"They need to scan the QR code in Settings."
             )
         else:
-            logger.error(f"❌ Twilio API error (status={e.status}, code={e.code}): {e.msg}")
+            logger.error(f"❌ Baileys error for user {user_id}: {e.response.status_code} — {e.response.text}")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Unexpected error sending WhatsApp for user {user_id}: {e}")
         return False
 
-    except Exception as e:
-        logger.error(f"❌ Failed to reach Twilio API: {e}")
-        return False
+
+def send_whatsapp_to_user(user_id: str, phone: str, message: str) -> bool:
+    """
+    Synchronous wrapper for send_whatsapp_via_user_session.
+    Use this from background threads (APScheduler, threading.Thread).
+    """
+    try:
+        return asyncio.run(send_whatsapp_via_user_session(user_id, phone, message))
+    except RuntimeError:
+        # Already inside an event loop
+        loop = asyncio.get_running_loop()
+        loop.create_task(send_whatsapp_via_user_session(user_id, phone, message))
+        return True
+
+
+# ── Legacy compatibility (kept so old call sites don't break) ─────────────────
+async def send_whatsapp_alert_via_baileys(phone: str, message: str) -> bool:
+    """
+    DEPRECATED: single-session sender.
+    New code should use send_whatsapp_via_user_session instead.
+    Kept for backward compatibility with notification_service.py.
+    """
+    logger.warning("send_whatsapp_alert_via_baileys is deprecated. Use send_whatsapp_via_user_session.")
+    return False
+
+
+def send_headless_whatsapp(phone: str, message: str) -> bool:
+    """DEPRECATED wrapper — kept for backward compatibility."""
+    logger.warning("send_headless_whatsapp is deprecated. Use send_whatsapp_to_user.")
+    return False

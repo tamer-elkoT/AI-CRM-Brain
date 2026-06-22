@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import Integrations from './pages/Integrations';
 import Settings from './pages/Settings';
+import Team from './pages/Team';
 
 import { ToastProvider } from './components/ui/Toast';
 
@@ -44,6 +45,7 @@ function App() {
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/team" element={<Team />} />
           </Route>
         </Routes>
         </BrowserRouter>

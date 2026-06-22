@@ -32,9 +32,9 @@ class LLMRecommendationOutput(BaseModel):
     recommendation_ar: str = Field(..., min_length=10, max_length=1000)
     recommendation_en: Optional[str] = Field(None, max_length=1000)
     risk_flag: Optional[str] = Field("NONE")
-    risk_reasoning: Optional[str] = Field(None, max_length=500)
+    risk_reasoning: str = Field("", max_length=500)
 
-    @validator("risk_flag")
+    @validator("risk_flag", pre=True, always=True)
     def validate_risk_flag(cls, v):
         allowed = [
             "HIGH_RISK",
@@ -46,6 +46,10 @@ class LLMRecommendationOutput(BaseModel):
         if v not in allowed:
             return "NONE"
         return v
+
+    @validator("risk_reasoning", pre=True, always=True)
+    def validate_risk_reasoning(cls, v):
+        return v if v is not None else ""
 
 
 # --- Main Recommender Service ---
@@ -221,7 +225,7 @@ class LLMRecommenderService:
             "recommendation_ar": "لم يتم إنشاء توصية (خطأ في النظام). استخدم النتيجة الأساسية للنموذج.",
             "recommendation_en": "Recommendation generation failed (system error). Use base ML score.",
             "risk_flag": "NONE",
-            "risk_reasoning": None,
+            "risk_reasoning": "",
             "llm_model_id": self.model_id,
             "prompt_version": PROMPT_VERSION,
             "llm_latency_ms": 0,

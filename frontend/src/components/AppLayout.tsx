@@ -18,8 +18,10 @@ const NAV_ITEMS: NavItem[] = [
   { icon: 'dashboard', label: 'Dashboard', path: '/dashboard' },
   { icon: 'monitoring', label: 'Analytics', path: '/analytics' },
   { icon: 'integration_instructions', label: 'Integrations', path: '/integrations' },
+  { icon: 'group', label: 'Team', path: '/team' },         // admin only — filtered below
   { icon: 'settings', label: 'Settings', path: '/settings' },
 ];
+
 
 export default function AppLayout() {
   const navigate = useNavigate();
@@ -66,7 +68,8 @@ export default function AppLayout() {
         </div>
 
         <div className="space-y-1">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.filter(item => item.path !== '/team' || user?.role === 'admin').map((item) => {
+
             const isActive = location.pathname === item.path;
             return (
               <button

@@ -132,3 +132,13 @@ export const analyticsApi = {
   getAnalytics: (startDate?: string, endDate?: string): Promise<AnalyticsResponse> =>
     api.get('/analytics', { params: { start_date: startDate, end_date: endDate } }).then((res) => res.data),
 };
+
+// WhatsApp Integration API
+export const whatsappApi = {
+  getStatus: (): Promise<{ connected: boolean; has_qr: boolean; phone: string | null; error?: string }> =>
+    api.get('/whatsapp/status').then((res) => res.data),
+  getQR: (): Promise<{ status: 'pending' | 'connected' | 'waiting' | 'error'; qr: string | null; message?: string }> =>
+    api.get('/whatsapp/qr').then((res) => res.data),
+  disconnect: (): Promise<{ status: string }> =>
+    api.post('/whatsapp/disconnect').then((res) => res.data),
+};

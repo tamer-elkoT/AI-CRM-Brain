@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeProvider';
-import { userApi, authApi, ingestionApi } from '../services/api';
+import { userApi, authApi, ingestionApi, whatsappApi } from '../services/api';
 
 export default function Settings() {
   const { logout, user, refreshUser } = useAuth();
@@ -73,15 +73,89 @@ export default function Settings() {
   };
 
   // ── Notification preferences ────────────────────────────────────────────────
-  const [whatsappAlerts, setWhatsappAlerts] = useState(() => localStorage.getItem('pref-whatsapp-alerts') === 'true');
   const [emailNotifications, setEmailNotifications] = useState(() => localStorage.getItem('pref-email-notifications') !== 'false');
   const [autoSync, setAutoSync]             = useState(() => localStorage.getItem('pref-auto-sync') === 'true');
   const [arabicRecs, setArabicRecs]         = useState(() => localStorage.getItem('pref-arabic-recs') !== 'false');
 
-  useEffect(() => { localStorage.setItem('pref-whatsapp-alerts', String(whatsappAlerts)); }, [whatsappAlerts]);
   useEffect(() => { localStorage.setItem('pref-email-notifications', String(emailNotifications)); }, [emailNotifications]);
   useEffect(() => { localStorage.setItem('pref-auto-sync', String(autoSync)); }, [autoSync]);
   useEffect(() => { localStorage.setItem('pref-arabic-recs', String(arabicRecs)); }, [arabicRecs]);
+
+  // ── WhatsApp Connect state ──────────────────────────────────────────────────
+  const [waConnected, setWaConnected]     = useState(false);
+  const [waPhone, setWaPhone]             = useState<string | null>(null);
+  const [waServiceDown, setWaServiceDown] = useState(false);
+  const [showQRModal, setShowQRModal]     = useState(false);
+  const [qrImage, setQrImage]             = useState<string | null>(null);
+  const [qrStatus, setQrStatus]           = useState<'pending' | 'connected' | 'waiting' | 'error' | 'loading'>('loading');
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [qrTimedOut, setQrTimedOut]       = useState(false);
+  const statusPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const qrPollRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const qrTimeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showQRRef     = useRef(showQRModal);
+  useEffect(() => { showQRRef.current = showQRModal; }, [showQRModal]);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const s = await whatsappApi.getStatus();
+      setWaConnected(s.connected);
+      setWaPhone(s.phone);
+      setWaServiceDown(false);
+      if (s.connected && showQRRef.current) setShowQRModal(false);
+    } catch {
+      setWaServiceDown(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+    statusPollRef.current = setInterval(fetchStatus, 15000); // poll every 15s (not 4s) to avoid log spam
+    return () => { if (statusPollRef.current) clearInterval(statusPollRef.current); };
+  }, [fetchStatus]);
+
+  const fetchQR = useCallback(async () => {
+    try {
+      const data = await whatsappApi.getQR();
+      setQrStatus(data.status);
+      setQrImage(data.qr);
+    } catch {
+      setQrStatus('error');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showQRModal) {
+      setQrStatus('loading');
+      setQrImage(null);
+      setQrTimedOut(false);
+      fetchQR();
+      qrPollRef.current = setInterval(fetchQR, 5000);
+      // Show a helpful timeout message if QR hasn't appeared in 30s
+      qrTimeoutRef.current = setTimeout(() => setQrTimedOut(true), 30000);
+    } else {
+      if (qrPollRef.current) clearInterval(qrPollRef.current);
+      if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current);
+      setQrTimedOut(false);
+    }
+    return () => {
+      if (qrPollRef.current) clearInterval(qrPollRef.current);
+      if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current);
+    };
+  }, [showQRModal, fetchQR]);
+
+  const handleDisconnect = async () => {
+    setDisconnecting(true);
+    try {
+      await whatsappApi.disconnect();
+      setWaConnected(false);
+      setWaPhone(null);
+    } catch (e) {
+      console.error('Disconnect error', e);
+    } finally {
+      setDisconnecting(false);
+    }
+  };
 
   // ── CSV/Excel upload (Admin only) ────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -238,47 +312,117 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* ── Notification Preferences Card ── */}
+          {/* ── WhatsApp + Notifications Card ── */}
           <div className="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-full bg-[#25D366]/10 text-[#25D366] flex items-center justify-center">
                 <span className="material-symbols-outlined">notifications_active</span>
               </div>
               <div>
-                <h3 className="font-headline-md text-headline-md text-on-surface">🔔 Notifications</h3>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">Configure deal alerts</p>
+                <h3 className="font-headline-md text-headline-md text-on-surface">🔔 Notifications & WhatsApp</h3>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">Link WhatsApp to receive deal alerts</p>
               </div>
             </div>
-            <div className="space-y-5">
-              <div className="flex items-center justify-between py-3 border-b border-outline-variant">
+
+            {/* WhatsApp Connection Section */}
+            <div className="mb-5 pb-5 border-b border-outline-variant">
+              <div className="flex items-center justify-between mb-3">
                 <div>
                   <p className="font-label-md text-on-surface flex items-center gap-2">
-                    <span className="text-[#25D366]">●</span>WhatsApp Alerts
+                    <span className="text-xl">📱</span> WhatsApp
                   </p>
-                  <p className="font-body-sm text-on-surface-variant">Urgent & hot deal notifications</p>
+                  <p className="font-body-sm text-on-surface-variant mt-0.5">Link your phone to receive deal alerts</p>
                 </div>
-                <Toggle value={whatsappAlerts} onChange={() => setWhatsappAlerts(!whatsappAlerts)} />
+                {waServiceDown ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />Service Offline
+                  </span>
+                ) : waConnected ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/30">
+                    <span className="w-2 h-2 rounded-full bg-[#25D366]" />Connected
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />Disconnected
+                  </span>
+                )}
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-outline-variant">
+
+              {waConnected && waPhone && (
+                <div className="flex items-center gap-2 mb-3 p-2.5 bg-[#25D366]/5 rounded-lg border border-[#25D366]/20">
+                  <span className="text-[#25D366] material-symbols-outlined text-[18px]">phone_iphone</span>
+                  <span className="font-body-sm text-on-surface">+{waPhone}</span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-xs text-[#25D366]">
+                    <span className="material-symbols-outlined text-[14px]">verified</span>Verified
+                  </span>
+                </div>
+              )}
+
+              {waServiceDown && (
+                <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-700 font-semibold mb-1">⚠️ Microservice offline. Start it:</p>
+                  <code className="block text-xs bg-amber-100 text-amber-800 rounded px-2 py-1.5">
+                    cd whatsapp-microservice &amp;&amp; npm start
+                  </code>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                {!waConnected && !waServiceDown && (
+                  <button
+                    id="whatsapp-connect-btn"
+                    onClick={() => setShowQRModal(true)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#25D366] text-white font-label-md hover:bg-[#1fad53] transition-colors shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+                    Scan QR to Connect
+                  </button>
+                )}
+                {waConnected && (
+                  <button
+                    onClick={handleDisconnect}
+                    disabled={disconnecting}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">link_off</span>
+                    {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+                  </button>
+                )}
+                {waServiceDown && (
+                  <button
+                    onClick={fetchStatus}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant font-label-md hover:bg-surface-container transition"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">refresh</span>
+                    Retry
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-2">
                 <div>
                   <p className="font-label-md text-on-surface">Email Notifications</p>
                   <p className="font-body-sm text-on-surface-variant">Alerts for urgent deals</p>
                 </div>
                 <Toggle value={emailNotifications} onChange={() => setEmailNotifications(!emailNotifications)} />
               </div>
-              {whatsappAlerts && (
+              {waConnected && (
                 <div className="bg-[#25D366]/5 border border-[#25D366]/20 rounded-lg p-3">
                   <p className="font-body-sm text-on-surface-variant">
-                    <span className="font-label-sm text-[#25D366]">Active:</span> You'll receive alerts when:
+                    <span className="font-label-sm text-[#25D366]">Active:</span> You'll receive WhatsApp alerts for:
                   </p>
                   <ul className="mt-1.5 space-y-1 font-body-sm text-on-surface-variant">
                     <li className="flex items-center gap-2"><span className="text-xs">🚨</span>Risk deals: High amount + low AI probability</li>
                     <li className="flex items-center gap-2"><span className="text-xs">🔥</span>Hot leads: AI probability &gt; 85%</li>
+                    <li className="flex items-center gap-2"><span className="text-xs">⏰</span>Deferred follow-ups that are due today</li>
                   </ul>
                 </div>
               )}
             </div>
           </div>
+
 
           {/* ── CRM Integration Card (Admin Only) ── */}
           {isAdmin && (
@@ -469,6 +613,147 @@ export default function Settings() {
 
         </div>
       </div>
+
+      {/* ── WhatsApp QR Code Modal ── */}
+      {showQRModal && (
+        <div
+          id="whatsapp-qr-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowQRModal(false); }}
+        >
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-outline-variant">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center">
+                  <span className="text-white text-xl">💬</span>
+                </div>
+                <div>
+                  <h3 className="font-headline-sm text-on-surface">Connect WhatsApp</h3>
+                  <p className="font-body-sm text-on-surface-variant">Scan to link your account</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition"
+              >
+                <span className="material-symbols-outlined text-on-surface-variant">close</span>
+              </button>
+            </div>
+
+            {/* QR Code Area */}
+            <div className="px-6 py-6 flex flex-col items-center min-h-[280px] justify-center">
+              {qrStatus === 'connected' ? (
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <div className="w-16 h-16 rounded-full bg-[#25D366]/10 flex items-center justify-center text-4xl">✅</div>
+                  <div className="text-center">
+                    <p className="font-headline-sm text-on-surface">Connected!</p>
+                    <p className="font-body-sm text-on-surface-variant mt-1">WhatsApp is linked successfully.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowQRModal(false)}
+                    className="px-6 py-2 bg-[#25D366] text-white rounded-lg font-label-md hover:bg-[#1fad53] transition"
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : qrStatus === 'loading' || (qrStatus === 'waiting' && !qrImage) ? (
+                <div className="flex flex-col items-center gap-4 py-4">
+                  {!qrTimedOut ? (
+                    <>
+                      <div className="w-14 h-14 border-4 border-[#25D366]/20 border-t-[#25D366] rounded-full animate-spin" />
+                      <div className="text-center">
+                        <p className="font-body-md text-on-surface-variant">Generating QR code...</p>
+                        <p className="text-xs text-on-surface-variant/60 mt-1">This takes a few seconds after disconnecting</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-4xl">⏱️</span>
+                      <div className="text-center">
+                        <p className="font-label-md text-on-surface">Taking too long?</p>
+                        <p className="font-body-sm text-on-surface-variant mt-1 max-w-[220px]">
+                          Make sure the WhatsApp microservice is running, then retry.
+                        </p>
+                        <code className="block mt-2 text-xs bg-surface-container rounded px-3 py-1.5 text-left">
+                          cd whatsapp-microservice && npm start
+                        </code>
+                      </div>
+                      <button
+                        onClick={() => { setQrTimedOut(false); fetchQR(); }}
+                        className="px-4 py-2 bg-[#25D366] text-white rounded-lg font-label-md hover:bg-[#1fad53] transition"
+                      >
+                        Retry
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : qrStatus === 'error' ? (
+                <div className="flex flex-col items-center gap-4 py-4 text-center">
+                  <span className="text-4xl">⚠️</span>
+                  <div>
+                    <p className="font-label-md text-on-surface">Microservice Not Running</p>
+                    <p className="font-body-sm text-on-surface-variant mt-1">Open a terminal and run:</p>
+                    <code className="block mt-2 text-xs bg-surface-container text-on-surface rounded px-3 py-2 text-left">
+                      cd whatsapp-microservice<br />npm start
+                    </code>
+                  </div>
+                  <button
+                    onClick={fetchQR}
+                    className="px-4 py-2 border border-outline-variant rounded-lg font-label-md text-on-surface hover:bg-surface-container transition"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : qrImage ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative p-2 bg-white rounded-xl shadow-md">
+                    <img
+                      src={qrImage}
+                      alt="WhatsApp QR Code — scan with your phone"
+                      className="w-56 h-56 rounded-lg"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-10 h-10 bg-white rounded-lg shadow flex items-center justify-center">
+                        <span className="text-2xl">💬</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-body-sm text-on-surface-variant text-center text-xs">
+                    ↻ QR refreshes automatically every 5 seconds
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Step-by-step instructions — show whenever a QR image is visible */}
+            {qrImage && (
+              <div className="px-6 pb-6">
+                <div className="bg-[#25D366]/5 border border-[#25D366]/20 rounded-xl p-4">
+                  <p className="font-label-sm text-[#25D366] mb-2 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">info</span>How to scan:
+                  </p>
+                  <ol className="space-y-2 font-body-sm text-on-surface-variant">
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-[#25D366] shrink-0 w-5">1.</span>
+                      Open WhatsApp on your phone
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-[#25D366] shrink-0 w-5">2.</span>
+                      Tap ⋮ Menu → <strong>Linked Devices</strong>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-[#25D366] shrink-0 w-5">3.</span>
+                      Tap <strong>"Link a Device"</strong> and scan above
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -38,24 +38,25 @@ llm_service = create_recommender_service()
 # --- Urgent Deal Notification (BackgroundTask) ---
 def notify_sales_manager(deal_name: str, account_name: str, amount: float, recommendation_ar: str, risk_flag: str):
     """
-    Simulated notification to the sales manager for urgent deals.
-    In production, this would send an email/Slack/SMS.
+    Log an urgent deal alert to the server console (legacy compatibility).
     """
-    logger.warning(
-        "\n"
-        "╔══════════════════════════════════════════════════════════════╗\n"
-        "║  🚨 URGENT DEAL ALERT — Sales Manager Notification        ║\n"
-        "╠══════════════════════════════════════════════════════════════╣\n"
-        f"║  Deal: {deal_name:<52}║\n"
-        f"║  Account: {account_name:<49}║\n"
-        f"║  Amount: ${amount:,.0f:<50}║\n"
-        f"║  Risk Flag: {risk_flag:<47}║\n"
-        "╠══════════════════════════════════════════════════════════════╣\n"
-        f"║  AI Recommendation: {recommendation_ar[:38]+'...' if len(recommendation_ar) > 38 else recommendation_ar:<39}║\n"
-        "╠══════════════════════════════════════════════════════════════╣\n"
-        "║  ⚠️  ACTION REQUIRED: Please call the client immediately.  ║\n"
-        "╚══════════════════════════════════════════════════════════════╝"
-    )
+    try:
+        border  = "=" * 62
+        divider = "-" * 62
+        logger.warning(
+            "\n"
+            + f"\u2554{border}\u2557\n"
+            + f"\u2551  \U0001f6a8 URGENT DEAL ALERT: {deal_name[:40]:<42}\u2551\n"
+            + f"\u255f{divider}\u2562\n"
+            + f"\u2551  Account:  {account_name[:50]:<52}\u2551\n"
+            + f"\u2551  Amount:   ${amount:>12,.0f}{'':38}\u2551\n"
+            + f"\u2551  Risk:     {str(risk_flag):<52}\u2551\n"
+            + f"\u255f{divider}\u2562\n"
+            + f"\u2551  AI: {str(recommendation_ar[:55]):<58}\u2551\n"
+            + f"\u255a{border}\u255d"
+        )
+    except Exception as e:
+        logger.warning(f"URGENT DEAL: {deal_name} | Amount: {amount} | Risk: {risk_flag}")
 
 
 @router.post("/recommendations/generate/{deal_id}")
@@ -89,6 +90,10 @@ async def generate_single_recommendation(
 
         # 3. Call LLM (Pass the FULL fused_payload, not just the probability)
         recommendation_data = llm_service.generate_recommendation(fused_payload)
+
+        # Pop fallback keys to avoid DB schema mismatch if LLM failed
+        recommendation_data.pop("error", None)
+        recommendation_data.pop("is_fallback", None)
 
         # 4. Save to database
         # Ensure you save the normalized version to the DB
@@ -194,6 +199,10 @@ async def generate_all_recommendations(
                 # Call LLM
                 recommendation_data = llm_service.generate_recommendation(fused_payload)
                 
+                # Pop fallback keys to avoid DB schema mismatch
+                recommendation_data.pop("error", None)
+                recommendation_data.pop("is_fallback", None)
+
                 # Upsert to DB
                 stmt = insert(LLMRecommendation).values(
                     id=str(uuid.uuid4()),
@@ -264,7 +273,7 @@ async def generate_all_recommendations(
         
         db.commit()
 
-        # Sprint 5: Auto-classify all deals after AI generation
+        # ─── Sprint 5: Auto-classify and schedule follow-ups ───────────────────
         try:
             from services.deal_classifier import classify_all_deals
             classify_db = SessionLocal()
@@ -275,10 +284,33 @@ async def generate_all_recommendations(
                 classify_db.close()
         except Exception as fu_err:
             logger.warning(f"Deal classification failed (non-fatal): {fu_err}")
-        
+
+        # ─── Auto-schedule follow-ups for ALL deals ────────────────────────────
+        try:
+            from controllers.followup_controller import _schedule_all_followups
+            sched_db = SessionLocal()
+            try:
+                scheduled = _schedule_all_followups(sched_db)
+                logger.info(f"Auto-scheduled {scheduled} follow-up records.")
+            finally:
+                sched_db.close()
+        except Exception as sched_err:
+            logger.warning(f"Follow-up scheduling failed (non-fatal): {sched_err}")
+
+        # ─── Immediately fire WhatsApp notifications in background ─────────────
+        import threading
+        def _fire_whatsapp():
+            try:
+                from services.followup_scheduler import check_deferred_followups
+                check_deferred_followups()
+            except Exception as e:
+                logger.error(f"WhatsApp notification error: {e}")
+        threading.Thread(target=_fire_whatsapp, daemon=True).start()
+        logger.info("🔔 WhatsApp follow-up notifications queued in background.")
+
         return {
             "status": "success",
-            "message": f"AI pipeline complete. {ml_processed} ML predictions + {rec_generated} LLM recommendations generated.",
+            "message": f"AI pipeline complete. {ml_processed} ML predictions + {rec_generated} LLM recommendations generated. WhatsApp alerts queued.",
             "batch_id": batch_id,
             "ml_predictions_generated": ml_processed,
             "recommendations_generated": rec_generated,
@@ -333,6 +365,10 @@ async def generate_batch_recommendations(
                 continue
 
             try:
+                # Pop fallback keys to avoid DB schema mismatch
+                rec_data.pop("error", None)
+                rec_data.pop("is_fallback", None)
+
                 stmt = insert(LLMRecommendation).values(
                     id=str(uuid.uuid4()),
                     deal_id=pred.deal_id,
