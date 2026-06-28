@@ -139,10 +139,15 @@ class LLMRecommenderService:
             # Even with JSON mode on, LLMs sometimes wrap their response in Markdown blocks (```json { ... } ```).
             # This code cleans off the markdown formatting, parses the string into a Python dictionary, and pushes it through the LLMRecommendationOutput Pydantic validator.
             content = raw_content.strip()
-            if content.startswith("```"):
-                content = content.split("```")[1]
-                if content.startswith("json"):
-                    content = content[4:]
+            
+            # Robust JSON extraction: find the first '{' and last '}'
+            start_idx = content.find('{')
+            end_idx = content.rfind('}')
+            
+            if start_idx != -1 and end_idx != -1 and end_idx >= start_idx:
+                content = content[start_idx:end_idx+1]
+            else:
+                raise ValueError("No JSON object found in response.")
 
             parsed = json.loads(content)
             validated = LLMRecommendationOutput(**parsed)

@@ -76,6 +76,7 @@ def send_whatsapp_alert(
     ai_probability: float,
     alert_type: str,
     recommendation_ar: str = "",
+    user_id: str = None,
 ):
     """
     Send a WhatsApp notification to a sales rep about a deal that needs attention.
@@ -138,9 +139,9 @@ def send_whatsapp_alert(
     )
 
     # Send truly headless message using CallMeBot API
-    if sanitized_phone and sanitized_phone != "N/A":
-        from utils.whatsapp_sender import send_headless_whatsapp
-        sent = send_headless_whatsapp(sanitized_phone, message_body)
+    if sanitized_phone and sanitized_phone != "N/A" and user_id:
+        from utils.whatsapp_sender import send_whatsapp_to_user
+        sent = send_whatsapp_to_user(user_id, sanitized_phone, message_body)
         if sent:
             logger.info(f"✅ Headless automated alert sent to {rep_name}")
         else:
@@ -165,6 +166,7 @@ def evaluate_and_notify(
     owner_name: str,
     owner_phone: Optional[str],
     recommendation_ar: str = "",
+    user_id: str = None,
 ):
     """
     Evaluate a deal after recommendation generation and send WhatsApp alerts
@@ -197,6 +199,7 @@ def evaluate_and_notify(
             ai_probability=adjusted_probability,
             alert_type="RISK",
             recommendation_ar=recommendation_ar,
+            user_id=user_id,
         )
     elif is_hot:
         return send_whatsapp_alert(
@@ -208,6 +211,7 @@ def evaluate_and_notify(
             ai_probability=adjusted_probability,
             alert_type="HOT_LEAD",
             recommendation_ar=recommendation_ar,
+            user_id=user_id,
         )
 
     return None

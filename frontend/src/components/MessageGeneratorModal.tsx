@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useGenerateMessage, useMarkFollowedUp } from '../hooks/useDeals';
 import type { RankedDeal, DealDetail } from '../types';
 
@@ -33,11 +33,11 @@ export default function MessageGeneratorModal({ deal, salesRepName, onClose }: M
     const encoded = encodeURIComponent(message);
     if (phone) {
       const sanitized = phone.replace(/[^0-9]/g, '');
-      window.open(`https://wa.me/${sanitized}?text=${encoded}`, '_blank');
+      window.open(`https://api.whatsapp.com/send?phone=${sanitized}&text=${encoded}`, '_blank');
     } else {
-      // No phone number available â€” open WhatsApp with message only
+      // No phone number available — open WhatsApp with message only
       // User can manually select the recipient
-      window.open(`https://wa.me/?text=${encoded}`, '_blank');
+      window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
     }
 
     // Mark as followed up

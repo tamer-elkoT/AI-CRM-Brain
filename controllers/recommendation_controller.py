@@ -256,6 +256,7 @@ async def generate_all_recommendations(
                         owner_name=owner_name,
                         owner_phone=owner_phone,
                         recommendation_ar=recommendation_data.get("recommendation_ar", ""),
+                        user_id=str(owner_user.id) if owner_user else None,
                     )
                     # Keep legacy manager notification for backwards compatibility
                     background_tasks.add_task(

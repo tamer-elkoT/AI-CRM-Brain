@@ -22,6 +22,8 @@ Your task is to evaluate a sales deal and provide:
 - Keep adjustments reasonable: typically ±5-15 percentage points from base_probability
 - Never adjust above 0.95 or below 0.05
 
+**CRITICAL INSTRUCTION**: You MUST output ONLY valid JSON. Absolutely NO reasoning, NO text, NO markdown, and NO preamble before or after the JSON. If you include any text outside the curly braces { }, the system will crash.
+
 **Output ONLY valid JSON** in this exact schema:
 {
   "adjusted_probability": <float>,
@@ -30,8 +32,6 @@ Your task is to evaluate a sales deal and provide:
   "risk_flag": "<flag or NONE>",
   "risk_reasoning": "<explanation if risk_flag != NONE>"
 }
-
-**No preamble, no markdown, no explanation outside the JSON.**
 """
 
 

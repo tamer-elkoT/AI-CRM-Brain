@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { DealDetail } from '../types';
 import { useAuth } from '../context/AuthContext';
 
@@ -40,9 +40,9 @@ export default function OutreachModal({ deal, mode, onClose }: OutreachModalProp
     if (mode === 'whatsapp') {
       if (deal.client_phone) {
         const sanitizedPhone = deal.client_phone.replace(/[^0-9]/g, '');
-        window.open(`https://wa.me/${sanitizedPhone}?text=${encodedText}`, '_blank');
+        window.open(`https://api.whatsapp.com/send?phone=${sanitizedPhone}&text=${encodedText}`, '_blank');
       } else {
-        window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
       }
     } else if (mode === 'email' && deal.client_email) {
       const subject = encodeURIComponent(`Regarding ${deal.deal_name}`);

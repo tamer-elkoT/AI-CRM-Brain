@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "groq"
     LLM_MODEL_ID: str = "llama-3.3-70b-versatile"
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
-    LLM_MAX_TOKENS: int = 500
+    LLM_MAX_TOKENS: int = 2000
     LLM_TEMPERATURE: float = 0.3
     GROK_BASE_URL: str = "https://api.x.ai/v1"
     GROK_API_KEY: str

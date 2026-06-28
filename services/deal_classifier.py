@@ -207,13 +207,13 @@ def _log_whatsapp_alert(deal: ZohoDeal, ai_score: float, owner: User):
         f"Open AI CRM Brain → http://localhost:5173/home"
     )
 
-    if rep_phone:
-        from utils.whatsapp_sender import send_headless_whatsapp
-        sent = send_headless_whatsapp(rep_phone, message)
+    if rep_phone and owner:
+        from utils.whatsapp_sender import send_whatsapp_to_user
+        sent = send_whatsapp_to_user(str(owner.id), rep_phone, message)
         if sent:
-            logger.info(f"✅ Headless automatic WhatsApp alert successfully sent to {rep_name}")
+            logger.info(f"✅ Automatic WhatsApp alert successfully sent to {rep_name}")
         else:
-            logger.warning(f"⚠️ Failed to send headless WhatsApp alert to {rep_name}. Check Twilio credentials or limits.")
+            logger.warning(f"⚠️ Failed to send WhatsApp alert to {rep_name}. Check Baileys connection.")
     else:
         logger.warning(
             f"[WA ALERT] ⚠️ No phone for rep '{rep_name}' on deal '{deal.deal_name}' — skipping WhatsApp alert. "
