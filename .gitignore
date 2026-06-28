@@ -111,3 +111,4 @@ models/data_ingestion/__pycache__
 models/ml_engine/__pycache__
 whatsapp-microservice/node_modules
 whatsapp-microservice/auth_info_baileys
+whatsapp-microservice/auth_sessions/
