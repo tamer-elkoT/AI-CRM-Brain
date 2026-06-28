@@ -17,6 +17,9 @@ from models.api_schemas import (
     AnalyticsResponse,
     AnalyticsPeriod,
     LeaderboardEntry,
+    PipelineAnalyticsResponse,
+    StageBreakdown,
+    TopDealEntry,
 )
 from controllers.auth_controller import get_current_user_dep, get_db
 from controllers.dashboard_controller import apply_rls
@@ -25,6 +28,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 CLOSED_STAGES = ["Closed Won", "Closed Lost"]
+
 
 
 @router.get("/analytics", response_model=AnalyticsResponse)
@@ -256,3 +260,159 @@ def _build_leaderboard(
     # Primary sort: most closed deals; secondary: most follow-ups
     entries.sort(key=lambda e: (-e.closed_deals, -e.followup_count))
     return entries
+
+
+# ============================================================
+# Analytics Pipeline Endpoint
+# ============================================================
+
+@router.get("/analytics/pipeline", response_model=PipelineAnalyticsResponse)
+def get_pipeline_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
+):
+    """
+    Returns all KPIs and stage breakdown data needed for the Analytics Dashboard:
+    - active_pipeline_value: SUM amount for all non-closed deals
+    - total_won_amount: SUM amount for Closed Won deals
+    - win_rate_pct: closed_won / (closed_won + closed_lost) * 100
+    - at_risk_value: SUM amount for deals where action_status = need_action_now
+    - stage_breakdown: list of (stage, count, total_amount, pct)
+    - top_deals: top 5 deals by amount (any non-closed stage)
+    """
+
+    # ── Base query with RLS ───────────────────────────────────────────────────
+    def base_q():
+        q = db.query(ZohoDeal)
+        return apply_rls(q, current_user)
+
+    # ── Active pipeline value (non-closed) ───────────────────────────────────
+    active_q = db.query(func.coalesce(func.sum(ZohoDeal.amount), 0.0))
+    active_q = apply_rls(active_q, current_user)
+    active_pipeline_value = float(
+        active_q.filter(ZohoDeal.stage.notin_(CLOSED_STAGES)).scalar() or 0.0
+    )
+
+    # ── Total won amount ──────────────────────────────────────────────────────
+    won_q = db.query(func.coalesce(func.sum(ZohoDeal.amount), 0.0))
+    won_q = apply_rls(won_q, current_user)
+    total_won_amount = float(
+        won_q.filter(ZohoDeal.stage == "Closed Won").scalar() or 0.0
+    )
+
+    # ── Closed Won / Lost counts for win rate ────────────────────────────────
+    won_count_q = db.query(func.count(ZohoDeal.id))
+    won_count_q = apply_rls(won_count_q, current_user)
+    closed_won_count = int(won_count_q.filter(ZohoDeal.stage == "Closed Won").scalar() or 0)
+
+    lost_count_q = db.query(func.count(ZohoDeal.id))
+    lost_count_q = apply_rls(lost_count_q, current_user)
+    closed_lost_count = int(lost_count_q.filter(ZohoDeal.stage == "Closed Lost").scalar() or 0)
+
+    total_closed = closed_won_count + closed_lost_count
+    win_rate_pct = round((closed_won_count / total_closed) * 100, 1) if total_closed > 0 else 0.0
+
+    # ── At-risk deals (need_action_now) ──────────────────────────────────────
+    risk_q = db.query(
+        func.count(ZohoDeal.id),
+        func.coalesce(func.sum(ZohoDeal.amount), 0.0),
+    )
+    risk_q = apply_rls(risk_q, current_user)
+    risk_row = risk_q.filter(
+        ZohoDeal.action_status == "need_action_now",
+        ZohoDeal.stage.notin_(CLOSED_STAGES),
+    ).first()
+    at_risk_deal_count = int(risk_row[0]) if risk_row else 0
+    at_risk_value = float(risk_row[1]) if risk_row else 0.0
+
+    # ── Other stalled count (active but not in won/lost) ─────────────────────
+    stalled_q = db.query(func.count(ZohoDeal.id))
+    stalled_q = apply_rls(stalled_q, current_user)
+    other_stalled_count = int(
+        stalled_q.filter(
+            ZohoDeal.stage.notin_(CLOSED_STAGES + ["Closed Won", "Closed Lost"]),
+            ZohoDeal.action_status != "need_action_now",
+        ).scalar() or 0
+    )
+
+    # ── Stage breakdown ───────────────────────────────────────────────────────
+    stage_q = db.query(
+        ZohoDeal.stage,
+        func.count(ZohoDeal.id).label("deal_count"),
+        func.coalesce(func.sum(ZohoDeal.amount), 0.0).label("total_amount"),
+    )
+    stage_q = apply_rls(stage_q, current_user)
+    stage_rows = (
+        stage_q
+        .filter(ZohoDeal.stage.notin_(CLOSED_STAGES))
+        .group_by(ZohoDeal.stage)
+        .order_by(func.sum(ZohoDeal.amount).desc())
+        .all()
+    )
+
+    # Stage ordering priority (pipeline funnel order)
+    STAGE_ORDER = [
+        "Value Proposition", "Qualification", "Needs Analysis",
+        "Id. Decision Makers", "Perception Analysis",
+        "Proposal/Price Quote", "Negotiation/Review",
+        "Discovery", "Proposal", "Negotiation", "Closing",
+    ]
+
+    def stage_sort_key(row):
+        try:
+            return STAGE_ORDER.index(row.stage)
+        except ValueError:
+            return 999
+
+    stage_rows_sorted = sorted(stage_rows, key=stage_sort_key)
+
+    stage_breakdown = []
+    for row in stage_rows_sorted:
+        pct = round((float(row.total_amount) / active_pipeline_value) * 100, 1) if active_pipeline_value > 0 else 0.0
+        stage_breakdown.append(StageBreakdown(
+            stage=row.stage,
+            deal_count=int(row.deal_count),
+            total_amount=float(row.total_amount),
+            pct_of_pipeline=min(pct, 100.0),
+        ))
+
+    # ── Top 5 deals by amount ─────────────────────────────────────────────────
+    top_q = db.query(ZohoDeal)
+    top_q = apply_rls(top_q, current_user)
+    top_deals_rows = (
+        top_q
+        .filter(ZohoDeal.stage.notin_(CLOSED_STAGES))
+        .order_by(ZohoDeal.amount.desc())
+        .limit(5)
+        .all()
+    )
+    top_deals = [
+        TopDealEntry(
+            deal_id=str(d.id),
+            deal_name=d.deal_name or "Unnamed",
+            account_name=d.account_name or "Unknown",
+            stage=d.stage or "Active",
+            amount=float(d.amount or 0.0),
+        )
+        for d in top_deals_rows
+    ]
+
+    logger.info(
+        f"Pipeline analytics for {current_user.email}: "
+        f"pipeline={active_pipeline_value:.0f}, won={total_won_amount:.0f}, "
+        f"win_rate={win_rate_pct}%, stages={len(stage_breakdown)}"
+    )
+
+    return PipelineAnalyticsResponse(
+        active_pipeline_value=active_pipeline_value,
+        total_won_amount=total_won_amount,
+        win_rate_pct=win_rate_pct,
+        at_risk_value=at_risk_value,
+        at_risk_deal_count=at_risk_deal_count,
+        closed_won_count=closed_won_count,
+        closed_lost_count=closed_lost_count,
+        other_stalled_count=other_stalled_count,
+        stage_breakdown=stage_breakdown,
+        top_deals=top_deals,
+    )
+

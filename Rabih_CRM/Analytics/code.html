@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rabih CRM | Analytics Dashboard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Geist -->
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .ai-glow {
+            box-shadow: inset 0 0 12px rgba(96, 99, 238, 0.1);
+            border: 1px solid rgba(96, 99, 238, 0.2);
+        }
+        /* Custom scrollbar for enterprise feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bcc9c6;
+            border-radius: 10px;
+        }
+        .notification-ring {
+            animation: ring 4s ease-in-out infinite;
+        }
+        @keyframes ring {
+            0%, 100% { transform: rotate(0); }
+            10%, 20% { transform: rotate(15deg); }
+            30%, 40% { transform: rotate(-15deg); }
+            50%, 60% { transform: rotate(10deg); }
+            70%, 80% { transform: rotate(-10deg); }
+            90% { transform: rotate(0); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#dae2fd",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary-container": "#5c647a",
+                        "tertiary-container": "#6063ee",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "outline-variant": "#bcc9c6",
+                        "on-primary-container": "#f4fffc",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#3d4947",
+                        "surface-container": "#eceef0",
+                        "tertiary-fixed": "#e1e0ff",
+                        "secondary-container": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-background": "#191c1e",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary": "#565e74",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-error-container": "#93000a",
+                        "outline": "#6d7a77",
+                        "surface-tint": "#006a61",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#4648d4",
+                        "background": "#f7f9fb",
+                        "inverse-primary": "#6bd8cb",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-tertiary-container": "#fffbff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#89f5e7",
+                        "on-primary-fixed": "#00201d",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-primary": "#ffffff",
+                        "primary": "#00685f",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#008378",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary-fixed-variant": "#005049",
+                        "surface": "#f7f9fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Geist"],
+                        "headline-xl": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "arabic-body": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "label-caps": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "arabic-body": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Shell Layout -->
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-outline-variant bg-surface flex flex-col p-4 z-50">
+<div class="flex items-center gap-3 px-2 mb-10">
+<div class="w-10 h-10 overflow-hidden flex items-center justify-center rounded-lg">
+<img alt="Rabih CRM Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeL73xwSycula6iJQqOT8hgMZz_5nkUjeg1hsA7lH44P3ituJw6Y9GLWQxyILW--yimb-J10nyq9zTI1ZIkSCM_nDzkBVS2UkQjbfPTokvaln8_6J-mTmG0bg3i4FF6calGjAxaeMnGe0odVfQBT4oO35nv2knj5JAf6rWANilOkwkhb6SW5auEOnf2jFAa-jmwS6AkhJsNZVHXrn1qkIbI0t5W6UFbyDzLOCMd4MAo6JuNtfOovHEraTivNFEecKiQ6IYk2JlL-I"/>
+</div>
+<div>
+<h1 class="text-body-lg font-bold text-on-surface">Rabih CRM</h1>
+<p class="text-[10px] text-outline font-label-caps uppercase tracking-widest">AI Sales Intelligence</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">auto_awesome</span>
+<span class="font-label-caps text-label-caps">Intelligence</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-lg px-4 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-label-caps text-label-caps">Analytics</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">account_tree</span>
+<span class="font-label-caps text-label-caps">Pipeline</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Integration</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">group</span>
+<span class="font-label-caps text-label-caps">Team</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined text-outline group-hover:text-primary">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant pt-4 space-y-1">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="font-label-caps text-label-caps">User Profile</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Help</span>
+</a>
+<a class="flex items-center gap-3 text-error px-4 py-2 hover:bg-error-container/20 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 relative">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-64 z-40 glass-header border-b border-outline-variant shadow-sm h-16 px-10 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-body-md focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Search accounts or deals..." type="text"/>
+</div>
+<nav class="hidden md:flex gap-6">
+<a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Pipeline</a>
+<a class="font-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Deals</a>
+<a class="font-body-md text-primary font-bold border-b-2 border-primary pb-1" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary-container text-on-primary px-4 py-2 rounded-lg text-body-md font-bold transition-all active:scale-95 shadow-sm">
+                    New Deal
+                </button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-all relative group">
+<span class="material-symbols-outlined text-on-surface-variant notification-ring">notifications</span>
+<span class="absolute top-2.5 right-2.5 w-2 h-2 bg-error rounded-full border-2 border-white ring-2 ring-error/20"></span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant overflow-hidden cursor-pointer hover:border-primary transition-all">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvgUf-d1gpdZWuNtFdrzsx-mk2XWOA5MRk4O-GUnEf8ZhxNMyCPDRVgKqZ1EKyMMZ9ENhG0oI0aAglSOjd0l00_oxhbNnPHJ4HDvmnPgx1XwsCThYr7yQ67oOKIME8UEzEJsygEJe-1-rkxDZ0mLm1MtTVry0N6KFyU5rdgqoEZSDfu9uRoFufJP0wO6OQilDXZEP23fitOaVWSZNZqqQBWypz5Hx_eKnaOm0w0GqTWOrtHQDJOgZafs3BOye-9nomCH5aL_S-GdI"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="pt-24 pb-10 px-10 max-w-[1440px] mx-auto">
+<!-- Global Date Slicer -->
+<div class="bg-surface-container-low rounded-2xl p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-outline-variant/30">
+<div class="flex flex-col">
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Analytics Dashboard</h2>
+<p class="text-on-surface-variant text-body-md">Data-driven performance metrics for Q3</p>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-lowest p-2 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex items-center gap-2 px-3 py-2 border-r border-outline-variant cursor-pointer hover:bg-surface-container transition-colors rounded-l-lg">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+<span class="font-body-md text-on-surface font-medium whitespace-nowrap">Jul 01, 2024 - Sep 30, 2024</span>
+</div>
+<div class="flex gap-1">
+<button class="px-3 py-1.5 rounded-lg text-label-caps font-label-caps bg-primary text-on-primary">Last 90 Days</button>
+<button class="px-3 py-1.5 rounded-lg text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container">This Year</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Core KPI Metric Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
+<!-- KPI 1: Total Active Pipeline Value -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Active Pipeline Value</span>
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-lg text-[32px] font-bold text-on-surface">$12.8M</h3>
+<span class="text-[12px] font-bold text-primary flex items-center">+8.4% <span class="material-symbols-outlined text-[14px]">arrow_upward</span></span>
+</div>
+<div class="mt-4 w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[64%]"></div>
+</div>
+</div>
+<!-- KPI 2: Total Won Deal Amount -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Total Won Amount</span>
+<div class="p-2 bg-secondary-container/30 rounded-lg">
+<span class="material-symbols-outlined text-secondary">workspace_premium</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-lg text-[32px] font-bold text-on-surface">$4.2M</h3>
+<span class="text-[12px] font-bold text-primary flex items-center">+12% <span class="material-symbols-outlined text-[14px]">arrow_upward</span></span>
+</div>
+<p class="text-[12px] text-outline mt-4">Target: $5.0M (84% achieved)</p>
+</div>
+<!-- KPI 3: Win Rate % -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Win Rate %</span>
+<div class="p-2 bg-tertiary-fixed/30 rounded-lg">
+<span class="material-symbols-outlined text-tertiary">trending_up</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-lg text-[32px] font-bold text-on-surface">68%</h3>
+<span class="text-[12px] font-bold text-primary flex items-center">+2.4% <span class="material-symbols-outlined text-[14px]">arrow_upward</span></span>
+</div>
+<p class="text-[12px] text-outline mt-4">Average deal cycle: 42 days</p>
+</div>
+<!-- KPI 4: High Risk Deals -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 hover:shadow-md transition-all ai-glow">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">At-Risk Value</span>
+<div class="p-2 bg-error-container/30 rounded-lg">
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="font-display-lg text-[32px] font-bold text-on-surface">$1.2M</h3>
+<span class="px-2 py-0.5 bg-error/10 text-error rounded text-[10px] font-bold uppercase">14 Deals</span>
+</div>
+<p class="text-[12px] text-on-tertiary-fixed-variant mt-4 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span> 
+                        AI intervention recommended
+                    </p>
+</div>
+</div>
+<!-- Middle Section: Analysis Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-gutter">
+<!-- Column 1: Deals by Stage Analysis -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h4 class="font-headline-md text-on-surface">Deals by Stage Analysis</h4>
+<p class="text-label-caps text-outline font-label-caps mt-1 uppercase">Distribution of $12.8M Total Pipeline</p>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-lg transition-colors"><span class="material-symbols-outlined text-on-surface-variant">bar_chart</span></button>
+<button class="p-2 hover:bg-surface-container rounded-lg transition-colors"><span class="material-symbols-outlined text-outline">filter_alt</span></button>
+</div>
+</div>
+<div class="space-y-5">
+<!-- Stage: Discovery -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">1. Discovery</span>
+<span class="text-body-md font-bold text-on-surface">$2.4M <span class="text-outline font-normal ml-1">(18 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-slate-300 h-full w-full group-hover:bg-slate-400 transition-colors"></div>
+</div>
+</div>
+<!-- Stage: Qualification -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">2. Qualification</span>
+<span class="text-body-md font-bold text-on-surface">$3.1M <span class="text-outline font-normal ml-1">(22 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-secondary-fixed-dim h-full w-[85%] group-hover:brightness-95 transition-all"></div>
+</div>
+</div>
+<!-- Stage: Needs Analysis -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">3. Needs Analysis</span>
+<span class="text-body-md font-bold text-on-surface">$1.8M <span class="text-outline font-normal ml-1">(12 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-secondary-container h-full w-[70%] group-hover:brightness-95 transition-all"></div>
+</div>
+</div>
+<!-- Stage: Value Proposition -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">4. Value Proposition</span>
+<span class="text-body-md font-bold text-on-surface">$2.2M <span class="text-outline font-normal ml-1">(15 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-primary-fixed-dim h-full w-[60%] group-hover:brightness-95 transition-all"></div>
+</div>
+</div>
+<!-- Stage: Proposal -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">5. Proposal</span>
+<span class="text-body-md font-bold text-on-surface">$1.5M <span class="text-outline font-normal ml-1">(9 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-primary-container h-full w-[45%] group-hover:brightness-95 transition-all"></div>
+</div>
+</div>
+<!-- Stage: Negotiation -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">6. Negotiation</span>
+<span class="text-body-md font-bold text-on-surface">$0.9M <span class="text-outline font-normal ml-1">(6 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-primary h-full w-[30%] group-hover:brightness-110 transition-all"></div>
+</div>
+</div>
+<!-- Stage: Closing -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-end">
+<span class="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider">7. Closing</span>
+<span class="text-body-md font-bold text-on-surface">$0.7M <span class="text-outline font-normal ml-1">(4 Deals)</span></span>
+</div>
+<div class="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+<div class="bg-on-primary-fixed-variant h-full w-[15%] group-hover:brightness-125 transition-all"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: Win/Loss Ratio -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col">
+<div class="flex justify-between items-center mb-8">
+<h4 class="font-headline-md text-on-surface">Win/Loss Ratio</h4>
+<span class="text-label-caps text-outline font-label-caps uppercase">This Quarter</span>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center">
+<div class="relative w-48 h-48 mb-8">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#eceef0" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#00685f" stroke-dasharray="68, 100" stroke-linecap="round" stroke-width="4.5"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#ba1a1a" stroke-dasharray="22, 100" stroke-dashoffset="-68" stroke-linecap="round" stroke-width="4.5"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#565e74" stroke-dasharray="10, 100" stroke-dashoffset="-90" stroke-linecap="round" stroke-width="4.5"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-display-lg font-bold text-on-surface">68%</span>
+<span class="text-label-caps text-outline font-label-caps">WIN RATE</span>
+</div>
+</div>
+<div class="w-full space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-body-md text-on-surface-variant">Closed Won</span>
+</div>
+<span class="font-bold text-on-surface">142 Deals</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<span class="text-body-md text-on-surface-variant">Closed Lost</span>
+</div>
+<span class="font-bold text-on-surface">46 Deals</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-secondary"></div>
+<span class="text-body-md text-on-surface-variant">Other / Stalled</span>
+</div>
+<span class="font-bold text-on-surface">21 Deals</span>
+</div>
+</div>
+</div>
+<button class="mt-8 w-full py-3 border border-outline-variant rounded-xl font-label-caps text-label-caps text-primary hover:bg-surface-container transition-colors uppercase tracking-widest">View Historical Trends</button>
+</div>
+</div>
+<!-- Bottom Section: Detailed Rankings -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Top Accounts Ranking -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-md text-on-surface">Top Accounts by Value</h4>
+<button class="text-primary text-label-caps font-label-caps hover:underline">Full List</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 p-3 hover:bg-surface-container-low transition-colors rounded-xl border border-transparent hover:border-outline-variant/30">
+<div class="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold">1</div>
+<div class="flex-1">
+<p class="font-body-md font-bold text-on-surface">Starlight Global Tech</p>
+<p class="text-[12px] text-outline">Software &amp; Infrastructure</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface">$1.2M</p>
+<div class="flex items-center gap-1 justify-end text-primary">
+<span class="text-[10px] font-bold">4 DEALS</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 hover:bg-surface-container-low transition-colors rounded-xl border border-transparent hover:border-outline-variant/30">
+<div class="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold">2</div>
+<div class="flex-1">
+<p class="font-body-md font-bold text-on-surface">Nexus Healthcare Systems</p>
+<p class="text-[12px] text-outline">Medical Services</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface">$0.85M</p>
+<div class="flex items-center gap-1 justify-end text-primary">
+<span class="text-[10px] font-bold">3 DEALS</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 hover:bg-surface-container-low transition-colors rounded-xl border border-transparent hover:border-outline-variant/30">
+<div class="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold">3</div>
+<div class="flex-1">
+<p class="font-body-md font-bold text-on-surface">Titan Manufacturing Ltd.</p>
+<p class="text-[12px] text-outline">Industrial Goods</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface">$0.72M</p>
+<div class="flex items-center gap-1 justify-end text-primary">
+<span class="text-[10px] font-bold">2 DEALS</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 hover:bg-surface-container-low transition-colors rounded-xl border border-transparent hover:border-outline-variant/30">
+<div class="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold">4</div>
+<div class="flex-1">
+<p class="font-body-md font-bold text-on-surface">Blue Sky Logistics</p>
+<p class="text-[12px] text-outline">Transportation</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-on-surface">$0.64M</p>
+<div class="flex items-center gap-1 justify-end text-primary">
+<span class="text-[10px] font-bold">5 DEALS</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Highest Value Deals Section -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-md text-on-surface">Highest Value Deals</h4>
+<div class="flex items-center gap-2">
+<span class="text-label-caps font-label-caps text-outline uppercase">Sorted by Amount</span>
+<span class="material-symbols-outlined text-outline text-sm">sort</span>
+</div>
+</div>
+<div class="overflow-hidden border border-outline-variant/30 rounded-xl">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low border-b border-outline-variant/30">
+<tr>
+<th class="px-4 py-3 text-label-caps font-label-caps text-outline uppercase">Deal Name</th>
+<th class="px-4 py-3 text-label-caps font-label-caps text-outline uppercase">Stage</th>
+<th class="px-4 py-3 text-label-caps font-label-caps text-outline uppercase text-right">Amount</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-surface group-hover:text-primary transition-colors">Enterprise CRM Migration</span>
+<span class="text-[11px] text-outline">Starlight Global Tech</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase">Proposal</span>
+</td>
+<td class="px-4 py-4 text-right font-bold text-on-surface">$450,000</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-surface group-hover:text-primary transition-colors">Global Supply Chain AI</span>
+<span class="text-[11px] text-outline">Blue Sky Logistics</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="px-2 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold rounded-full uppercase">Negotiation</span>
+</td>
+<td class="px-4 py-4 text-right font-bold text-on-surface">$385,000</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-surface group-hover:text-primary transition-colors">Cloud Security Framework</span>
+<span class="text-[11px] text-outline">Nexus Healthcare</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="px-2 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-bold rounded-full uppercase">Discovery</span>
+</td>
+<td class="px-4 py-4 text-right font-bold text-on-surface">$320,000</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-surface group-hover:text-primary transition-colors">Automated Data Pipelines</span>
+<span class="text-[11px] text-outline">Titan Manufacturing</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<span class="px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-[10px] font-bold rounded-full uppercase">Qualification</span>
+</td>
+<td class="px-4 py-4 text-right font-bold text-on-surface">$290,000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Loading state skeleton / loader -->
+<div class="hidden fixed inset-0 z-[60] bg-white/20 backdrop-blur-sm flex items-center justify-center" id="loading-state">
+<div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4">
+<div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+<p class="font-label-caps text-label-caps text-outline animate-pulse uppercase tracking-widest">Updating Dashboard Data...</p>
+</div>
+</div>
+<script>
+    // Simple UI interaction simulator
+    document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if(btn.innerText.includes('New Deal') || btn.innerText.includes('Days')) {
+                const loader = document.getElementById('loading-state');
+                loader.classList.remove('hidden');
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                }, 800);
+            }
+        });
+    });
+
+    // Chart hover effects
+    document.querySelectorAll('.bg-surface-container-lowest').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.classList.add('-translate-y-0.5');
+        });
+        card.addEventListener('mouseleave', () => {
+            card.classList.remove('-translate-y-0.5');
+        });
+    });
+</script>
+</body></html>

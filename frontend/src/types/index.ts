@@ -291,3 +291,36 @@ export interface AnalyticsResponse {
   total_followups: number;
   leaderboard?: LeaderboardEntry[];
 }
+
+// ============================================================
+// Analytics Pipeline (new endpoint)
+// ============================================================
+
+export interface StageBreakdown {
+  stage: string;
+  deal_count: number;
+  total_amount: number;
+  pct_of_pipeline: number; // 0-100
+}
+
+export interface TopDealEntry {
+  deal_id: string;
+  deal_name: string;
+  account_name: string;
+  stage: string;
+  amount: number;
+}
+
+export interface PipelineAnalyticsResponse {
+  active_pipeline_value: number;
+  total_won_amount: number;
+  win_rate_pct: number;
+  at_risk_value: number;
+  at_risk_deal_count: number;
+  closed_won_count: number;
+  closed_lost_count: number;
+  other_stalled_count: number;
+  stage_breakdown: StageBreakdown[];
+  top_deals: TopDealEntry[];
+}
+

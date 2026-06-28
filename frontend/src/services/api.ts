@@ -22,6 +22,7 @@ import type {
   GenerateMessageResponse,
   StageUpdateResponse,
   AnalyticsResponse,
+  PipelineAnalyticsResponse,
   AdminSignupRequest,
   TeamSignupRequest,
   InviteRequest,
@@ -131,6 +132,8 @@ export const notificationApi = {
 export const analyticsApi = {
   getAnalytics: (startDate?: string, endDate?: string): Promise<AnalyticsResponse> =>
     api.get('/analytics', { params: { start_date: startDate, end_date: endDate } }).then((res) => res.data),
+  getPipeline: (): Promise<PipelineAnalyticsResponse> =>
+    api.get('/analytics/pipeline').then((res) => res.data),
 };
 
 // WhatsApp Integration API

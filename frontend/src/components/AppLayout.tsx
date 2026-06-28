@@ -32,8 +32,7 @@ interface NavItem {
 const PRIMARY_NAV: NavItem[] = [
   { icon: 'home',         label: 'Home',        path: '/home' },         // All Deals Pipeline
   { icon: 'analytics',   label: 'Dashboard',   path: '/dashboard' },
-  { icon: 'groups',      label: 'Accounts',    path: '/settings', stub: true },
-  { icon: 'assessment',  label: 'Reports',     path: '/analytics' },    // Reports & Insights
+  { icon: 'insights',    label: 'Analytics',   path: '/analytics' },    // Analytics Dashboard
   { icon: 'auto_mode',   label: 'Automations', path: '/integrations', stub: true },
 ];
 

@@ -314,3 +314,45 @@ class AnalyticsResponse(BaseModel):
     total_followups: int
     # Only included when the requesting user is a sales_manager
     leaderboard: Optional[List[LeaderboardEntry]] = None
+
+
+# ============================================================
+# Analytics Pipeline Schemas (new endpoint)
+# ============================================================
+
+class StageBreakdown(BaseModel):
+    """Deal count and total value for a single pipeline stage."""
+    stage: str
+    deal_count: int
+    total_amount: float
+    pct_of_pipeline: float   # 0-100, relative to total active pipeline value
+
+
+class TopDealEntry(BaseModel):
+    """A deal record for the Highest Value Deals table."""
+    deal_id: str
+    deal_name: str
+    account_name: str
+    stage: str
+    amount: float
+
+
+class PipelineAnalyticsResponse(BaseModel):
+    """
+    Full analytics payload for the Analytics Dashboard.
+    Includes KPIs + stage breakdown + top deals.
+    """
+    # KPI cards
+    active_pipeline_value: float       # SUM amount for non-closed deals
+    total_won_amount: float            # SUM amount for Closed Won deals
+    win_rate_pct: float                # closed_won / (closed_won + closed_lost) * 100
+    at_risk_value: float               # SUM amount where action_status = need_action_now
+    at_risk_deal_count: int            # COUNT of at-risk deals
+    closed_won_count: int
+    closed_lost_count: int
+    other_stalled_count: int           # neither won nor lost (active stalled)
+    # Stage funnel
+    stage_breakdown: List[StageBreakdown]
+    # Bottom tables
+    top_deals: List[TopDealEntry]      # top 5 by amount (any active stage)
+

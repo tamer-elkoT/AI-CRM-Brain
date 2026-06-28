@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { dashboardApi, actionApi, followupApi } from '../services/api';
-import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse, DealCreate, CreateDealResponse, FollowupMarkRequest, FollowupMarkResponse, GenerateMessageResponse, StageUpdateResponse } from '../types';
+import { dashboardApi, actionApi, followupApi, analyticsApi } from '../services/api';
+import type { DashboardResponse, DealDetail, ActionResponse, SyncResponse, AccountRankingResponse, GenerateResponse, AllDealsResponse, DealCreate, CreateDealResponse, FollowupMarkRequest, FollowupMarkResponse, GenerateMessageResponse, StageUpdateResponse, PipelineAnalyticsResponse } from '../types';
 
 export function useDashboard(sortBy: string = 'ai_score', limit?: number) {
   return useQuery<DashboardResponse>({
@@ -20,6 +20,14 @@ export function useAccountRanking() {
   return useQuery<AccountRankingResponse>({
     queryKey: ['account_ranking'],
     queryFn: dashboardApi.getAccountRanking,
+  });
+}
+
+export function usePipelineAnalytics() {
+  return useQuery<PipelineAnalyticsResponse>({
+    queryKey: ['pipeline_analytics'],
+    queryFn: analyticsApi.getPipeline,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
 

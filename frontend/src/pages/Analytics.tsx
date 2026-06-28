@@ -1,454 +1,614 @@
 /**
- * Analytics.tsx â€” Rabih CRM "Reports & Insights" Page
+ * Analytics.tsx — Rabih CRM Analytics Dashboard
  *
- * Matches Stitch Reports_Tab design:
- *  - 4 metric cards: Sales Velocity Â· Conversion Rate Â· Total Opportunities Â· Stalled Deals
- *  - Deal Velocity Trend (SVG line chart) + AI Insights dark panel
- *  - Win/Loss by Lead Source (horizontal bar chart)
- *  - Revenue by Industry (donut chart)
- *  - Top Performing Deals table
+ * Design: Emerald Enterprise (from Rabih_CRM/Analytics/)
+ *
+ * Sections:
+ *  1. Header with date range selector + action buttons
+ *  2. Four KPI cards: Active Pipeline Value, Total Won, Win Rate, At-Risk
+ *  3. Deals by Stage Analysis (horizontal progress bars)
+ *  4. Win/Loss Ratio (SVG donut)
+ *  5. Top Accounts by Value
+ *  6. Highest Value Deals table (clickable → DealDrawer)
+ *
+ * Data sources:
+ *  - usePipelineAnalytics() → /analytics/pipeline (new endpoint)
+ *  - useAccountRanking()    → /analytics/accounts/ranked
+ *  - useTriggerSync()       → /ingest/deals
  */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAllDeals, useTriggerSync } from '../hooks/useDeals';
+import { usePipelineAnalytics, useAccountRanking, useTriggerSync } from '../hooks/useDeals';
 import { useToast } from '../components/ui/Toast';
 import DealDrawer from '../components/DealDrawer';
+import type { StageBreakdown } from '../types';
 
-const WIN_LOSS_DATA = [
-  { label: 'Direct Outbound',   win: 72, color: 'bg-secondary' },
-  { label: 'Inbound Marketing', win: 45, color: 'bg-secondary' },
-  { label: 'Referrals',         win: 88, color: 'bg-secondary' },
-  { label: 'Partner Network',   win: 54, color: 'bg-secondary' },
-];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const INDUSTRY_DATA = [
-  { label: 'Fintech',    pct: 40, color: '#006a61', dot: 'bg-secondary' },
-  { label: 'SaaS',       pct: 30, color: '#131b2e', dot: 'bg-[#131b2e]' },
-  { label: 'Healthcare', pct: 15, color: '#89f5e7', dot: 'bg-[#89f5e7]' },
-  { label: 'Others',     pct: 15, color: '#c6c6cd', dot: 'bg-outline-variant' },
-];
-
-const AI_INSIGHTS = [
-  {
-    text: "Follow up on 5 deals in ",
-    highlight: 'Negotiation',
-    rest: " stage that haven't been touched in 3 days.",
-    action: 'Take Action',
-    route: '/home',
-    toast: null,
-  },
-  {
-    text: 'Focus on ',
-    highlight: 'Fintech sector',
-    rest: ' — 80% higher win rate observed this quarter.',
-    action: 'View Report',
-    route: null,
-    toast: 'Filter your pipeline by Fintech industry to see the 80% win-rate segment.',
-  },
-  {
-    text: 'Pipeline gap detected for Q4. Increase outbound activity in ',
-    highlight: 'Enterprise Software',
-    rest: '.',
-    action: 'Run Campaign',
-    route: '/integrations',
-    toast: null,
-  },
-];
-
-function initials(name: string): string {
-  return name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('');
+function fmtMoney(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+  return `$${n.toLocaleString()}`;
 }
+
+function fmtMoneyFull(n: number): string {
+  return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
+/** Pick a bar colour based on pipeline funnel position */
+const STAGE_COLORS: Record<string, string> = {
+  'Value Proposition':   'bg-[#6bd8cb]',
+  'Qualification':       'bg-[#bec6e0]',
+  'Needs Analysis':      'bg-[#dae2fd]',
+  'Id. Decision Makers': 'bg-[#bec6e0]',
+  'Perception Analysis': 'bg-[#dae2fd]',
+  'Proposal/Price Quote':'bg-[#89f5e7]',
+  'Negotiation/Review':  'bg-[#008378]',
+  'Discovery':           'bg-slate-300',
+  'Proposal':            'bg-[#89f5e7]',
+  'Negotiation':         'bg-[#006a61]',
+  'Closing':             'bg-[#005049]',
+};
+
+function stageColor(stage: string): string {
+  return STAGE_COLORS[stage] ?? 'bg-[#bec6e0]';
+}
+
+const STAGE_BADGE_STYLES: Record<string, string> = {
+  'Proposal':            'bg-[#dae2fd] text-[#3f465c]',
+  'Proposal/Price Quote':'bg-[#dae2fd] text-[#3f465c]',
+  'Negotiation':         'bg-[#89f5e7] text-[#005049]',
+  'Negotiation/Review':  'bg-[#89f5e7] text-[#005049]',
+  'Discovery':           'bg-surface-container-highest text-on-surface-variant',
+  'Qualification':       'bg-[#e1e0ff] text-[#2f2ebe]',
+  'Closing':             'bg-[#00201d] text-[#89f5e7]',
+};
+
+function stageBadge(stage: string): string {
+  return STAGE_BADGE_STYLES[stage] ?? 'bg-surface-container-high text-on-surface-variant';
+}
+
+// ─── Skeleton Loader ──────────────────────────────────────────────────────────
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`animate-pulse bg-surface-container rounded-xl ${className ?? ''}`} />;
+}
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
+
+interface KpiCardProps {
+  label: string;
+  value: string;
+  sub?: React.ReactNode;
+  icon: string;
+  iconBg: string;
+  iconColor: string;
+  isLoading: boolean;
+  aiGlow?: boolean;
+}
+
+function KpiCard({ label, value, sub, icon, iconBg, iconColor, isLoading, aiGlow }: KpiCardProps) {
+  return (
+    <div
+      className={`bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30
+        hover:shadow-md transition-all duration-200 group cursor-default
+        ${aiGlow ? 'shadow-[inset_0_0_12px_rgba(96,99,238,0.1)] border border-[rgba(96,99,238,0.2)]' : 'shadow-sm'}`}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <span className="text-[11px] font-bold text-outline uppercase tracking-widest leading-tight">{label}</span>
+        <div className={`p-2 ${iconBg} rounded-lg`}>
+          <span className={`material-symbols-outlined ${iconColor} text-[20px]`}
+            style={{ fontVariationSettings: aiGlow ? "'FILL' 1" : "'FILL' 0" }}>
+            {icon}
+          </span>
+        </div>
+      </div>
+      {isLoading ? (
+        <>
+          <Skeleton className="h-9 w-28 mb-3" />
+          <Skeleton className="h-3 w-24" />
+        </>
+      ) : (
+        <>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-[32px] font-bold text-on-surface leading-none">{value}</h3>
+          </div>
+          {sub && <div className="mt-4">{sub}</div>}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Win Rate Progress bar ────────────────────────────────────────────────────
+
+function WinRateBar({ pct }: { pct: number }) {
+  return (
+    <div className="mt-4 w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+      <div
+        className="bg-primary h-full rounded-full transition-all duration-700"
+        style={{ width: `${Math.min(pct, 100)}%` }}
+      />
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+type DateRangeKey = 'Last 30 Days' | 'Last 90 Days' | 'This Year';
 
 export default function Analytics() {
   const navigate = useNavigate();
-  const { data: dealsData, isLoading } = useAllDeals(1, 15, undefined, 'ai_score', false);
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRangeKey>('Last 90 Days');
+
+  const { data: pipeline, isLoading: pipelineLoading } = usePipelineAnalytics();
+  const { data: accountData, isLoading: accountsLoading } = useAccountRanking();
   const syncMutation = useTriggerSync();
   const { toast } = useToast();
-  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState('Last 30 Days');
-
-  const handleInsightAction = (insight: typeof AI_INSIGHTS[number]) => {
-    if (insight.route) {
-      navigate(insight.route);
-    } else if (insight.toast) {
-      toast({ title: '💡 AI Insight', description: insight.toast, variant: 'success' });
-    }
-  };
-
-  const deals = dealsData?.items ?? [];
 
   const handleSync = () => {
     syncMutation.mutate(undefined, {
-      onSuccess: (res) => toast({ title: 'ðŸ”„ Sync Complete', description: res.message, variant: 'success' }),
+      onSuccess: (res) => toast({ title: '🔄 Sync Complete', description: res.message, variant: 'success' }),
       onError: (err) => toast({ title: 'Sync Failed', description: (err as Error).message, variant: 'destructive' }),
     });
   };
 
-  // Compute metrics from real data
-  const totalDeals = dealsData?.total ?? 0;
-  const stalledDeals = deals.filter((d) => d.action_status === 'need_action_now').length;
-  const highPriority = deals.filter((d) => d.priority === 'HIGH').length;
+  // Compute donut chart stroke parameters
+  const wonCount = pipeline?.closed_won_count ?? 0;
+  const lostCount = pipeline?.closed_lost_count ?? 0;
+  const stalledCount = pipeline?.other_stalled_count ?? 0;
+  const totalDonut = wonCount + lostCount + stalledCount;
+
+  const wonPct = totalDonut > 0 ? (wonCount / totalDonut) * 100 : 0;
+  const lostPct = totalDonut > 0 ? (lostCount / totalDonut) * 100 : 0;
+  const stalledPct = totalDonut > 0 ? (stalledCount / totalDonut) * 100 : 0;
+
+  // For SVG donut: strokeDasharray = [pct, 100]
+  // strokeDashoffset = -accumulated_previous_pct
+  const circum = 100;
+  const lostOffset = -(wonPct);
+  const stalledOffset = -(wonPct + lostPct);
+
+  const winRate = pipeline?.win_rate_pct ?? 0;
 
   return (
     <>
-      {/* â”€â”€ Page Header Strip â”€â”€ */}
-      <div className="px-margin-mobile md:px-10 py-5 border-b border-outline-variant bg-surface">
-        <div className="flex items-center justify-between max-w-[1400px] mx-auto">
+      {/* ── Page Header ── */}
+      <div className="px-4 md:px-10 py-5 border-b border-outline-variant bg-surface-container-lowest">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-[1440px] mx-auto">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <span className="material-symbols-outlined text-on-surface-variant text-[18px]">assessment</span>
-              <span className="text-on-surface-variant text-sm font-medium">Reports &amp; Insights</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black text-on-surface">Intelligence Dashboard</h2>
+            <h2 className="text-2xl md:text-[28px] font-bold text-on-surface leading-tight">
+              Analytics Dashboard
+            </h2>
+            <p className="text-on-surface-variant text-sm mt-1">
+              Data-driven performance metrics
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setDateRange('Last 30 Days')}
-              className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-white rounded-xl text-sm font-semibold hover:bg-surface-container-low transition-colors shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[18px] text-on-surface-variant">calendar_today</span>
-              {dateRange}
-            </button>
+
+          {/* Date range + actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Date range picker */}
+            <div className="flex items-center gap-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-1 shadow-sm">
+              <div className="flex items-center gap-2 px-3 py-1.5 border-r border-outline-variant">
+                <span className="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
+                <span className="text-sm font-medium text-on-surface whitespace-nowrap hidden sm:block">
+                  {dateRange}
+                </span>
+              </div>
+              {(['Last 30 Days', 'Last 90 Days', 'This Year'] as DateRangeKey[]).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setDateRange(r)}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                    dateRange === r
+                      ? 'bg-primary text-on-primary'
+                      : 'text-on-surface-variant hover:bg-surface-container'
+                  }`}
+                >
+                  {r === 'Last 30 Days' ? '30D' : r === 'Last 90 Days' ? '90D' : 'Year'}
+                </button>
+              ))}
+              <button className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+                <span className="material-symbols-outlined text-[18px]">filter_list</span>
+              </button>
+            </div>
+
+            {/* Sync */}
             <button
               onClick={handleSync}
               disabled={syncMutation.isPending}
               className="flex items-center gap-2 px-4 py-2 bg-secondary/10 text-secondary border border-secondary/20 rounded-xl text-sm font-semibold hover:bg-secondary/20 transition-colors disabled:opacity-50"
             >
               <span className={`material-symbols-outlined text-[18px] ${syncMutation.isPending ? 'animate-spin' : ''}`}>sync</span>
-              Sync CRM
+              <span className="hidden sm:inline">Sync CRM</span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-white rounded-xl text-sm font-semibold hover:bg-surface-container-low transition-colors shadow-sm">
+
+            {/* Export */}
+            <button className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-surface-container-lowest rounded-xl text-sm font-semibold hover:bg-surface-container-low transition-colors shadow-sm">
               <span className="material-symbols-outlined text-[18px] text-on-surface-variant">download</span>
-              Export
+              <span className="hidden sm:inline">Export</span>
             </button>
           </div>
         </div>
-        <p className="text-on-surface-variant text-sm mt-2 max-w-2xl md:ml-10">
-          Comprehensive sales insights and performance reports. Review your team's closing velocity, conversion efficiency, and automated growth opportunities.
-        </p>
       </div>
 
-      <div className="px-margin-mobile md:px-10 py-8 max-w-[1400px] mx-auto w-full space-y-8 pb-16">
+      {/* ── Content Canvas ── */}
+      <div className="pt-6 pb-12 px-4 md:px-10 max-w-[1440px] mx-auto w-full space-y-6">
 
-        {/* â”€â”€ 4 Metric Cards â”€â”€ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Sales Velocity */}
-          <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] flex flex-col gap-3 hover:border-secondary/30 transition-all group">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-on-surface-variant">Sales Velocity</span>
-              <div className="p-2 bg-secondary/10 rounded-xl">
-                <span className="material-symbols-outlined text-secondary text-[20px]"
-                  style={{ fontVariationSettings: "'FILL' 1" }}>speed</span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-2xl font-black text-on-surface">18.4 Days</h3>
-              <div className="flex items-center gap-1 mt-1">
-                <div className="flex items-center bg-emerald-100 px-2 py-0.5 rounded-lg text-emerald-700 text-xs font-bold">
-                  <span className="material-symbols-outlined text-[14px]">arrow_downward</span>12%
-                </div>
-                <span className="text-on-surface-variant text-xs">vs last month</span>
-              </div>
-            </div>
-          </div>
+        {/* ── 4 KPI Cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-          {/* Conversion Rate */}
-          <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] flex flex-col gap-3 hover:border-secondary/30 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-on-surface-variant">Conversion Rate</span>
-              <div className="p-2 bg-surface-container-high rounded-xl">
-                <span className="material-symbols-outlined text-on-surface-variant text-[20px]">cached</span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-2xl font-black text-on-surface">24.8%</h3>
-              <div className="flex items-center gap-1 mt-1">
-                <div className="flex items-center bg-emerald-100 px-2 py-0.5 rounded-lg text-emerald-700 text-xs font-bold">
-                  <span className="material-symbols-outlined text-[14px]">arrow_upward</span>4.2%
-                </div>
-                <span className="text-on-surface-variant text-xs">vs last month</span>
-              </div>
-            </div>
-          </div>
+          {/* 1 — Active Pipeline Value */}
+          <KpiCard
+            label="Active Pipeline Value"
+            value={fmtMoney(pipeline?.active_pipeline_value ?? 0)}
+            icon="account_balance_wallet"
+            iconBg="bg-primary/10"
+            iconColor="text-primary"
+            isLoading={pipelineLoading}
+            sub={
+              <WinRateBar pct={pipeline ? (pipeline.active_pipeline_value / Math.max(pipeline.active_pipeline_value + pipeline.total_won_amount, 1)) * 100 : 0} />
+            }
+          />
 
-          {/* Total Opportunities */}
-          <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] flex flex-col gap-3 hover:border-secondary/30 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-on-surface-variant">Total Opportunities</span>
-              <div className="p-2 bg-surface-container-high rounded-xl">
-                <span className="material-symbols-outlined text-on-surface-variant text-[20px]">monitoring</span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-2xl font-black text-on-surface">
-                {isLoading ? 'â€”' : totalDeals.toLocaleString()}
-              </h3>
-              <div className="flex items-center gap-1 mt-1">
-                <div className="flex items-center bg-secondary/10 px-2 py-0.5 rounded-lg text-secondary text-xs font-bold">
-                  +{highPriority} New
-                </div>
-                <span className="text-on-surface-variant text-xs">this week</span>
-              </div>
-            </div>
-          </div>
+          {/* 2 — Total Won Amount */}
+          <KpiCard
+            label="Total Won Amount"
+            value={fmtMoney(pipeline?.total_won_amount ?? 0)}
+            icon="workspace_premium"
+            iconBg="bg-[#dae2fd]/50"
+            iconColor="text-secondary"
+            isLoading={pipelineLoading}
+            sub={
+              <p className="text-[12px] text-outline">
+                {wonCount} deals closed won
+              </p>
+            }
+          />
 
-          {/* Stalled Deals */}
-          <div className="bg-white p-5 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border-l-4 border-l-error flex flex-col gap-3 hover:border-error/30 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-on-surface-variant">Stalled Deals</span>
-              <div className="p-2 bg-error-container/40 rounded-xl">
-                <span className="material-symbols-outlined text-error text-[20px]">priority_high</span>
+          {/* 3 — Win Rate % */}
+          <KpiCard
+            label="Win Rate %"
+            value={`${winRate.toFixed(1)}%`}
+            icon="trending_up"
+            iconBg="bg-[#e1e0ff]/50"
+            iconColor="text-[#4648d4]"
+            isLoading={pipelineLoading}
+            sub={
+              <p className="text-[12px] text-outline">
+                {wonCount} won · {lostCount} lost
+              </p>
+            }
+          />
+
+          {/* 4 — At-Risk Value (AI glow) */}
+          <KpiCard
+            label="At-Risk Value"
+            value={fmtMoney(pipeline?.at_risk_value ?? 0)}
+            icon="auto_awesome"
+            iconBg="bg-error-container/30"
+            iconColor="text-error"
+            isLoading={pipelineLoading}
+            aiGlow
+            sub={
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-error/10 text-error rounded text-[10px] font-bold uppercase">
+                  {pipeline?.at_risk_deal_count ?? 0} Deals
+                </span>
+                <p className="text-[11px] text-[#2f2ebe] font-medium">
+                  AI intervention recommended
+                </p>
               </div>
-            </div>
-            <div>
-              <h3 className="text-2xl font-black text-on-surface">
-                {isLoading ? 'â€”' : stalledDeals}
-              </h3>
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-error text-xs font-bold">Requires Attention</span>
-                <span className="text-on-surface-variant text-xs">â€¢ &gt;7 days idle</span>
-              </div>
-            </div>
-          </div>
+            }
+          />
         </div>
 
-        {/* â”€â”€ Viz Row: Trend Chart + AI Insights â”€â”€ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* ── Middle Row: Stage Analysis + Win/Loss Donut ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Deal Velocity Trend â€” 8 cols */}
-          <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
-            <div className="flex items-center justify-between mb-8">
+          {/* Deals by Stage Analysis — 2 cols */}
+          <div className="lg:col-span-2 bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+            <div className="flex justify-between items-center mb-7">
               <div>
-                <h4 className="text-xl font-semibold text-on-surface">Deal Velocity Trend</h4>
-                <p className="text-on-surface-variant text-sm">Avg. days to close over the last 6 months</p>
+                <h4 className="text-lg font-semibold text-on-surface">Deals by Stage Analysis</h4>
+                <p className="text-[11px] font-bold text-outline uppercase tracking-wider mt-0.5">
+                  Distribution of {fmtMoney(pipeline?.active_pipeline_value ?? 0)} Total Pipeline
+                </p>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-secondary" />
-                  <span className="text-xs font-semibold text-on-surface-variant">Closed-Won</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-outline-variant" />
-                  <span className="text-xs font-semibold text-on-surface-variant">Industry Average</span>
-                </div>
+              <div className="flex gap-1">
+                <button className="p-2 hover:bg-surface-container rounded-lg transition-colors">
+                  <span className="material-symbols-outlined text-on-surface-variant text-[20px]">bar_chart</span>
+                </button>
+                <button className="p-2 hover:bg-surface-container rounded-lg transition-colors">
+                  <span className="material-symbols-outlined text-outline text-[20px]">filter_alt</span>
+                </button>
               </div>
             </div>
 
-            {/* SVG Line Chart */}
-            <div className="relative h-[260px] w-full">
-              <div className="absolute inset-0 flex flex-col justify-between py-2 border-b border-outline-variant">
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="w-full border-t border-surface-container-highest" />
+            {pipelineLoading ? (
+              <div className="space-y-5">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
                 ))}
               </div>
-              <div className="absolute inset-x-4 bottom-0 h-full flex items-end">
-                <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                  <defs>
-                    <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(0, 106, 97, 0.2)" />
-                      <stop offset="100%" stopColor="rgba(0, 106, 97, 0)" />
-                    </linearGradient>
-                  </defs>
-                  {/* Area fill */}
-                  <path d="M 0,60 Q 20,45 40,55 T 60,30 T 80,40 T 100,20 L 100,100 L 0,100 Z" fill="url(#chartFill)" />
-                  {/* Main line */}
-                  <path d="M 0,60 Q 20,45 40,55 T 60,30 T 80,40 T 100,20" fill="none" stroke="#006a61" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  {/* Reference line */}
-                  <line x1="0" x2="100" y1="50" y2="50" stroke="#c6c6cd" strokeDasharray="4" strokeWidth="1" />
-                  {/* Dots */}
-                  {[[0,60],[20,45],[40,55],[60,30],[80,40],[100,20]].map(([x,y], i) => (
-                    <circle key={i} cx={x} cy={y} r="2.5" fill="#006a61" />
-                  ))}
-                </svg>
+            ) : pipeline?.stage_breakdown.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-on-surface-variant">
+                <span className="material-symbols-outlined text-[40px] mb-3 opacity-30">bar_chart</span>
+                <p className="text-sm">No active deals in the pipeline yet.</p>
+                <button
+                  onClick={handleSync}
+                  className="mt-4 text-primary text-sm font-semibold hover:underline"
+                >
+                  Sync CRM data →
+                </button>
               </div>
-              {/* X-axis labels */}
-              <div className="flex justify-between mt-2 absolute -bottom-6 left-0 right-0 px-4">
-                {['Jan','Feb','Mar','Apr','May','Jun'].map((m) => (
-                  <span key={m} className="text-[11px] font-semibold text-on-surface-variant">{m}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* AI Insights Panel â€” 4 cols */}
-          <div className="lg:col-span-4 bg-[#131b2e] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-5">
-                <span className="material-symbols-outlined text-[#6bd8cb] text-[20px]"
-                  style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                <h4 className="font-semibold text-[#6bd8cb] text-base">AI Insights</h4>
-              </div>
-              <div className="space-y-3">
-                {AI_INSIGHTS.map((insight, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleInsightAction(insight)}
-                    className="w-full text-left bg-white/10 backdrop-blur-sm border border-white/10 p-4 rounded-xl hover:bg-white/20 active:scale-[0.98] transition-all cursor-pointer group"
-                  >
-                    <p className="text-sm text-white/80 leading-relaxed">
-                      {insight.text}
-                      <span className="text-[#6bd8cb] font-bold">{insight.highlight}</span>
-                      {insight.rest}
-                    </p>
-                    <div className="mt-3 flex justify-end">
-                      <span className="text-[11px] font-bold text-[#6bd8cb] uppercase flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                        {insight.action}
-                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            ) : (
+              <div className="space-y-5">
+                {(pipeline?.stage_breakdown ?? []).map((s: StageBreakdown, idx: number) => (
+                  <div key={s.stage} className="space-y-1.5">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                        {idx + 1}. {s.stage}
+                      </span>
+                      <span className="text-sm font-bold text-on-surface">
+                        {fmtMoney(s.total_amount)}{' '}
+                        <span className="text-outline font-normal text-[12px] ml-1">({s.deal_count} Deals)</span>
                       </span>
                     </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* â”€â”€ Win/Loss by Source + Revenue by Industry â”€â”€ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Win/Loss */}
-          <div className="bg-white p-6 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
-            <h4 className="text-lg font-semibold text-on-surface mb-1">Win/Loss by Lead Source</h4>
-            <p className="text-on-surface-variant text-sm mb-6">Channel effectiveness analysis</p>
-            <div className="space-y-5">
-              {WIN_LOSS_DATA.map((row) => (
-                <div key={row.label}>
-                  <div className="flex justify-between text-sm font-semibold mb-1.5">
-                    <span className="text-on-surface">{row.label}</span>
-                    <span className="text-on-surface-variant">{row.win}% Win Rate</span>
-                  </div>
-                  <div className="h-2.5 w-full bg-surface-container-highest rounded-full overflow-hidden flex">
-                    <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${row.win}%` }} />
-                    <div className="h-full bg-error/30 rounded-full" style={{ width: `${100 - row.win}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Revenue by Industry â€” Donut */}
-          <div className="bg-white p-6 rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
-            <h4 className="text-lg font-semibold text-on-surface mb-1">Revenue by Industry</h4>
-            <p className="text-on-surface-variant text-sm mb-6">Market segment contribution</p>
-            <div className="flex items-center gap-8">
-              {/* Donut SVG */}
-              <div className="relative w-40 h-40 flex-shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" strokeWidth="4" />
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#006a61" strokeWidth="4"
-                    strokeDasharray="40 60" strokeDashoffset="0" />
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#131b2e" strokeWidth="4"
-                    strokeDasharray="30 70" strokeDashoffset="-40" />
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#89f5e7" strokeWidth="4"
-                    strokeDasharray="15 85" strokeDashoffset="-70" />
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#c6c6cd" strokeWidth="4"
-                    strokeDasharray="15 85" strokeDashoffset="-85" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-on-surface font-black text-lg leading-none">$4.2M</span>
-                  <span className="text-[10px] font-bold text-on-surface-variant uppercase mt-0.5">Total Rev</span>
-                </div>
-              </div>
-              {/* Legend */}
-              <div className="flex-1 space-y-3">
-                {INDUSTRY_DATA.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-3 h-3 rounded-full ${item.dot}`} />
-                      <span className="text-sm font-medium text-on-surface">{item.label}</span>
+                    <div className="w-full bg-surface-container h-8 rounded-lg overflow-hidden group">
+                      <div
+                        className={`${stageColor(s.stage)} h-full rounded-lg transition-all duration-700 ease-out hover:brightness-95`}
+                        style={{ width: `${Math.max(s.pct_of_pipeline, 4)}%` }}
+                      />
                     </div>
-                    <span className="text-sm font-mono text-on-surface-variant">{item.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Win/Loss Ratio — 1 col */}
+          <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-lg font-semibold text-on-surface">Win/Loss Ratio</h4>
+              <span className="text-[11px] font-bold text-outline uppercase tracking-wider">This Period</span>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {/* SVG Donut */}
+              <div className="relative w-44 h-44 mb-7">
+                {pipelineLoading ? (
+                  <div className="w-full h-full rounded-full border-8 border-surface-container animate-pulse" />
+                ) : (
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    {/* Track */}
+                    <circle cx="18" cy="18" fill="transparent" r="16" stroke="#eceef0" strokeWidth="4" />
+                    {/* Won — primary teal */}
+                    {wonPct > 0 && (
+                      <circle
+                        cx="18" cy="18" fill="transparent" r="16"
+                        stroke="#00685f"
+                        strokeDasharray={`${wonPct} ${circum}`}
+                        strokeLinecap="round"
+                        strokeWidth="4.5"
+                      />
+                    )}
+                    {/* Lost — error red */}
+                    {lostPct > 0 && (
+                      <circle
+                        cx="18" cy="18" fill="transparent" r="16"
+                        stroke="#ba1a1a"
+                        strokeDasharray={`${lostPct} ${circum}`}
+                        strokeDashoffset={lostOffset}
+                        strokeLinecap="round"
+                        strokeWidth="4.5"
+                      />
+                    )}
+                    {/* Stalled — secondary */}
+                    {stalledPct > 0 && (
+                      <circle
+                        cx="18" cy="18" fill="transparent" r="16"
+                        stroke="#565e74"
+                        strokeDasharray={`${stalledPct} ${circum}`}
+                        strokeDashoffset={stalledOffset}
+                        strokeLinecap="round"
+                        strokeWidth="4.5"
+                      />
+                    )}
+                  </svg>
+                )}
+                {/* Centre label */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  {pipelineLoading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <>
+                      <span className="text-[28px] font-bold text-on-surface leading-none">
+                        {winRate.toFixed(0)}%
+                      </span>
+                      <span className="text-[10px] font-bold text-outline uppercase tracking-widest mt-1">
+                        WIN RATE
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="w-full space-y-3">
+                {[
+                  { label: 'Closed Won',     count: wonCount,     dot: 'bg-primary' },
+                  { label: 'Closed Lost',    count: lostCount,    dot: 'bg-error' },
+                  { label: 'Other / Stalled',count: stalledCount, dot: 'bg-secondary' },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${row.dot}`} />
+                      <span className="text-sm text-on-surface-variant">{row.label}</span>
+                    </div>
+                    {pipelineLoading
+                      ? <Skeleton className="h-4 w-16" />
+                      : <span className="font-bold text-on-surface text-sm">{row.count} Deals</span>
+                    }
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* â”€â”€ Top Performing Deals Table â”€â”€ */}
-        <div className="bg-white rounded-2xl border border-outline-variant shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] overflow-hidden">
-          <div className="px-6 py-4 border-b border-outline-variant flex items-center justify-between">
-            <h4 className="text-xl font-semibold text-on-surface">Top Performing Deals</h4>
-            <button className="text-secondary font-semibold text-sm hover:underline flex items-center gap-1">
-              View All Pipeline
-              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            <button
+              onClick={() => navigate('/home')}
+              className="mt-7 w-full py-3 border border-outline-variant rounded-xl text-[11px] font-bold text-primary hover:bg-surface-container transition-colors uppercase tracking-widest"
+            >
+              View Historical Trends
             </button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] font-bold uppercase tracking-wider">
-                  {['Company', 'Value', 'Probability', 'Owner', 'Stage', 'Last Touch'].map((h) => (
-                    <th key={h} className={`px-6 py-3 ${h === 'Last Touch' ? 'text-right' : ''}`}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant">
-                {isLoading ? (
-                  <tr><td colSpan={6} className="py-8 text-center text-on-surface-variant text-sm">Loadingâ€¦</td></tr>
-                ) : deals.length === 0 ? (
-                  <tr><td colSpan={6} className="py-8 text-center text-on-surface-variant text-sm">No deals found. Sync your CRM to populate data.</td></tr>
-                ) : deals.map((deal) => (
-                  <tr key={deal.deal_id}
-                    className="hover:bg-surface-container-lowest transition-colors cursor-pointer"
-                    onClick={() => setSelectedDealId(deal.deal_id)}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#131b2e] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
-                          {initials(deal.account_name || deal.deal_name)}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-sm text-on-surface">{deal.deal_name}</p>
-                          <p className="text-[11px] text-on-surface-variant">{deal.account_name}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm text-on-surface">
-                      ${deal.amount?.toLocaleString() ?? 'â€”'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                          <div className="h-full bg-secondary rounded-full" style={{ width: `${deal.ai_score ?? 0}%` }} />
-                        </div>
-                        <span className="text-xs font-semibold text-on-surface">{(deal.ai_score ?? 0).toFixed(0)}%</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[10px] font-bold">
-                          {deal.deal_name?.[0]?.toUpperCase() ?? '?'}
-                        </div>
-                        <span className="text-sm text-on-surface">Owner</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${
-                        deal.stage === 'Closed Won' ? 'bg-secondary/10 text-secondary' :
-                        deal.stage === 'Negotiation/Review' ? 'bg-surface-container-highest text-on-surface-variant' :
-                        'bg-surface-container-high text-on-surface-variant'
-                      }`}>
-                        {deal.stage ?? 'Active'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right text-sm text-on-surface-variant">
-                      {deal.last_followup_date
-                        ? new Date(deal.last_followup_date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
-                        : 'â€”'}
-                    </td>
-                  </tr>
+        </div>
+
+        {/* ── Bottom Row: Top Accounts + Highest Value Deals ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Top Accounts by Value */}
+          <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-lg font-semibold text-on-surface">Top Accounts by Value</h4>
+              <button
+                onClick={() => navigate('/home')}
+                className="text-primary text-[11px] font-bold uppercase tracking-wider hover:underline"
+              >
+                Full List
+              </button>
+            </div>
+
+            {accountsLoading ? (
+              <div className="space-y-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="w-10 h-10 flex-shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-36" />
+                      <Skeleton className="h-2.5 w-24" />
+                    </div>
+                    <Skeleton className="h-4 w-16" />
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : (accountData?.accounts ?? []).length === 0 ? (
+              <div className="py-12 text-center text-on-surface-variant text-sm">
+                No account data yet. Sync your CRM.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(accountData?.accounts ?? []).slice(0, 5).map((acct, idx) => (
+                  <div
+                    key={acct.account_name}
+                    className="flex items-center gap-4 p-3 hover:bg-surface-container-low transition-colors rounded-xl border border-transparent hover:border-outline-variant/30 cursor-pointer group"
+                    onClick={() => navigate('/home')}
+                  >
+                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-all">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-on-surface truncate group-hover:text-primary transition-colors">
+                        {acct.account_name}
+                      </p>
+                      <p className="text-[11px] text-outline">
+                        Avg Score: {acct.avg_score.toFixed(0)}%
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-bold text-on-surface text-sm">
+                        {acct.deal_count} {acct.deal_count === 1 ? 'Deal' : 'Deals'}
+                      </p>
+                      <p className="text-[10px] font-bold text-primary uppercase">
+                        Score {acct.avg_score.toFixed(0)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Highest Value Deals Table */}
+          <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/30">
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-lg font-semibold text-on-surface">Highest Value Deals</h4>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-outline uppercase tracking-wider">Sorted by Amount</span>
+                <span className="material-symbols-outlined text-outline text-[16px]">sort</span>
+              </div>
+            </div>
+
+            {pipelineLoading ? (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2">
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-48" />
+                      <Skeleton className="h-2.5 w-28" />
+                    </div>
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                ))}
+              </div>
+            ) : (pipeline?.top_deals ?? []).length === 0 ? (
+              <div className="py-12 text-center text-on-surface-variant text-sm">
+                No active deals found. Sync your CRM.
+              </div>
+            ) : (
+              <div className="overflow-hidden border border-outline-variant/30 rounded-xl">
+                <table className="w-full text-left">
+                  <thead className="bg-surface-container-low border-b border-outline-variant/30">
+                    <tr>
+                      <th className="px-4 py-3 text-[10px] font-bold text-outline uppercase tracking-wider">Deal Name</th>
+                      <th className="px-4 py-3 text-[10px] font-bold text-outline uppercase tracking-wider">Stage</th>
+                      <th className="px-4 py-3 text-[10px] font-bold text-outline uppercase tracking-wider text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/30">
+                    {(pipeline?.top_deals ?? []).map((deal) => (
+                      <tr
+                        key={deal.deal_id}
+                        className="hover:bg-surface-container-low transition-colors cursor-pointer group"
+                        onClick={() => setSelectedDealId(deal.deal_id)}
+                      >
+                        <td className="px-4 py-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">
+                              {deal.deal_name}
+                            </span>
+                            <span className="text-[11px] text-outline">{deal.account_name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-1 text-[10px] font-bold rounded-full uppercase ${stageBadge(deal.stage)}`}>
+                            {deal.stage}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right font-bold text-on-surface text-sm">
+                          {fmtMoneyFull(deal.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
+
       </div>
 
+      {/* Deal Drawer */}
       {selectedDealId && (
         <DealDrawer dealId={selectedDealId} onClose={() => setSelectedDealId(null)} />
       )}
     </>
   );
 }
-
