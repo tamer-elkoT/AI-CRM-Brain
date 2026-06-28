@@ -187,67 +187,135 @@ export default function Auth() {
       <section className="w-full lg:w-1/2 flex flex-col justify-center px-6 lg:px-20 py-12 bg-surface-container-lowest border-r border-outline-variant relative z-10 overflow-y-auto">
         <div className="max-w-md w-full mx-auto pb-10">
           
+          {/* ── Brand Header ── */}
           <div className="mb-10 cursor-pointer" onClick={() => setView('login')}>
-            <h1 className="font-headline-md text-headline-md font-black text-on-surface flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined fill text-secondary text-3xl">psychology</span>
-              AI CRM Brain
-            </h1>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white border border-outline-variant/30 shadow-sm flex items-center justify-center flex-shrink-0">
+                <img
+                  src="/Rabih_Logo.jpeg"
+                  alt="Rabih CRM"
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
+              <div>
+                <h1 className="font-headline-md text-[20px] font-black text-on-surface leading-tight">
+                  Rabih CRM
+                </h1>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">Enterprise Intelligence</p>
+              </div>
+            </div>
           </div>
 
           {renderError()}
 
-          {/* VIEW: LOGIN */}
+          {/* ── VIEW: LOGIN (Stitch refined design) ── */}
           {view === 'login' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <h2 className="font-headline-md text-headline-md font-black text-on-surface mb-1">
+                Welcome to Rabih CRM <span className="text-on-surface-variant font-normal">(رابح)</span>
+              </h2>
               <p className="font-body-md text-body-md text-on-surface-variant mb-8">
                 Sign in to access your enterprise intelligence.
               </p>
-              
-              <button
-                onClick={() => handleGoogleLoginAction()}
-                className="w-full mb-6 flex items-center justify-center gap-2 py-3 px-4 border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface"
-                type="button"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                Sign in with Google
-              </button>
 
-              <div className="relative flex items-center py-4 mb-4">
+              {/* ── SSO Buttons row (Google + Microsoft) ── */}
+              <div className="flex gap-3 mb-6">
+                <button
+                  id="btn-google-login"
+                  onClick={() => handleGoogleLoginAction()}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface"
+                  type="button"
+                >
+                  <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                  Google
+                </button>
+                <button
+                  id="btn-microsoft-login"
+                  onClick={() => setErrorMsg('Microsoft SSO coming soon.')}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface"
+                  type="button"
+                >
+                  <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
+                    <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+                    <rect x="13" y="1" width="10" height="10" fill="#00A4EF" />
+                    <rect x="1" y="13" width="10" height="10" fill="#7FBA00" />
+                    <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
+                  </svg>
+                  Microsoft
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="relative flex items-center py-3 mb-4">
                 <div className="flex-grow border-t border-outline-variant" />
-                <span className="flex-shrink-0 mx-4 font-body-sm text-body-sm text-on-surface-variant">or</span>
+                <span className="flex-shrink-0 mx-4 font-body-sm text-body-sm text-on-surface-variant">or continue with</span>
                 <div className="flex-grow border-t border-outline-variant" />
               </div>
 
+              {/* ── Email / Password form ── */}
               <form className="space-y-4" onSubmit={handleLoginSubmit}>
                 <div>
-                  <label className="block font-label-sm text-on-surface mb-1">Email</label>
-                  <input
-                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg focus:outline-none"
-                    type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <label className="block font-label-sm text-label-sm text-on-surface mb-1.5" htmlFor="auth-email">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                      account_circle
+                    </span>
+                    <input
+                      id="auth-email"
+                      className="w-full pl-10 pr-4 py-3 bg-surface border border-outline-variant rounded-xl font-body-md text-body-md text-on-surface focus:outline-none transition-all"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block font-label-sm text-on-surface mb-1">Password</label>
-                  <input
-                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg focus:outline-none"
-                    type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <label className="block font-label-sm text-label-sm text-on-surface mb-1.5" htmlFor="auth-password">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                      lock
+                    </span>
+                    <input
+                      id="auth-password"
+                      className="w-full pl-10 pr-4 py-3 bg-surface border border-outline-variant rounded-xl font-body-md text-body-md text-on-surface focus:outline-none transition-all"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                    />
+                  </div>
                 </div>
                 <button
-                  className="w-full py-3 bg-primary-container text-on-primary-container font-label-md rounded-lg hover:opacity-90 transition-opacity mt-4"
-                  type="submit" disabled={loading}
+                  id="btn-sign-in"
+                  className="w-full py-3.5 bg-primary-container text-on-primary-container font-label-md text-label-md rounded-xl hover:opacity-90 transition-all mt-6 flex items-center justify-center gap-2 shadow-md shadow-primary/10"
+                  type="submit"
+                  disabled={loading}
                 >
                   {loading ? 'Authenticating...' : 'Sign In'}
+                  {!loading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
                 </button>
               </form>
               <p className="text-center mt-6 text-on-surface-variant font-body-sm">
                 Don't have an account?{' '}
-                <button className="text-secondary font-medium hover:underline" onClick={() => setView('gateway')}>Sign up</button>
+                <button
+                  id="btn-go-signup"
+                  className="text-secondary font-semibold hover:underline"
+                  onClick={() => setView('gateway')}
+                >
+                  Sign up
+                </button>
               </p>
             </div>
           )}
@@ -255,8 +323,8 @@ export default function Auth() {
           {/* VIEW: GATEWAY */}
           {view === 'gateway' && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <h2 className="text-2xl font-bold text-on-surface mb-2">Get Started</h2>
-              <p className="font-body-md text-on-surface-variant mb-8">Choose how you want to join AI CRM Brain.</p>
+              <h2 className="font-headline-md text-headline-md font-black text-on-surface mb-2">Get Started</h2>
+              <p className="font-body-md text-on-surface-variant mb-8">Choose how you want to join Rabih CRM.</p>
               
               <div className="space-y-4">
                 <button
@@ -489,17 +557,46 @@ export default function Auth() {
         </div>
       </section>
 
-      {/* RIGHT SECTION - SPLASH */}
-      <section className="hidden lg:flex w-1/2 bg-surface-container flex-col justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-secondary via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-lg w-full mx-auto px-10 relative z-10 text-center">
-          <div className="w-32 h-32 mx-auto bg-secondary/10 rounded-full flex items-center justify-center mb-8 shadow-inner border border-secondary/20">
-            <span className="material-symbols-outlined text-secondary text-6xl drop-shadow-md">lightbulb</span>
+      {/* ── RIGHT SECTION — Stitch refined splash panel ── */}
+      <section className="hidden lg:flex w-1/2 bg-primary-container flex-col justify-center relative overflow-hidden">
+        {/* Radial teal glow */}
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_50%,_#0D9488,_transparent_70%)] pointer-events-none" />
+        {/* Dot-grid texture */}
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(#0D9488 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        <div className="max-w-lg w-full mx-auto px-12 relative z-10">
+          {/* Icon ring */}
+          <div className="w-24 h-24 mx-auto bg-primary/20 rounded-full flex items-center justify-center mb-8 shadow-inner border border-primary/30">
+            <span
+              className="material-symbols-outlined text-primary-fixed-dim text-5xl"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              psychology
+            </span>
           </div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4 font-black tracking-tight">Enterprise Intelligence Hub</h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
-            Predict deal closures with high accuracy and get generative AI recommendations directly connected to your CRM data. Built for multi-tenant B2B scale.
+          {/* Headline */}
+          <h2 className="font-headline-lg text-headline-lg text-on-primary-container mb-4 font-black tracking-tight text-center">
+            Enterprise Intelligence Hub
+          </h2>
+          <p className="font-body-lg text-body-lg text-primary-fixed-dim/80 leading-relaxed text-center">
+            Predict deal closures with high accuracy and get generative AI recommendations directly connected to your CRM data.
           </p>
+          {/* Feature pills */}
+          <div className="flex flex-wrap justify-center gap-2 mt-8">
+            {['ML Scoring', 'Arabic AI Insights', 'Zoho Integration', 'Multi-tenant'].map((f) => (
+              <span
+                key={f}
+                className="px-3 py-1.5 bg-primary/20 text-primary-fixed-dim font-label-sm text-label-sm rounded-full border border-primary/30"
+              >
+                {f}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
     </main>

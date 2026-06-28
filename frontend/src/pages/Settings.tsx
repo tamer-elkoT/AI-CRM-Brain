@@ -210,7 +210,7 @@ export default function Settings() {
 
   return (
     <>
-      <header className="bg-surface border-b border-outline-variant sticky top-0 z-30">
+      <header className="bg-surface border-b border-outline-variant sticky top-[48px] z-20">
         <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 w-full max-w-max-width mx-auto">
           <div>
             <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Settings</h2>
@@ -445,7 +445,7 @@ export default function Settings() {
                   className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition disabled:opacity-50"
                 >
                   <div className="flex items-center gap-3">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Zoho_logo.svg/120px-Zoho_logo.svg.png" alt="Zoho" className="h-6" />
+                    <img src="/zoho_logo.png" alt="Zoho" className="h-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                     <div className="text-left">
                       <p className="font-label-md text-blue-800">Connect Zoho CRM</p>
                       <p className="text-xs text-blue-600">OAuth 2.0 — syncs deals to your workspace</p>

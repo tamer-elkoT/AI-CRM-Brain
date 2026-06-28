@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rabih CRM | Enterprise AI Sales Intelligence</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Geist Font (Approximated via Sans-Serif for standard rendering) -->
+<link href="https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist.css" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#dae2fd",
+                    "surface-container-high": "#e6e8ea",
+                    "on-secondary-container": "#5c647a",
+                    "tertiary-container": "#6063ee",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "outline-variant": "#bcc9c6",
+                    "on-primary-container": "#f4fffc",
+                    "surface-variant": "#e0e3e5",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#3d4947",
+                    "surface-container": "#eceef0",
+                    "tertiary-fixed": "#e1e0ff",
+                    "secondary-container": "#dae2fd",
+                    "on-tertiary-fixed-variant": "#2f2ebe",
+                    "on-background": "#191c1e",
+                    "primary-fixed-dim": "#6bd8cb",
+                    "surface-container-low": "#f2f4f6",
+                    "secondary": "#565e74",
+                    "on-tertiary-fixed": "#07006c",
+                    "on-error-container": "#93000a",
+                    "outline": "#6d7a77",
+                    "surface-tint": "#006a61",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-surface": "#191c1e",
+                    "tertiary": "#4648d4",
+                    "background": "#f7f9fb",
+                    "inverse-primary": "#6bd8cb",
+                    "on-secondary": "#ffffff",
+                    "surface-bright": "#f7f9fb",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-tertiary-container": "#fffbff",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#89f5e7",
+                    "on-primary-fixed": "#00201d",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "on-primary": "#ffffff",
+                    "primary": "#00685f",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#008378",
+                    "surface-dim": "#d8dadc",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed-dim": "#c0c1ff",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-primary-fixed-variant": "#005049",
+                    "surface": "#f7f9fb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px",
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "body-md": ["Geist", "sans-serif"],
+                    "headline-xl": ["Geist", "sans-serif"],
+                    "headline-md": ["Geist", "sans-serif"],
+                    "arabic-body": ["Geist", "sans-serif"],
+                    "display-lg": ["Geist", "sans-serif"],
+                    "body-lg": ["Geist", "sans-serif"],
+                    "label-caps": ["Geist", "sans-serif"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "arabic-body": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; background-color: #f7f9fb; }
+        .glass-header { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .ai-glow { box-shadow: 0 0 20px rgba(70, 72, 212, 0.1); border: 1px solid rgba(70, 72, 212, 0.2); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Sidebar Wrapper -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface border-r border-outline-variant flex flex-col p-4 z-50">
+<!-- Brand Section -->
+<div class="flex items-center gap-3 mb-8 px-4">
+<img alt="Rabih CRM Logo" class="w-12 h-12 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEh_BXRoh9OcfhTXTnelEoBUmfG7grH8AcJSetGhnFgx7MGncehIGtM96ZM9uvXl6Z9ViK8IHiAySN-JBzSngZnUwSVW_L1CjmwKzIomzvYKDzgiGwz1_wOwlIhpsOUO3J5lyOEYeheFsrNgsjpujqfAgPrF0u-lPtEBEotqD8tveQdq5dMS2NaXI7sGhm1DeCk9YXPJ8yOawL3ALPH92WKioTiMzsr6glRSAhuTHQ123rUZUFiB_Du2JDNFcxEDzjwhj3W_liK-M"/>
+<div class="flex flex-col">
+<span class="text-primary font-headline-md text-headline-md tracking-tight leading-none">Rabih</span>
+<span class="text-on-surface-variant font-label-caps text-[10px] uppercase opacity-60">Intelligence Hub</span>
+</div>
+</div>
+<!-- Main Navigation -->
+<nav class="flex-1 space-y-1">
+<!-- Renamed Intelligence to Home and moved to top -->
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-md text-body-md">Home</span>
+</a>
+<a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-lg px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-body-md text-body-md font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-body-md text-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-body-md text-body-md">Pipeline</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-body-md text-body-md">Integration</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Team</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<!-- Footer Navigation -->
+<div class="mt-auto pt-4 border-t border-outline-variant space-y-1">
+<div class="flex items-center gap-3 px-4 py-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsjqobUyZXLf1DqTybHi6Jps0TXBtoJ6Sfi3rqJzAVvAgo9SXOaN3abANeGir5d-2FdV8_WyFrx3hD147zAhs1E7fm_CPBwroX2AuCw9xYiIpCloaJH3XZNSy8LnISn7wJF41Xwt-H5ZlAzIfoVUUZ-Au3pFkb_YNEe8y2eX5HakQ4F-Hjb4uSR6Uctkc2Lt72u958AdOSzlem9gAAk3_SUA9le0Qhkf3MotH9ebXbjIY6thuB0QPT0DK-XNGzNJTgvSqSl02z7MQ"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps font-bold">User Profile</span>
+<span class="text-[10px] text-on-surface-variant">Admin Level</span>
+</div>
+</div>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md text-body-md">Help</span>
+</a>
+<a class="flex items-center gap-3 text-error px-4 py-3 hover:bg-error-container/20 transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md text-body-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 min-h-screen bg-background pb-12">
+<!-- Top Navigation (Glass Header) -->
+<header class="fixed top-0 right-0 left-64 h-16 glass-header bg-surface/80 border-b border-outline-variant flex items-center justify-between px-margin-desktop z-40">
+<div class="flex items-center gap-8">
+<h1 class="font-headline-md text-headline-md text-primary">North Star Dashboard</h1>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Pipeline</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Deals</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Search insights..." type="text"/>
+</div>
+<!-- Notification bell in Top Navigation bar as requested -->
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<!-- Renamed CTA to 'New Deal' -->
+<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-2 rounded-xl font-body-md text-body-md shadow-sm hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Deal
+                </button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="pt-24 px-margin-desktop max-w-[1440px] mx-auto">
+<!-- Welcome Header -->
+<div class="mb-10">
+<h2 class="font-display-lg text-display-lg tracking-tight text-on-background">Good morning, Rabih.</h2>
+<!-- Replaced Arabic subtitle with English equivalent -->
+<p class="text-on-surface-variant font-body-lg text-body-lg mt-2">Your AI-powered sales intelligence hub. Processing 4 new high-value leads in the Dubai sector.</p>
+</div>
+<!-- Metric Cards Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-10">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">Total Active Deals</span>
+<span class="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">payments</span>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-bold">1,284</span>
+<span class="flex items-center text-primary text-xs font-bold bg-primary-fixed/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 12%
+                        </span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">High Priority Count</span>
+<span class="material-symbols-outlined text-error bg-error-container p-2 rounded-lg">priority_high</span>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-bold">342</span>
+<span class="flex items-center text-error text-xs font-bold bg-error-container/30 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">warning</span> Action Required
+                        </span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm ai-glow flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-tertiary tracking-widest uppercase font-bold">Average AI Score</span>
+<span class="material-symbols-outlined text-tertiary bg-tertiary-fixed p-2 rounded-lg" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="text-4xl font-bold">86.4</span>
+<span class="flex items-center text-tertiary text-xs font-bold bg-tertiary-fixed px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">verified</span> Optimized
+                        </span>
+</div>
+</div>
+</div>
+<!-- Visualization Row -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-10">
+<!-- Advanced Visualization (Scatter Plot Placeholder) -->
+<div class="lg:col-span-8 bg-surface-container-lowest p-8 rounded-xl border border-outline-variant shadow-sm h-[400px] flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md">Key Accounts to Focus On</h3>
+<p class="text-on-surface-variant text-sm">Visualizing Deal Value vs. AI Win Probability</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="font-label-caps text-[10px]">Safe</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-orange-400"></span>
+<span class="font-label-caps text-[10px]">Moderate</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span class="font-label-caps text-[10px]">Risk</span>
+</div>
+</div>
+</div>
+<!-- Chart Simulation Area -->
+<div class="flex-1 relative border-l border-b border-outline-variant/30 flex items-end justify-between px-4 pb-4 overflow-hidden">
+<!-- Simulated Y Axis Label -->
+<div class="absolute -left-12 top-1/2 -rotate-90 text-[10px] text-on-surface-variant tracking-widest font-label-caps">AI PROBABILITY (%)</div>
+<!-- Simulated X Axis Label -->
+<div class="absolute bottom-[-10px] left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant tracking-widest font-label-caps">DEAL VALUE ($)</div>
+<!-- Grid Lines -->
+<div class="absolute inset-0 grid grid-cols-4 grid-rows-4 pointer-events-none opacity-20">
+<div class="border-r border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-r border-b border-outline"></div>
+<div class="border-b border-outline"></div>
+</div>
+<!-- Simulated Bubbles -->
+<div class="absolute bottom-[80%] left-[20%] w-10 h-10 bg-primary/40 border border-primary rounded-full animate-pulse cursor-pointer group flex items-center justify-center">
+<div class="hidden group-hover:block absolute -top-8 bg-inverse-surface text-inverse-on-surface text-[10px] py-1 px-2 rounded whitespace-nowrap">Bank Masr: $150k (92%)</div>
+</div>
+<div class="absolute bottom-[40%] left-[60%] w-12 h-12 bg-orange-400/40 border border-orange-400 rounded-full cursor-pointer group flex items-center justify-center">
+<div class="hidden group-hover:block absolute -top-8 bg-inverse-surface text-inverse-on-surface text-[10px] py-1 px-2 rounded whitespace-nowrap">Tech Solutions: $450k (65%)</div>
+</div>
+<div class="absolute bottom-[20%] left-[85%] w-16 h-16 bg-error/40 border border-error rounded-full cursor-pointer group flex items-center justify-center">
+<div class="hidden group-hover:block absolute -top-8 bg-inverse-surface text-inverse-on-surface text-[10px] py-1 px-2 rounded whitespace-nowrap">Global Corp: $1.2M (42%)</div>
+</div>
+<div class="absolute bottom-[70%] left-[45%] w-8 h-8 bg-primary/40 border border-primary rounded-full cursor-pointer group flex items-center justify-center">
+</div>
+</div>
+</div>
+<!-- Account Win Probability Panel -->
+<div class="lg:col-span-4 bg-tertiary-container text-on-tertiary-container p-8 rounded-xl shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-label-caps text-label-caps font-bold">AI INSIGHT</span>
+</div>
+<h3 class="font-headline-md text-headline-md leading-tight mb-4">You have a 82% win chance for the "Dubai Retail" sector this quarter.</h3>
+<p class="opacity-80 text-body-md font-body-md">AI suggests reallocating 15% of your pipeline from Enterprise to Mid-Market to maximize closure velocity.</p>
+</div>
+<div class="mt-8">
+<button class="w-full bg-surface-container-lowest text-tertiary font-bold py-3 rounded-lg hover:shadow-lg transition-all active:scale-95">Explore Detailed Insights</button>
+</div>
+</div>
+</div>
+<!-- Ranked Deals Table Section -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-bright">
+<h3 class="font-headline-md text-headline-md">High-Intent Pipeline</h3>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto scrollbar-hide">
+<table class="w-full text-left">
+<thead class="bg-surface-container text-on-surface-variant">
+<tr>
+<th class="px-6 py-4 font-label-caps text-label-caps uppercase tracking-widest">Account Name</th>
+<th class="px-6 py-4 font-label-caps text-label-caps uppercase tracking-widest">Value</th>
+<th class="px-6 py-4 font-label-caps text-label-caps uppercase tracking-widest">Priority</th>
+<th class="px-6 py-4 font-label-caps text-label-caps uppercase tracking-widest">ML Readiness</th>
+<th class="px-6 py-4 font-label-caps text-label-caps uppercase tracking-widest">AI Prediction</th>
+<th class="px-6 py-4 font-label-caps text-label-caps uppercase tracking-widest text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-fixed text-primary rounded-lg flex items-center justify-center font-bold">BM</div>
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-background">Bank Masr</span>
+<span class="text-xs text-on-surface-variant">Banking &amp; Finance</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md">$150,000</td>
+<td class="px-6 py-4">
+<span class="bg-error-container text-error text-[10px] font-bold px-3 py-1 rounded-full uppercase">High</span>
+</td>
+<td class="px-6 py-4">
+<div class="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[92%]"></div>
+</div>
+<span class="text-[10px] mt-1 block">92.4% Match</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 font-bold text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                                        95% Win
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary px-4 py-1.5 rounded-lg font-body-md text-sm transition-all group-hover:shadow-md">Insights</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-secondary-container text-secondary rounded-lg flex items-center justify-center font-bold">ZW</div>
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-background">ZaWolf Corp</span>
+<span class="text-xs text-on-surface-variant">Logistics</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md">$85,000</td>
+<td class="px-6 py-4">
+<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-3 py-1 rounded-full uppercase">Med</span>
+</td>
+<td class="px-6 py-4">
+<div class="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[78%]"></div>
+</div>
+<span class="text-[10px] mt-1 block">78.1% Match</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 font-bold text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+                                        64% Win
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary px-4 py-1.5 rounded-lg font-body-md text-sm transition-all group-hover:shadow-md">Insights</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-tertiary-fixed text-tertiary rounded-lg flex items-center justify-center font-bold">MC</div>
+<div class="flex flex-col">
+<span class="font-body-md font-bold text-on-background">MasterCard (MENA)</span>
+<span class="text-xs text-on-surface-variant">Fintech</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md">$420,000</td>
+<td class="px-6 py-4">
+<span class="bg-error-container text-error text-[10px] font-bold px-3 py-1 rounded-full uppercase">High</span>
+</td>
+<td class="px-6 py-4">
+<div class="w-32 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[98%]"></div>
+</div>
+<span class="text-[10px] mt-1 block">98.9% Match</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 font-bold text-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                                        91% Win
+                                    </div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary px-4 py-1.5 rounded-lg font-body-md text-sm transition-all group-hover:shadow-md">Insights</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-outline-variant flex justify-center">
+<button class="text-primary font-bold text-sm hover:underline">View All 1,284 Deals</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button for AI Help -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-tertiary text-on-tertiary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all z-50 group">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">chat_spark</span>
+<span class="absolute right-16 bg-inverse-surface text-inverse-on-surface text-xs py-2 px-4 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Ask Rabih AI</span>
+</button>
+<script>
+        // Micro-interactions and data visualization placeholders
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // Potential expansion logic
+            });
+        });
+
+        // Simple parallax or hover effect for cards
+        const metricCards = document.querySelectorAll('.bg-surface-container-lowest');
+        metricCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body></html>

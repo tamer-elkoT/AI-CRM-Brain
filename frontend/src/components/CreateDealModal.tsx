@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useCreateDeal, useAccountNames } from '../hooks/useDeals';
 import { useToast } from './ui/Toast';
 import { Select } from './ui/Select';
@@ -59,7 +59,7 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
 
   const accountOptions = [
     ...(accountNames ?? []).map((name) => ({ value: name, label: name })),
-    { value: '__NEW__', label: '➕ Add New Account' },
+    { value: '__NEW__', label: 'âž• Add New Account' },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,7 +69,7 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
     createDeal.mutate(form, {
       onSuccess: (res) => {
         toast({
-          title: '✅ Deal Created',
+          title: 'âœ… Deal Created',
           description: res.message,
           variant: 'success',
         });
@@ -88,7 +88,7 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col drawer-slide-in"
         onClick={(e) => e.stopPropagation()}
@@ -122,7 +122,7 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
             />
           </div>
 
-          {/* Account Name — Dropdown with "Add New" */}
+          {/* Account Name â€” Dropdown with "Add New" */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-label-sm text-label-sm text-on-surface mb-1">Account Name</label>
@@ -279,3 +279,4 @@ export default function CreateDealModal({ open, onClose }: CreateDealModalProps)
     </div>
   );
 }
+

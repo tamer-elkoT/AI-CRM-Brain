@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rabih CRM - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c6c6cd",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "on-secondary-fixed-variant": "#005049",
+                        "tertiary": "#000000",
+                        "secondary-fixed": "#89f5e7",
+                        "surface": "#f8f9ff",
+                        "primary-fixed": "#dae2fd",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-variant": "#d3e4fe",
+                        "on-tertiary-container": "#98805d",
+                        "secondary": "#0D9488",
+                        "on-secondary-fixed": "#00201d",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-surface-variant": "#45464d",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "tertiary-fixed": "#fcdeb5",
+                        "secondary-container": "#ccf2f0",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "inverse-surface": "#213145",
+                        "tertiary-container": "#271901",
+                        "on-secondary-container": "#0D9488",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-error": "#ffffff",
+                        "outline": "#76777d",
+                        "surface-container": "#e5eeff",
+                        "on-primary-container": "#7c839b",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#271901",
+                        "surface-tint": "#565e74",
+                        "on-background": "#0b1c30",
+                        "inverse-primary": "#bec6e0",
+                        "primary-container": "#131b2e",
+                        "surface-container-highest": "#d3e4fe",
+                        "primary": "#000000",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "max-width": "1440px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "mono-data": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "mono-data": ["13px", { "lineHeight": "1", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline-lg { font-family: 'Geist', sans-serif; font-size: 32px; line-height: 1.3; font-weight: 600; }
+        .font-headline-md { font-family: 'Geist', sans-serif; font-size: 24px; line-height: 1.4; font-weight: 600; }
+        .font-label-md { font-family: 'Geist', sans-serif; font-size: 14px; line-height: 1; letter-spacing: 0.02em; font-weight: 600; }
+        .font-label-sm { font-family: 'Geist', sans-serif; font-size: 12px; line-height: 1; font-weight: 500; }
+        .font-body-md { font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.5; font-weight: 400; }
+        .font-mono-data { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1; font-weight: 400; }
+        
+        .shadow-level-1 { box-shadow: 0px 2px 4px rgba(15, 23, 42, 0.05); }
+        
+        /* Progress Bar Animation */
+        @keyframes loadProgress {
+            0% { width: 0; }
+        }
+        .progress-animate {
+            animation: loadProgress 1s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col md:flex-row">
+<!-- SideNavBar (Desktop/Tablet) -->
+<nav class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-gutter px-4 z-40">
+<!-- Header -->
+<div class="mb-8 flex items-center space-x-3">
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-white">
+<img alt="Rabih CRM Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2GRXKOkGe7Mskb6qDrXuMcOWHDewpv_vaKVxqpbYghyZAWbm53MgsvCdRPWtBpREJFiaT2Yrv1Eh_qgANpl5_nmxOkImGEGf1nEPWNYk3Fj6fTSoBn2WLHLG-lfIoUdzLzsss2fvfoI5uRyzPCa5tXsR64PdZcd2giUmRob96v1D5cJuBqxurLIBVoj6aG5GSQ-4sXABKrDjINQm4u4Y0EJUxfphZv0vVF-XJNxlFW3fu7Nh1_ntnqy7Qei0UoQ2tybBSLOKMrng"/>
+</div>
+<div>
+<h1 class="font-headline-md text-[20px] font-black text-on-surface">Rabih CRM</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Enterprise Intelligence</p>
+</div>
+</div>
+<!-- CTA -->
+<button class="mb-8 w-full py-3 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>New Analysis</span>
+</button>
+<!-- Navigation Links -->
+<div class="flex-1 space-y-2">
+<a class="flex items-center space-x-3 px-3 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold font-label-md text-label-md scale-98 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface rounded-lg font-medium font-label-md text-label-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span>Intelligence</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface rounded-lg font-medium font-label-md text-label-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span>Accounts</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface rounded-lg font-medium font-label-md text-label-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span>Reports</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface rounded-lg font-medium font-label-md text-label-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined">auto_mode</span>
+<span>Automations</span>
+</a>
+</div>
+<!-- Footer Links -->
+<div class="pt-4 border-t border-outline-variant space-y-2">
+<a class="flex items-center space-x-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface rounded-lg font-medium font-label-md text-label-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Help</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface rounded-lg font-medium font-label-md text-label-md transition-all duration-150" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 flex flex-col min-h-screen">
+<!-- TopNavBar (Mobile Only Structure for Nav, but Header elements for Desktop too) -->
+<header class="bg-surface border-b border-outline-variant sticky top-0 z-30">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 w-full max-w-max-width mx-auto">
+<!-- Mobile Menu Button -->
+<button class="md:hidden text-on-surface mr-4">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<!-- Page Context / Title -->
+<div class="flex-1">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Dashboard</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">دماغ رابح لإدارة علاقات العملاء بالذكاء الاصطناعي</p>
+</div>
+<!-- Global Actions -->
+<div class="flex items-center space-x-4">
+<div class="hidden sm:block text-right mr-4">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Last Synced</p>
+<p class="font-mono-data text-mono-data text-on-surface mt-1">Today, 09:41 AM</p>
+</div>
+<button class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center space-x-2" id="syncBtn">
+<span class="material-symbols-outlined text-[18px] text-secondary" id="syncIcon">sync</span>
+<span class="hidden sm:inline">Sync CRM</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-2 hidden sm:block"></div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden ml-4 border border-outline-variant cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO-YU5OzCOPmjGY8MzMHf6Ke037Am0ZBGUBGJucTZa_6NifZbi_BBnphXS8QqXDHW3G-QQc5aCR4X9Sl3gDRAhbpj7i66CuVOTFE3V6nq85xLa7exLxCZ6VZOB0_0XwiNYq_3pzJaAhHPpov5-_8bXJxLlItRHbAui2whSqHGht0OErUQ_BitqU1bKMzWdhIorkWUawb85rxElGVbggD91suEFZXgzRkcGz7sAYtTcbdc-QFg8LL3KIO6DRZhzpKQuG4oWSCfBZIw"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-margin-mobile md:p-margin-desktop max-w-max-width mx-auto w-full flex-1 flex flex-col space-y-gutter md:space-y-6">
+<!-- Metric Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-4 flex flex-col justify-between hover:bg-surface transition-colors cursor-default">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Active Deals</span>
+<span class="material-symbols-outlined text-secondary">trending_up</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface">1,284</span>
+<div class="bg-secondary/10 px-2 py-1 rounded-full flex items-center space-x-1 text-secondary">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span class="font-label-sm text-label-sm">+5% vs last week</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-4 flex flex-col justify-between hover:bg-surface transition-colors cursor-default">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">High Priority Count</span>
+<span class="material-symbols-outlined text-error">priority_high</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface">342</span>
+<div class="bg-error/10 px-2 py-1 rounded-full flex items-center space-x-1 text-error">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span class="font-label-sm text-label-sm">+12% vs last week</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-4 flex flex-col justify-between hover:bg-surface transition-colors cursor-default">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Average AI Score</span>
+<span class="material-symbols-outlined text-secondary">auto_awesome</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-on-surface">86.4</span>
+<div class="bg-secondary/10 px-2 py-1 rounded-full flex items-center space-x-1 text-secondary">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span class="font-label-sm text-label-sm">+2.1 pts</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Complex Area Layout -->
+<div class="flex flex-col lg:flex-row gap-gutter">
+<!-- Main Data Area -->
+<div class="flex-1 space-y-gutter">
+<!-- Visualization Placeholder -->
+<div class="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-4 h-80 flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Key Accounts to Focus On</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Scatter plot: Deal Value vs AI Probability</p>
+<div class="flex-1 w-full bg-surface-container-low rounded border border-outline-variant border-dashed flex items-center justify-center relative overflow-hidden">
+<!-- Decorative visualization element -->
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#0D9488 1px, transparent 1px); background-size: 20px 20px;"></div>
+<span class="material-symbols-outlined text-outline text-4xl">scatter_plot</span>
+<span class="ml-2 font-label-md text-label-md text-outline">Interactive Chart Area</span>
+</div>
+</div>
+<!-- Ranked Deals Table -->
+<div class="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl overflow-hidden">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="font-headline-md text-headline-md text-on-surface">Ranked Deals</h3>
+<button class="text-secondary font-label-md text-label-md hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#F1F5F9] border-b border-outline-variant">
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[150px]">Deal Name</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[120px]">Account</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant">Priority</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[100px]">ML Score</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant min-w-[100px]">AI Score</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant text-right">Action</th>
+</tr>
+</thead>
+<tbody>
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-[#F8FAFC] transition-colors">
+<td class="p-3">
+<span class="font-body-md text-body-md text-on-surface font-medium">Q4 Enterprise Renewal</span>
+</td>
+<td class="p-3 font-body-sm text-body-sm text-on-surface-variant">Acme Corp</td>
+<td class="p-3">
+<span class="inline-block px-2 py-1 bg-error/10 text-error rounded font-label-sm text-label-sm border border-error/20">High</span>
+</td>
+<td class="p-3">
+<div class="flex items-center space-x-2">
+<div class="w-full h-1 bg-[#E2E8F0] rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[85%] progress-animate"></div>
+</div>
+<span class="font-mono-data text-mono-data">85</span>
+</div>
+</td>
+<td class="p-3">
+<div class="flex items-center space-x-2">
+<div class="w-full h-1 bg-[#E2E8F0] rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-secondary to-[#0F172A] w-[92%] progress-animate"></div>
+</div>
+<span class="font-mono-data text-mono-data">92</span>
+</div>
+</td>
+<td class="p-3 text-right">
+<button class="px-3 py-1.5 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-variant transition-colors">Insights</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-[#F8FAFC] transition-colors">
+<td class="p-3">
+<span class="font-body-md text-body-md text-on-surface font-medium">Global Rollout Phase 2</span>
+</td>
+<td class="p-3 font-body-sm text-body-sm text-on-surface-variant">TechFlow Inc</td>
+<td class="p-3">
+<span class="inline-block px-2 py-1 bg-tertiary-fixed-dim/20 text-tertiary-container rounded font-label-sm text-label-sm border border-tertiary-fixed-dim/40">Medium</span>
+</td>
+<td class="p-3">
+<div class="flex items-center space-x-2">
+<div class="w-full h-1 bg-[#E2E8F0] rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[65%] progress-animate"></div>
+</div>
+<span class="font-mono-data text-mono-data">65</span>
+</div>
+</td>
+<td class="p-3">
+<div class="flex items-center space-x-2">
+<div class="w-full h-1 bg-[#E2E8F0] rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-secondary to-[#0F172A] w-[78%] progress-animate"></div>
+</div>
+<span class="font-mono-data text-mono-data">78</span>
+</div>
+</td>
+<td class="p-3 text-right">
+<button class="px-3 py-1.5 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm hover:bg-surface-variant transition-colors">Insights</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Sidebar / Filter Panel -->
+<div class="w-full lg:w-72 flex-shrink-0 space-y-4">
+<div class="bg-surface-container-lowest border border-outline-variant shadow-level-1 rounded-xl p-4">
+<h4 class="font-label-md text-label-md text-on-surface mb-4 flex items-center">
+<span class="material-symbols-outlined mr-2 text-[18px]">filter_list</span>
+                            Filter Settings
+                        </h4>
+<!-- Priority Filter -->
+<div class="mb-6">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Priority Level</label>
+<div class="space-y-2">
+<label class="flex items-center space-x-2 cursor-pointer">
+<input checked="" class="form-radio text-secondary focus:ring-secondary h-4 w-4 border-outline-variant" name="priority" type="radio"/>
+<span class="font-body-sm text-body-sm">All Priorities</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer">
+<input class="form-radio text-secondary focus:ring-secondary h-4 w-4 border-outline-variant" name="priority" type="radio"/>
+<span class="font-body-sm text-body-sm">High</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer">
+<input class="form-radio text-secondary focus:ring-secondary h-4 w-4 border-outline-variant" name="priority" type="radio"/>
+<span class="font-body-sm text-body-sm">Medium</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer">
+<input class="form-radio text-secondary focus:ring-secondary h-4 w-4 border-outline-variant" name="priority" type="radio"/>
+<span class="font-body-sm text-body-sm">Low</span>
+</label>
+</div>
+</div>
+<!-- Score Slider -->
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2 flex justify-between">
+<span>Minimum AI Score</span>
+<span class="font-mono-data text-mono-data" id="scoreValue">50</span>
+</label>
+<input class="w-full h-1 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-secondary" id="scoreSlider" max="100" min="0" type="range" value="50"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Sync Button Interaction
+        const syncBtn = document.getElementById('syncBtn');
+        const syncIcon = document.getElementById('syncIcon');
+        
+        syncBtn.addEventListener('click', () => {
+            // Loading state
+            syncBtn.classList.add('opacity-70', 'cursor-wait');
+            syncIcon.classList.add('animate-spin');
+            
+            setTimeout(() => {
+                // Reset state
+                syncBtn.classList.remove('opacity-70', 'cursor-wait');
+                syncIcon.classList.remove('animate-spin');
+            }, 1500);
+        });
+
+        // Score Slider Update
+        const scoreSlider = document.getElementById('scoreSlider');
+        const scoreValue = document.getElementById('scoreValue');
+
+        scoreSlider.addEventListener('input', (e) => {
+            scoreValue.textContent = e.target.value;
+        });
+    </script>
+</body></html>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '../services/api';
 import type { TemplateUpdateRequest } from '../types';
@@ -53,9 +53,9 @@ export default function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-50 transition-opacity" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/50 z-[80] transition-opacity" onClick={onClose} />
       
-      <div className="fixed inset-y-0 right-0 z-50 w-full md:w-96 bg-surface-container-low shadow-level-3 border-l border-outline-variant flex flex-col drawer-slide-in-right">
+      <div className="fixed inset-y-0 right-0 z-[80] w-full md:w-96 bg-surface-container-low shadow-level-3 border-l border-outline-variant flex flex-col drawer-slide-in-right">
         <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface sticky top-0">
           <h2 className="font-title-lg text-on-surface">Profile Settings</h2>
           <button onClick={onClose} className="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant transition-colors">
@@ -86,7 +86,7 @@ export default function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
                 </div>
               </div>
 
-              {/* ── Basic Info ── */}
+              {/* â”€â”€ Basic Info â”€â”€ */}
               <div className="space-y-3">
                 <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider">Basic Info</h3>
                 
@@ -121,7 +121,7 @@ export default function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
                 </div>
               </div>
 
-              {/* ── Company Info ── */}
+              {/* â”€â”€ Company Info â”€â”€ */}
               <div className="space-y-3 pt-4 border-t border-outline-variant">
                 <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider">Company</h3>
                 
@@ -146,7 +146,7 @@ export default function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
                 </div>
               </div>
 
-              {/* ── Templates ── */}
+              {/* â”€â”€ Templates â”€â”€ */}
               <div className="space-y-3 pt-4 border-t border-outline-variant">
                 <h3 className="font-label-md text-on-surface-variant uppercase tracking-wider">Outreach Templates</h3>
                 
@@ -208,3 +208,4 @@ export default function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
     </>
   );
 }
+

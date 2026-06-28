@@ -68,7 +68,7 @@ export default function Integrations() {
   return (
     <>
       {/* Header */}
-      <header className="bg-surface border-b border-outline-variant sticky top-0 z-30">
+      <header className="bg-surface border-b border-outline-variant sticky top-[48px] z-20">
         <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 w-full max-w-max-width mx-auto">
           <div className="flex-1">
             <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Integrations</h2>
@@ -90,10 +90,14 @@ export default function Integrations() {
               }`}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center">
-                  <span className={`material-symbols-outlined text-2xl ${crm.status === 'connected' ? 'text-secondary' : 'text-on-surface-variant'}`}>
-                    {crm.icon}
-                  </span>
+                <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center overflow-hidden">
+                  {crm.name === 'Zoho CRM' ? (
+                    <img src="/zoho_logo.png" alt="Zoho CRM" className="w-10 h-10 object-contain" />
+                  ) : (
+                    <span className={`material-symbols-outlined text-2xl ${crm.status === 'connected' ? 'text-secondary' : 'text-on-surface-variant'}`}>
+                      {crm.icon}
+                    </span>
+                  )}
                 </div>
                 {crm.status === 'connected' && (
                   <span className="flex items-center gap-1 px-2.5 py-1 bg-secondary/10 text-secondary rounded-full font-label-sm text-label-sm">

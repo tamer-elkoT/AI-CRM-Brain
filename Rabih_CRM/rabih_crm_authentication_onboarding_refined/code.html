@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="light" dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rabih CRM - Authentication &amp; Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#cbdbf5",
+                        "secondary-fixed": "#89f5e7",
+                        "background": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "tertiary-container": "#271901",
+                        "on-background": "#0b1c30",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-fixed": "#271901",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#bec6e0",
+                        "secondary-fixed-dim": "#6bd8cb",
+                        "tertiary": "#000000",
+                        "on-secondary-container": "#006f66",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#00201d",
+                        "on-surface-variant": "#45464d",
+                        "surface": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#131b2e",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#fcdeb5",
+                        "secondary-container": "#86f2e4",
+                        "primary": "#0D9488",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary": "#0D9488",
+                        "outline-variant": "#e2e8f0",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "on-primary-container": "#7c839b",
+                        "surface-tint": "#565e74",
+                        "primary-fixed-dim": "#bec6e0",
+                        "primary-fixed": "#dae2fd",
+                        "on-tertiary-container": "#98805d",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#005049",
+                        "outline": "#cbd5e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "32px",
+                        "max-width": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "mono-data": ["JetBrains Mono"],
+                        "label-md": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Geist"],
+                        "display-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "mono-data": ["13px", { "lineHeight": "1", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus {
+            box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+            border-color: #0D9488;
+        }
+        select:focus {
+            box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+            border-color: #0D9488;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex antialiased">
+<main class="flex w-full min-h-screen">
+<!-- Left Section: Authentication -->
+<section class="w-full lg:w-1/2 flex flex-col justify-center px-margin-mobile lg:px-margin-desktop py-12 bg-surface-container-lowest border-r border-outline-variant relative z-10">
+<div class="max-w-md w-full mx-auto">
+<div class="mb-12">
+<div class="mb-8">
+<img alt="Rabih CRM Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLvFjrS_9ZuhphiGjdpwalzQyQN5WDswifK0abl9kDKXjmRwWinr4_9THthjbbbDxBPa_8wdUyc_r1X5i0YSNz6Uq8TTt_ymfE7aPC42WiXrLinnmElCTnW3RD9G1pXPiFYjrOdhVepUduujkMrF5JymDH4-E7RD5b3Tj6isyHgHds_59EG6ItgqDw3RHUQqmpywTfiIGhNniBep9Kyu5hY2RKdpClsz2mAZj5XrmUkfHkR2qmB4ruebOg"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container mb-2">
+                    Welcome to Rabih CRM (رابح)
+                </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Sign in to access your enterprise intelligence.</p>
+</div>
+<div class="space-y-6">
+<div class="flex gap-4">
+<button class="flex-1 flex items-center justify-center gap-2 py-3 px-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface bg-white shadow-sm">
+<img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk8WVKWrxA3M2aAgZyM4fQHdJ_yB35XWcBtiT8wCEs7PbuyuXrNZHsxs845iR_5QDQb08rjnylvlDs1ZxOF6smWMQ3DY_-hwy3bgfq59EqvyA650o5L9wU0NFKsfnET14XpF-XFKz7HpX_8v3BzQEB8tA9MMr7eVItEwC1YN0I6f0ONAt5hTSiX8JmMFKaeourOYH4-9fKlvA_l-JYZaDiIMDd459feqRAS9eerbDxer5vaCmpG03kEqTDjnxvt09B7S8GV1dTW-c"/>
+                        Google
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-3 px-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors font-label-md text-label-md text-on-surface bg-white shadow-sm">
+<img alt="Microsoft" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjF39FkBu_2jJ22_uLBCUckvHW6hxGjTl31cmWAuKKx6NwUoeaPXujvzz9vAy8mJPpmN_rVYxFrjMAzAYCxR2So1rbAZecKl5avxYMtEvSQjq0VkxhPcM33Zt9iJhXAsTFcSFSwSL5C_mTLhAsEjdCppcWJWHozUwCt_2389ePicd6qAx_Ej1unXNrSFwwrjYIqHP3tHCd3VXtHTLteMPlN20xMKQv3YhBUyiUovNx3lkf3DMFHnDyNrWcAVo6Bp7b-vQkec5i3jw"/>
+                        Microsoft
+                    </button>
+</div>
+<div class="relative flex items-center py-4">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink-0 mx-4 font-body-sm text-body-sm text-on-surface-variant">or continue with</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-1.5" for="identifier">Email or Phone Number</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">account_circle</span>
+<input class="w-full pl-11 pr-4 py-3 bg-white border border-outline rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none transition-all" id="identifier" name="identifier" placeholder="Enter your email or phone" type="text"/>
+</div>
+</div>
+<button class="w-full py-3.5 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:opacity-90 transition-all flex justify-center items-center gap-2 mt-8 shadow-lg shadow-primary/20" type="submit">
+                        Continue
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</form>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center mt-6">
+                    Don't have an account? <a class="text-secondary font-semibold hover:underline" href="#">Sign up</a>
+</p>
+</div>
+</div>
+</section>
+<!-- Right Section: Onboarding Stepper -->
+<section class="hidden lg:flex w-1/2 bg-surface-container flex-col justify-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary via-transparent to-transparent pointer-events-none"></div>
+<div class="max-w-lg w-full mx-auto px-margin-desktop relative z-10">
+<div class="mb-12">
+<h2 class="font-headline-lg text-headline-lg text-primary-container mb-2">Configure Workspace</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Set up your Rabih CRM intelligence hub in just a few steps.</p>
+</div>
+<!-- Progress Indicator -->
+<div class="flex items-center mb-10 relative">
+<div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-md text-label-md z-10 shadow-lg shadow-secondary/30">1</div>
+<div class="flex-1 h-1 bg-outline-variant absolute top-1/2 -translate-y-1/2 left-10 right-10 overflow-hidden">
+<div class="h-full bg-secondary/20 w-full"></div>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest text-on-surface-variant border border-outline-variant flex items-center justify-center font-label-md text-label-md z-10 shadow-sm ml-auto" id="step2-indicator">2</div>
+</div>
+<!-- Card: Workspace Details -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-outline-variant transition-all duration-300" id="step1">
+<h3 class="font-headline-md text-headline-md text-primary-container mb-6">Workspace Details</h3>
+<div class="space-y-6">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-2" for="company">Company Name</label>
+<input class="w-full px-4 py-3 bg-surface border border-outline rounded-xl font-body-md text-body-md text-on-surface focus:outline-none transition-all placeholder:text-on-surface-variant/30" id="company" placeholder="Acme Corp" type="text"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface mb-2" for="industry">Industry</label>
+<div class="relative">
+<select class="w-full px-4 py-3 bg-surface border border-outline rounded-xl font-body-md text-body-md text-on-surface focus:outline-none transition-all appearance-none cursor-pointer" id="industry">
+<option disabled="" selected="" value="">Select industry</option>
+<option value="tech">Technology &amp; Software</option>
+<option value="finance">Financial Services</option>
+<option value="healthcare">Healthcare</option>
+<option value="retail">Retail &amp; E-commerce</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<button class="w-full py-3.5 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:opacity-90 transition-all flex justify-center items-center gap-2 mt-4 shadow-lg shadow-primary/10" onclick="goToStep2()" type="button">
+                        Next Step
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card: CRM Integration (Hidden initially) -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_20px_50px_rgba(15,23,42,0.08)] border border-outline-variant transition-all duration-300 hidden opacity-0 translate-y-4" id="step2">
+<h3 class="font-headline-md text-headline-md text-primary-container mb-2">CRM Integration</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Connect your primary data source to activate Rabih CRM insights.</p>
+<div class="border border-outline-variant rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer group border-dashed border-2 hover:border-secondary">
+<img alt="Zoho CRM" class="w-20 h-20 mb-4 transition-transform group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNuC0mt2a2XYThJj9ZTDbkbQgyyS0e14yPeD8krRokQxOj5AceCGZtFH_UOMmyO6Lk-C0AwARbNpgbXdBVNc2xH0kzLZEiCSBnZr5MYrJgWGCMaaQ2uOo6fKJ2-1UvyUdTZcK3vP8SVjaKCFP_pY93AFB0MygQsjBedTCut0CrmZu8tXBj8fIQm34MYzpDylLui4wHnIUdOyVOSCKqthTAZJQtKmW7KtSNPGSvXGqZvGIIcKGn4UXB0dpjzJkHca7UhFg6IprFWJQ"/>
+<span class="font-label-md text-label-md text-primary-container mb-1 group-hover:text-secondary transition-colors">Connect Zoho CRM</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sync contacts, deals, and activities</span>
+</div>
+<div class="mt-8 flex justify-between items-center">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary-container transition-colors flex items-center gap-1" onclick="goToStep1()" type="button">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+                        Back
+                    </button>
+<button class="py-3 px-8 bg-secondary text-on-secondary font-label-md text-label-md rounded-xl hover:opacity-90 transition-all shadow-lg shadow-secondary/20" type="button">Complete Setup</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<script>
+    function goToStep2() {
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const indicator2 = document.getElementById('step2-indicator');
+        
+        step1.classList.add('opacity-0', '-translate-y-4');
+        setTimeout(() => {
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            
+            requestAnimationFrame(() => {
+                step2.classList.remove('opacity-0', 'translate-y-4');
+                step2.classList.add('opacity-100', 'translate-y-0');
+                
+                indicator2.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant', 'border-outline-variant');
+                indicator2.classList.add('bg-secondary', 'text-on-secondary', 'border-secondary', 'shadow-lg', 'shadow-secondary/30');
+            });
+        }, 300);
+    }
+
+    function goToStep1() {
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const indicator2 = document.getElementById('step2-indicator');
+        
+        step2.classList.add('opacity-0', 'translate-y-4');
+        setTimeout(() => {
+            step2.classList.add('hidden');
+            step1.classList.remove('hidden');
+            
+            requestAnimationFrame(() => {
+                step1.classList.remove('opacity-0', '-translate-y-4');
+                step1.classList.add('opacity-100', 'translate-y-0');
+                
+                indicator2.classList.add('bg-surface-container-lowest', 'text-on-surface-variant', 'border-outline-variant');
+                indicator2.classList.remove('bg-secondary', 'text-on-secondary', 'border-secondary', 'shadow-lg', 'shadow-secondary/30');
+            });
+        }, 300);
+    }
+</script>
+</body></html>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useGenerateMessage, useMarkFollowedUp } from '../hooks/useDeals';
 import type { RankedDeal, DealDetail } from '../types';
 
@@ -35,7 +35,7 @@ export default function MessageGeneratorModal({ deal, salesRepName, onClose }: M
       const sanitized = phone.replace(/[^0-9]/g, '');
       window.open(`https://wa.me/${sanitized}?text=${encoded}`, '_blank');
     } else {
-      // No phone number available — open WhatsApp with message only
+      // No phone number available â€” open WhatsApp with message only
       // User can manually select the recipient
       window.open(`https://wa.me/?text=${encoded}`, '_blank');
     }
@@ -58,7 +58,7 @@ export default function MessageGeneratorModal({ deal, salesRepName, onClose }: M
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
       <div
         className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -74,7 +74,7 @@ export default function MessageGeneratorModal({ deal, salesRepName, onClose }: M
                 AI Message Generator
               </h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Powered by Grok • {deal.account_name} — {deal.deal_name || ('deal_name' in deal ? deal.deal_name : '')}
+                Powered by Grok â€¢ {deal.account_name} â€” {deal.deal_name || ('deal_name' in deal ? deal.deal_name : '')}
               </p>
             </div>
           </div>
@@ -199,3 +199,4 @@ export default function MessageGeneratorModal({ deal, salesRepName, onClose }: M
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import type { DealDetail } from '../types';
 import { useAuth } from '../context/AuthContext';
 
@@ -53,7 +53,7 @@ export default function OutreachModal({ deal, mode, onClose }: OutreachModalProp
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
       <div 
         className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -130,3 +130,4 @@ export default function OutreachModal({ deal, mode, onClose }: OutreachModalProp
     </div>
   );
 }
+

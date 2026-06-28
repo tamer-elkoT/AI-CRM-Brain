@@ -2,148 +2,163 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   RABIH CRM — GLOBAL STYLES
+   Design System: Cognitive Enterprise
+   ═══════════════════════════════════════════════════════════════ */
+
 @layer base {
+  /* ── Material Symbols icon font settings ── */
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
   .material-symbols-outlined.fill {
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
-  input:focus {
-    box-shadow: 0 0 0 2px rgba(0, 106, 97, 0.2);
-    border-color: #006a61;
+
+  /* ── Focus ring for inputs (teal glow) ── */
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.18);
+    border-color: #0D9488;
+    outline: none;
   }
-  
+
+  /* ── Elevation Tokens ── */
   .shadow-level-1 { box-shadow: 0px 2px 4px rgba(15, 23, 42, 0.05); }
-        
-  /* Progress Bar Animation */
+  .shadow-level-2 { box-shadow: 0px 10px 15px rgba(15, 23, 42, 0.08); }
+  .shadow-level-3 { box-shadow: 0px 20px 50px rgba(15, 23, 42, 0.12); }
+
+  /* ── Progress Bar Animation ── */
   @keyframes loadProgress {
     0% { width: 0; }
   }
   .progress-animate {
     animation: loadProgress 1s ease-out forwards;
   }
-  
-  .backdrop-blur-layer { backdrop-filter: blur(8px); }
-  .drawer-slide-in { animation: slideIn 0.3s ease-out forwards; }
-  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-  .drawer-slide-in-left { animation: slideInLeft 0.3s ease-out forwards; }
-  @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
-  /* rtl for arabic */
-  .rtl-content { direction: rtl; text-align: right; }
 
-  /* Smooth theme transition */
-  * {
-    transition-property: background-color, border-color;
+  /* ── Drawer / Slide animations ── */
+  .backdrop-blur-layer { backdrop-filter: blur(8px); }
+  .drawer-slide-in { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  .drawer-slide-in-left { animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+  /* ── RTL Support for Arabic content ── */
+  .rtl-content {
+    direction: rtl;
+    text-align: right;
+    /* Fallback for Arabic glyphs — Inter supports Arabic script */
+    font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+  }
+
+  /* ── Typography Helper Classes (mirrors Stitch inline styles) ── */
+  .font-headline-lg   { font-family: 'Geist', sans-serif; font-size: 32px; line-height: 1.3; font-weight: 600; }
+  .font-headline-md   { font-family: 'Geist', sans-serif; font-size: 24px; line-height: 1.4; font-weight: 600; }
+  .font-label-md      { font-family: 'Geist', sans-serif; font-size: 14px; line-height: 1; letter-spacing: 0.02em; font-weight: 600; }
+  .font-label-sm      { font-family: 'Geist', sans-serif; font-size: 12px; line-height: 1; font-weight: 500; }
+  .font-body-md       { font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.5; font-weight: 400; }
+  .font-body-sm       { font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; font-weight: 400; }
+  .font-mono-data     { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1; font-weight: 400; }
+
+  /* ── Smooth theme transitions (bg + border only to avoid jank) ── */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color;
     transition-duration: 0.2s;
     transition-timing-function: ease-out;
+  }
+  /* Disable transition on elements that need immediate response */
+  button, a, input, select, textarea {
+    transition-duration: 0.15s;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════
    DARK MODE OVERRIDES
-   Remap Material Design color tokens to dark palette
+   Token remapping for dark palette
    ═══════════════════════════════════════════════════════════════ */
 .dark {
-  /* Surfaces */
-  --tw-bg-surface: #0f1724;
   color-scheme: dark;
 }
 
-/* Override Tailwind utility colors in dark mode */
-.dark .bg-surface { background-color: #0f1724 !important; }
-.dark .bg-surface-container-lowest { background-color: #0a0f1a !important; }
-.dark .bg-surface-container-low { background-color: #141c2e !important; }
-.dark .bg-surface-container { background-color: #1a2438 !important; }
-.dark .bg-surface-container-high { background-color: #1f2d44 !important; }
+/* ── Surfaces ── */
+.dark .bg-surface                    { background-color: #0f1724 !important; }
+.dark .bg-surface-bright             { background-color: #0f1724 !important; }
+.dark .bg-surface-container-lowest  { background-color: #0a0f1a !important; }
+.dark .bg-surface-container-low     { background-color: #141c2e !important; }
+.dark .bg-surface-container         { background-color: #1a2438 !important; }
+.dark .bg-surface-container-high    { background-color: #1f2d44 !important; }
 .dark .bg-surface-container-highest { background-color: #253650 !important; }
-.dark .bg-surface-bright { background-color: #1a2438 !important; }
-.dark .bg-surface-variant { background-color: #253650 !important; }
-.dark .bg-background { background-color: #0f1724 !important; }
+.dark .bg-surface-variant           { background-color: #253650 !important; }
+.dark .bg-background                { background-color: #0f1724 !important; }
 
-/* Text colors */
-.dark .text-on-surface { color: #e2e8f0 !important; }
+/* ── Text ── */
+.dark .text-on-surface         { color: #e2e8f0 !important; }
 .dark .text-on-surface-variant { color: #94a3b8 !important; }
-.dark .text-on-background { color: #e2e8f0 !important; }
+.dark .text-on-background      { color: #e2e8f0 !important; }
 
-/* Borders */
+/* ── Borders ── */
 .dark .border-outline-variant { border-color: #2d3a50 !important; }
-.dark .border-outline { border-color: #475569 !important; }
+.dark .border-outline         { border-color: #475569 !important; }
 
-/* Primary container (used for logo bg, header elements) */
-.dark .bg-primary-container { background-color: #1e293b !important; }
-.dark .text-on-primary-container { color: #cbd5e1 !important; }
+/* ── Primary container (Midnight Slate) ── */
+.dark .bg-primary-container          { background-color: #0f172a !important; }
+.dark .text-on-primary-container     { color: #cbd5e1 !important; }
+.dark .bg-primary-container\/20      { background-color: rgba(10, 15, 26, 0.65) !important; }
 
-/* Secondary (teal accent — keep vibrant) */
-.dark .bg-secondary { background-color: #0d9488 !important; }
-.dark .text-secondary { color: #2dd4bf !important; }
-.dark .bg-secondary\/10 { background-color: rgba(13, 148, 136, 0.15) !important; }
+/* ── Primary / Secondary (Teal — keep vibrant) ── */
+.dark .bg-primary                    { background-color: #0d9488 !important; }
+.dark .text-primary                  { color: #2dd4bf !important; }
+.dark .bg-secondary                  { background-color: #0d9488 !important; }
+.dark .text-secondary                { color: #2dd4bf !important; }
+.dark .bg-secondary\/10              { background-color: rgba(13, 148, 136, 0.15) !important; }
+.dark .border-primary                { border-color: #2dd4bf !important; }
 
-/* Error */
-.dark .bg-error-container { background-color: #3b1419 !important; }
-.dark .text-on-error-container { color: #fca5a5 !important; }
-.dark .bg-error\/10 { background-color: rgba(186, 26, 26, 0.2) !important; }
-.dark .text-error { color: #f87171 !important; }
+/* ── Error ── */
+.dark .bg-error-container            { background-color: #3b1419 !important; }
+.dark .text-on-error-container       { color: #fca5a5 !important; }
+.dark .bg-error\/10                  { background-color: rgba(186, 26, 26, 0.2) !important; }
+.dark .text-error                    { color: #f87171 !important; }
 
-/* Table specific */
-.dark .bg-\[\#F1F5F9\] { background-color: #1a2438 !important; }
-.dark .bg-\[\#F8FAFC\] { background-color: #141c2e !important; }
+/* ── Table-specific background overrides ── */
+.dark .bg-\[\#F1F5F9\]              { background-color: #1a2438 !important; }
+.dark .bg-\[\#F8FAFC\]              { background-color: #141c2e !important; }
 .dark .hover\:bg-\[\#F8FAFC\]:hover { background-color: #1a2438 !important; }
 
-/* Cards shadow in dark mode */
-.dark .shadow-level-1 { box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3); }
+/* ── Card shadow in dark mode ── */
+.dark .shadow-level-1 { box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.35); }
+.dark .shadow-level-2 { box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4); }
 
-/* Input focus in dark mode */
-.dark input:focus {
+/* ── Input / Select dark mode ── */
+.dark input:focus, .dark select:focus {
   box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25);
   border-color: #2dd4bf;
 }
-.dark input, .dark select {
+.dark input, .dark select, .dark textarea {
   background-color: #141c2e !important;
   border-color: #2d3a50 !important;
   color: #e2e8f0 !important;
 }
-.dark input::placeholder { color: #64748b !important; }
+.dark input::placeholder, .dark textarea::placeholder { color: #64748b !important; }
 
-/* Scrollbar dark mode */
-.dark ::-webkit-scrollbar { width: 8px; height: 8px; }
-.dark ::-webkit-scrollbar-track { background: #0f1724; }
-.dark ::-webkit-scrollbar-thumb { background: #2d3a50; border-radius: 4px; }
+/* ── Scrollbar ── */
+.dark ::-webkit-scrollbar           { width: 8px; height: 8px; }
+.dark ::-webkit-scrollbar-track     { background: #0f1724; }
+.dark ::-webkit-scrollbar-thumb     { background: #2d3a50; border-radius: 4px; }
 .dark ::-webkit-scrollbar-thumb:hover { background: #3b4f6b; }
 
-/* Auth page specific - keep dark on the right panel */
-.dark .bg-surface-container.hidden { background-color: #141c2e !important; }
+/* ── WhatsApp button stays green ── */
+.dark .bg-\[\#25D366\]\/10           { background-color: rgba(37, 211, 102, 0.15) !important; }
 
-/* Deal drawer overlay */
-.dark .bg-primary-container\/20 { background-color: rgba(10, 15, 26, 0.6) !important; }
-
-/* WhatsApp button stays green in dark */
-.dark .bg-\[\#25D366\]\/10 { background-color: rgba(37, 211, 102, 0.15) !important; }
-
-/* Red danger zone */
-.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; }
-.dark .border-red-200 { border-color: rgba(239, 68, 68, 0.3) !important; }
-
-/* Sprint 5: Message Generator Modal */
-.dark .bg-purple-500\/10 { background-color: rgba(147, 51, 234, 0.15) !important; }
-.dark .border-purple-500\/30 { border-color: rgba(147, 51, 234, 0.3) !important; }
-
-/* Sprint 5: Emerald follow-up elements */
-.dark .bg-emerald-500\/5 { background-color: rgba(16, 185, 129, 0.08) !important; }
-.dark .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.15) !important; }
-.dark .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2) !important; }
-.dark .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3) !important; }
-
-/* Sprint 5: Inline select dropdowns */
-.dark select {
-  background-color: #141c2e !important;
-  border-color: #2d3a50 !important;
-  color: #e2e8f0 !important;
-}
-.dark select option {
-  background-color: #141c2e;
-  color: #e2e8f0;
-}
-
-/* Sprint 5: Modal backdrop */
-.dark .bg-black\/40 { background-color: rgba(0, 0, 0, 0.6) !important; }
+/* ── Misc dark overrides ── */
+.dark .bg-black\/40                  { background-color: rgba(0, 0, 0, 0.65) !important; }
+.dark .bg-red-50                     { background-color: rgba(239, 68, 68, 0.1) !important; }
+.dark .border-red-200                { border-color: rgba(239, 68, 68, 0.3) !important; }
+.dark .bg-purple-500\/10             { background-color: rgba(147, 51, 234, 0.15) !important; }
+.dark .border-purple-500\/30         { border-color: rgba(147, 51, 234, 0.3) !important; }
+.dark .bg-emerald-500\/5             { background-color: rgba(16, 185, 129, 0.08) !important; }
+.dark .bg-emerald-500\/10            { background-color: rgba(16, 185, 129, 0.15) !important; }
+.dark .border-emerald-500\/20        { border-color: rgba(16, 185, 129, 0.2) !important; }
+.dark .border-emerald-500\/30        { border-color: rgba(16, 185, 129, 0.3) !important; }
+.dark select option                  { background-color: #141c2e; color: #e2e8f0; }

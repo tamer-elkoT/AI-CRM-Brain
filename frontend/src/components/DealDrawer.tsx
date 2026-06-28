@@ -164,7 +164,7 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
 
   if (isLoading || !deal) {
     return (
-      <div className="fixed inset-0 bg-primary-container/20 backdrop-blur-layer z-40 flex justify-end">
+      <div className="fixed inset-0 bg-primary-container/20 backdrop-blur-layer z-[70] flex justify-end">
         <div className="w-full max-w-[600px] h-full bg-surface-container-lowest shadow-lg flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary" />
         </div>
@@ -175,51 +175,92 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
   const actionCfg = ACTION_STATUS_CONFIG[deal.action_status || 'no_action'] || ACTION_STATUS_CONFIG.no_action;
 
   return (
-    <div className="fixed inset-0 bg-primary-container/20 backdrop-blur-layer z-40 flex justify-end" onClick={onClose}>
+    <div className="fixed inset-0 bg-primary-container/20 backdrop-blur-layer z-[70] flex justify-end" onClick={onClose}>
       <div
         className="w-full max-w-[600px] h-full bg-surface-container-lowest shadow-[0px_10px_15px_rgba(15,23,42,0.1)] flex flex-col drawer-slide-in border-l border-outline-variant"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* ── Pinned Drawer Header (Stitch refined design) ── */}
         <div className="flex items-center justify-between p-6 border-b border-outline-variant bg-surface-container-lowest z-10 sticky top-0">
           <div>
-            <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary fill">monetization_on</span>
+            {/* Brand label */}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-primary font-bold text-label-sm tracking-widest uppercase font-label-md">
+                Rabih CRM • رابح
+              </span>
+            </div>
+            <h2 className="font-headline-md text-headline-md text-on-primary-container flex items-center gap-2">
+              <span
+                className="material-symbols-outlined text-primary"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                monetization_on
+              </span>
               {deal.deal_name}
             </h2>
             <div className="flex items-center gap-2 mt-1">
-              <p className="font-body-sm text-body-sm text-on-surface-variant">ID: #{deal.deal_id}</p>
-              {/* Feature 4: Action status badge in header */}
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-xs ${actionCfg.bg} ${actionCfg.color}`}>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                ID: #{deal.deal_id}
+              </p>
+              {/* Feature 4: Action status badge */}
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-xs ${actionCfg.bg} ${actionCfg.color}`}
+              >
                 <span className="text-[10px]">{actionCfg.icon}</span>
                 {actionCfg.label}
               </span>
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" className="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
-            <span className="material-symbols-outlined">close</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleAction}
+              disabled={markActioned.isPending}
+              className="bg-primary text-on-primary px-4 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-all shadow-sm disabled:opacity-50 hidden sm:flex items-center gap-2"
+            >
+              Edit Deal
+            </button>
+            <button
+              onClick={onClose}
+              aria-label="Close drawer"
+              className="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Deal Metadata */}
+          {/* ── Deal Metadata (Stitch icon-card grid) ── */}
           <section>
-            <h3 className="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Deal Metadata</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">
+              Deal Metadata
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { icon: 'business', label: 'Account', value: deal.account_name },
-                { icon: 'payments', label: 'Amount', value: `$${deal.amount.toLocaleString()}` },
+                { icon: 'payments', label: 'Amount', value: `$${deal.amount.toLocaleString()}`, mono: true },
                 { icon: 'event', label: 'Closing', value: deal.closing_date },
                 { icon: 'person', label: 'Owner', value: deal.owner_name || 'Unknown' },
                 { icon: 'phone', label: 'Client Phone', value: deal.client_phone || 'N/A' },
                 { icon: 'mail', label: 'Client Email', value: deal.client_email || 'N/A' },
-              ].map(({ icon, label, value }) => (
-                <div key={label} className="bg-surface rounded-lg border border-outline-variant p-4 flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary mt-0.5">{icon}</span>
-                  <div>
+              ].map(({ icon, label, value, mono }) => (
+                <div
+                  key={label}
+                  className="bg-surface-container-low rounded-2xl border border-outline-variant/30 p-4 flex items-start gap-3 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="p-2 bg-white rounded-xl text-primary flex-shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">{icon}</span>
+                  </div>
+                  <div className="min-w-0">
                     <p className="font-label-sm text-label-sm text-on-surface-variant">{label}</p>
-                    <p className="font-body-md text-body-md text-on-surface font-medium mt-1">{value}</p>
+                    <p
+                      className={`text-on-primary-container font-semibold mt-0.5 break-words ${
+                        mono ? 'font-mono-data text-mono-data' : 'font-body-md text-body-md'
+                      }`}
+                    >
+                      {value}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -269,25 +310,61 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
             )}
           </section>
 
-          {/* Quick Score Overview */}
+          {/* ── Predictive Probability KPI Cards (Stitch refined design) ── */}
           <section>
-            <h3 className="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Predictive Probability</h3>
+            <h3 className="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">
+              Predictive Probability
+            </h3>
             <div className="flex gap-4">
-              <div className="flex-1 bg-surface-container-lowest rounded-xl border border-outline-variant p-4">
+              {/* Base ML Score */}
+              <div className="flex-1 bg-surface-container-low rounded-2xl border border-outline-variant/30 p-5 shadow-sm">
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">Base ML Score</p>
-                <span className="font-headline-md text-headline-md text-on-surface">{deal.base_probability}%</span>
-                <div className="w-full h-1 bg-[#E2E8F0] rounded-full mt-3 overflow-hidden">
-                  <div className="h-full bg-outline-variant rounded-full" style={{ width: `${deal.base_probability}%` }} />
+                <div className="flex items-end gap-2">
+                  <span className="font-headline-md text-headline-md text-on-primary-container">
+                    {deal.base_probability}%
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-outline-variant/20 rounded-full mt-3 overflow-hidden">
+                  <div
+                    className="h-full bg-outline-variant rounded-full progress-animate"
+                    style={{ width: `${deal.base_probability}%` }}
+                  />
                 </div>
               </div>
-              <div className="flex-1 bg-surface-container-lowest rounded-xl border border-secondary p-4 shadow-sm relative overflow-hidden">
-                <p className="font-label-sm text-label-sm text-secondary font-bold mb-2 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px]">psychology</span>
-                  Adjusted AI Score
+
+              {/* Rabih AI Score — highlighted card */}
+              <div className="flex-1 bg-white rounded-2xl border-2 border-primary p-5 shadow-level-2 relative overflow-hidden">
+                {/* Decorative corner accent */}
+                <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-bl-full -mr-4 -mt-4" />
+                <p className="font-label-sm text-label-sm text-primary font-bold mb-2 flex items-center gap-1.5 relative z-10">
+                  <span className="material-symbols-outlined text-[18px]">psychology</span>
+                  Rabih AI Score
                 </p>
-                <span className="font-headline-md text-headline-md text-on-surface">{deal.adjusted_probability}%</span>
-                <div className="w-full h-1 bg-[#E2E8F0] rounded-full mt-3 overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-secondary-fixed-dim to-secondary" style={{ width: `${deal.adjusted_probability}%` }} />
+                <div className="flex items-end gap-2 relative z-10">
+                  <span className="font-headline-md text-headline-md text-on-primary-container">
+                    {deal.adjusted_probability}%
+                  </span>
+                  {/* Delta indicator */}
+                  {(() => {
+                    const delta = deal.adjusted_probability - deal.base_probability;
+                    const sign = delta >= 0 ? '+' : '';
+                    return (
+                      <div className="bg-primary/10 px-2.5 py-1 rounded-full flex items-center gap-1 mb-1">
+                        <span className="material-symbols-outlined text-primary text-[14px]">
+                          {delta >= 0 ? 'trending_up' : 'trending_down'}
+                        </span>
+                        <span className="font-label-sm text-label-sm text-primary font-bold">
+                          {sign}{delta.toFixed(1)}%
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <div className="w-full h-1.5 bg-outline-variant/20 rounded-full mt-3 overflow-hidden relative z-10">
+                  <div
+                    className="h-full rounded-full bg-primary progress-animate"
+                    style={{ width: `${deal.adjusted_probability}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -339,20 +416,46 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
                 )}
               </div>
 
-              {/* Arabic Recommendation — RTL */}
-              <div dir="rtl" className="bg-primary-container rounded-lg p-5 text-on-primary-container relative overflow-hidden shadow-sm text-right">
-                <div className="flex items-center justify-start gap-2 mb-3">
-                  <span className="material-symbols-outlined text-secondary-fixed">tips_and_updates</span>
-                  <h4 className="font-label-md text-label-md text-secondary-fixed font-bold">توصية الذكاء الاصطناعي</h4>
+              {/* ── Arabic RTL Recommendation Box (Stitch refined design) ── */}
+              <div
+                className="bg-primary-container rounded-2xl p-6 rtl-content text-on-primary-container relative overflow-hidden shadow-level-2"
+                dir="rtl"
+                lang="ar"
+              >
+                {/* Decorative language icon watermark */}
+                <div className="absolute -top-4 -right-4 text-white/5 opacity-10 pointer-events-none">
+                  <span className="material-symbols-outlined text-[100px]">language</span>
                 </div>
-                <p className="font-body-md text-body-md leading-relaxed">{deal.recommendation_ar}</p>
+                {/* Header */}
+                <div className="flex items-center justify-start gap-3 mb-4 relative z-10">
+                  <div className="p-1.5 bg-primary/20 rounded-lg">
+                    <span className="material-symbols-outlined text-primary-fixed-dim">tips_and_updates</span>
+                  </div>
+                  <h4 className="font-label-md text-label-md text-primary-fixed-dim font-bold">
+                    توصية رابح (Rabih CRM)
+                  </h4>
+                </div>
+                {/* Arabic recommendation text — RTL with increased line-height for Arabic script */}
+                <p
+                  className="font-body-md text-body-md relative z-10"
+                  style={{ lineHeight: '1.9', fontFamily: "'Noto Sans Arabic', 'Inter', sans-serif" }}
+                >
+                  {deal.recommendation_ar}
+                </p>
               </div>
 
               {/* English Translation */}
               {deal.recommendation_en && (
-                <div className="bg-surface rounded-lg p-5 text-on-surface border border-outline-variant relative overflow-hidden shadow-sm">
-                  <h4 className="font-label-md text-label-md font-bold mb-2">English Translation</h4>
-                  <p className="font-body-md text-body-md leading-relaxed">{deal.recommendation_en}</p>
+                <div className="bg-surface-container-low rounded-2xl p-5 text-on-surface border border-outline-variant shadow-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">translate</span>
+                    <h4 className="font-label-md text-label-md text-on-primary-container font-bold">
+                      English Translation
+                    </h4>
+                  </div>
+                  <p className="font-body-md text-body-md leading-relaxed text-on-surface">
+                    {deal.recommendation_en}
+                  </p>
                 </div>
               )}
             </div>
@@ -413,30 +516,45 @@ export default function DealDrawer({ dealId, onClose }: DealDrawerProps) {
           </section>
         </div>
 
-        {/* Footer Actions — Feature 7: Mark Followed Up */}
-        <div className="p-6 border-t border-outline-variant bg-surface-container-lowest sticky bottom-0 z-10 flex justify-between gap-3">
+        {/* ── Sticky Footer Actions (Stitch refined design) ── */}
+        <div className="p-6 border-t border-outline-variant bg-surface-container-lowest sticky bottom-0 z-10 flex flex-wrap justify-between items-center gap-3">
+          {/* Left: Follow-up action */}
           <div className="flex gap-2">
             {deal.action_status !== 'followed_up' && (
               <button
+                id="btn-mark-followed-up"
                 onClick={handleMarkFollowedUp}
                 disabled={markFollowed.isPending}
-                className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 px-4 py-2.5 rounded-xl font-label-md text-label-md flex items-center gap-2 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                <span className="material-symbols-outlined text-[18px]">history</span>
                 {markFollowed.isPending ? 'Saving...' : 'Mark Followed Up'}
               </button>
             )}
           </div>
-          <div className="flex gap-3">
-            <button onClick={onClose} className="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors">
+
+          {/* Right: Dismiss + Mark Actioned */}
+          <div className="flex gap-4 items-center">
+            <button
+              id="btn-dismiss-drawer"
+              onClick={onClose}
+              className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors"
+            >
               Dismiss
             </button>
             <button
+              id="btn-mark-actioned"
               onClick={handleAction}
               disabled={markActioned.isPending}
-              className="bg-secondary text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-sm disabled:opacity-50"
+              className="bg-primary text-on-primary px-8 py-3 rounded-xl font-label-md text-label-md flex items-center gap-2.5 hover:opacity-90 transition-all shadow-md active:scale-95 disabled:opacity-50"
             >
-              <span className={`material-symbols-outlined text-[18px] ${markActioned.isPending ? 'animate-spin' : ''}`}>check_circle</span>
+              <span
+                className={`material-symbols-outlined text-[20px] ${
+                  markActioned.isPending ? 'animate-spin' : ''
+                }`}
+              >
+                check_circle
+              </span>
               Mark Actioned
             </button>
           </div>

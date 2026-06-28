@@ -16,9 +16,9 @@ interface ScatterChartProps {
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  HIGH: '#006a61',   // secondary (teal)
-  MEDIUM: '#dec29a', // tertiary-fixed-dim (amber)
-  LOW: '#76777d',    // outline (slate)
+  HIGH:   '#0D9488',   // primary/secondary — teal
+  MEDIUM: '#dec29a',   // tertiary-fixed-dim — amber
+  LOW:    '#76777d',   // outline — slate
 };
 
 interface TooltipPayloadEntry {

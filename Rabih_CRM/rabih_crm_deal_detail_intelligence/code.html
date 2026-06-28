@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rabih CRM - Deal Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary": "#ffffff",
+                      "outline-variant": "#c6c6cd",
+                      "tertiary-fixed-dim": "#dec29a",
+                      "on-secondary-fixed-variant": "#005049",
+                      "tertiary": "#000000",
+                      "secondary-fixed": "#89f5e7",
+                      "surface": "#f8f9ff",
+                      "primary-fixed": "#dae2fd",
+                      "surface-bright": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "surface-variant": "#d3e4fe",
+                      "on-tertiary-container": "#98805d",
+                      "secondary": "#0D9488",
+                      "on-secondary-fixed": "#00201d",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "surface-container-lowest": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "error": "#ba1a1a",
+                      "secondary-fixed-dim": "#5eead4",
+                      "surface-container-low": "#eff4ff",
+                      "primary-fixed-dim": "#bec6e0",
+                      "on-surface-variant": "#45464d",
+                      "on-tertiary-fixed-variant": "#574425",
+                      "tertiary-fixed": "#fcdeb5",
+                      "secondary-container": "#ccfbf1",
+                      "on-primary": "#ffffff",
+                      "background": "#f8f9ff",
+                      "inverse-surface": "#213145",
+                      "tertiary-container": "#271901",
+                      "on-secondary-container": "#115e59",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#cbdbf5",
+                      "on-error": "#ffffff",
+                      "outline": "#76777d",
+                      "surface-container": "#e5eeff",
+                      "on-primary-container": "#7c839b",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#271901",
+                      "surface-tint": "#0D9488",
+                      "on-background": "#0b1c30",
+                      "inverse-primary": "#bec6e0",
+                      "primary-container": "#131b2e",
+                      "surface-container-highest": "#d3e4fe",
+                      "primary": "#0D9488",
+                      "surface-container-high": "#dce9ff",
+                      "on-primary-fixed": "#131b2e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "max-width": "1440px",
+                      "gutter": "16px",
+                      "margin-desktop": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Geist"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Geist"],
+                      "headline-md": ["Geist"],
+                      "display-lg": ["Geist"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-sm": ["Geist"],
+                      "headline-lg-mobile": ["Geist"],
+                      "mono-data": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "1", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "mono-data": ["13px", {"lineHeight": "1", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .backdrop-blur-layer { backdrop-filter: blur(8px); }
+        .drawer-slide-in { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        /* rtl for arabic */
+        .rtl-content { direction: rtl; text-align: right; }
+    </style>
+</head>
+<body class="bg-background min-h-screen text-on-surface antialiased overflow-hidden">
+<!-- Mock Background / Main Content Area (Obscured) -->
+<div class="h-screen w-full bg-surface-container flex items-center justify-center p-8">
+<div class="text-center">
+<h1 class="font-display-lg text-display-lg text-on-surface opacity-50">Rabih CRM Dashboard</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant opacity-50 mt-4">Deal details side drawer opens over this content.</p>
+</div>
+</div>
+<!-- Drawer Overlay & Backdrop -->
+<div class="fixed inset-0 bg-primary-container/20 backdrop-blur-layer z-40 flex justify-end">
+<!-- Side Drawer -->
+<div class="w-full max-w-[600px] h-full bg-surface-container-lowest shadow-[0px_10px_15px_rgba(15,23,42,0.1)] flex flex-col drawer-slide-in border-l border-outline-variant">
+<!-- Drawer Header (Pinned) -->
+<div class="flex items-center justify-between p-6 border-b border-outline-variant bg-surface-container-lowest z-10 sticky top-0">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-secondary font-bold text-label-sm tracking-widest uppercase">Rabih CRM • رابح</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+                    Acme Corp Enterprise Deal
+                </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">ID: #DL-84920 • Updated 2h ago</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-secondary text-on-secondary px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-on-secondary-container hover:text-white transition-colors shadow-sm">
+                    Edit Deal
+                </button>
+<button aria-label="Close" class="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Drawer Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-6 space-y-8">
+<!-- Column 1: Deal Metadata -->
+<section>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Deal Metadata</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface rounded-lg border border-outline-variant p-4 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">business</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Account</p>
+<p class="font-body-md text-body-md text-on-surface font-medium mt-1">Acme Corp</p>
+</div>
+</div>
+<div class="bg-surface rounded-lg border border-outline-variant p-4 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">step</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Stage</p>
+<p class="font-body-md text-body-md text-on-surface font-medium mt-1">Proposal</p>
+</div>
+</div>
+<div class="bg-surface rounded-lg border border-outline-variant p-4 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">payments</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Amount</p>
+<p class="font-mono-data text-mono-data text-on-surface font-medium mt-1">$50,000</p>
+</div>
+</div>
+<div class="bg-surface rounded-lg border border-outline-variant p-4 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">event</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Closing</p>
+<p class="font-body-md text-body-md text-on-surface font-medium mt-1">Dec 2024</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Column 2: Probability KPI Cards -->
+<section>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Predictive Probability</h3>
+<div class="flex gap-4">
+<!-- Base ML Score -->
+<div class="flex-1 bg-surface-container-lowest rounded-xl border border-outline-variant p-4 shadow-[0px_2px_4px_rgba(15,23,42,0.05)]">
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-2">Base ML Score</p>
+<div class="flex items-end gap-2">
+<span class="font-headline-md text-headline-md text-on-surface">65%</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-[#E2E8F0] rounded-full mt-3 overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full" style="width: 65%;"></div>
+</div>
+</div>
+<!-- Adjusted AI Score (Highlighted) -->
+<div class="flex-1 bg-surface-container-lowest rounded-xl border border-secondary p-4 shadow-[0px_4px_6px_rgba(13,148,136,0.1)] relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-secondary/5 rounded-bl-full -mr-4 -mt-4"></div>
+<p class="font-label-sm text-label-sm text-secondary font-bold mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+                            Rabih AI Score
+                        </p>
+<div class="flex items-end gap-2">
+<span class="font-headline-md text-headline-md text-on-surface">82%</span>
+<div class="bg-secondary/10 px-2 py-0.5 rounded-full flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-secondary text-[14px]">trending_up</span>
+<span class="font-label-sm text-label-sm text-secondary">+17%</span>
+</div>
+</div>
+<!-- Progress Bar with gradient -->
+<div class="w-full h-1 bg-[#E2E8F0] rounded-full mt-3 overflow-hidden">
+<div class="h-full rounded-full bg-gradient-to-r from-secondary-fixed-dim to-secondary" style="width: 82%;"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Column 3: AI Insights & Actions -->
+<section>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-4 uppercase tracking-wider">Rabih Intelligence</h3>
+<div class="space-y-4">
+<!-- SHAP Factors Expander -->
+<div class="bg-surface rounded-lg border border-outline-variant overflow-hidden">
+<button class="w-full px-4 py-3 flex items-center justify-between bg-surface hover:bg-surface-bright transition-colors text-left" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow-icon').classList.toggle('rotate-180');">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">analytics</span>
+<span class="font-label-md text-label-md text-on-surface">Why this score? (Impact Factors)</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200 arrow-icon">expand_more</span>
+</button>
+<div class="px-4 pb-4 pt-1 border-t border-outline-variant hidden">
+<div class="space-y-3 mt-2">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Recent Email Sentiment</span>
+<div class="bg-secondary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[12px]">add</span>
+<span class="font-mono-data text-mono-data text-secondary">10</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Budget Confirmed</span>
+<div class="bg-secondary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[12px]">add</span>
+<span class="font-mono-data text-mono-data text-secondary">5</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Executive Sponsor Engaged</span>
+<div class="bg-secondary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[12px]">add</span>
+<span class="font-mono-data text-mono-data text-secondary">4</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Competitor Mentioned</span>
+<div class="bg-error/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-error text-[12px]">remove</span>
+<span class="font-mono-data text-mono-data text-error">2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Arabic Recommendation Box -->
+<div class="bg-primary-container rounded-lg p-5 rtl-content text-on-primary-container relative overflow-hidden shadow-sm" dir="rtl">
+<div class="absolute -top-4 -right-4 text-white/5 opacity-20">
+<span class="material-symbols-outlined text-[100px]">language</span>
+</div>
+<div class="flex items-center justify-start gap-2 mb-3">
+<span class="material-symbols-outlined text-secondary-fixed">tips_and_updates</span>
+<h4 class="font-label-md text-label-md text-secondary-fixed font-bold">توصية رابح (Rabih CRM)</h4>
+</div>
+<p class="font-body-md text-body-md leading-relaxed text-slate-300">
+                            بناءً على تحليل المشاعر الأخير، يوصى بجدولة مكالمة متابعة مع صانع القرار الرئيسي لمناقشة التفاصيل النهائية للعقد. لقد أظهروا اهتمامًا قويًا، ولكن التوضيح السريع بشأن شروط التنفيذ سيضمن الإغلاق في هذا الربع.
+                        </p>
+</div>
+</div>
+</section>
+</div>
+<!-- Drawer Footer (Sticky Actions) -->
+<div class="p-6 border-t border-outline-variant bg-surface-container-lowest sticky bottom-0 z-10 flex justify-end gap-3">
+<button class="px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors">
+                Dismiss
+            </button>
+<button class="bg-secondary text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-on-secondary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                Mark Actioned
+            </button>
+</div>
+</div>
+</div>
+</body></html>

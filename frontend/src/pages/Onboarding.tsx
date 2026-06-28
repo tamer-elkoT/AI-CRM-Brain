@@ -72,31 +72,62 @@ export default function Onboarding() {
       <section className="w-full lg:w-1/2 flex flex-col justify-center px-margin-mobile lg:px-margin-desktop py-12 bg-surface-container-lowest border-r border-outline-variant relative z-10">
         <div className="max-w-md w-full mx-auto">
           <div className="mb-8">
-            <h1 className="font-headline-md text-headline-md font-black text-on-surface flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined fill text-secondary text-3xl">psychology</span>
-              AI CRM Brain
-            </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">Set up your workspace.</p>
+            {/* Brand mark */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span
+                  className="material-symbols-outlined text-primary text-2xl"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  analytics
+                </span>
+              </div>
+              <div>
+                <h1 className="font-headline-md text-[18px] font-black text-on-surface leading-tight">
+                  Rabih CRM
+                </h1>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">Enterprise Intelligence</p>
+              </div>
+            </div>
+            <p className="font-body-md text-body-md text-on-surface-variant">Configure your workspace.</p>
 
-            {/* Step indicator */}
+            {/* Step indicator — teal accent */}
             <div className="flex items-center gap-2 mt-6">
               {['Company Info', 'Connect CRM', 'Done'].map((label, i) => {
-                const stepIndex = i;
                 const currentIndex = step === 'company' ? 0 : step === 'connect' ? 1 : 2;
-                const isActive = stepIndex === currentIndex;
-                const isComplete = stepIndex < currentIndex;
+                const isActive   = i === currentIndex;
+                const isComplete = i < currentIndex;
                 return (
                   <div key={label} className="flex items-center gap-2">
-                    {i > 0 && <div className={`w-8 h-px ${isComplete || isActive ? 'bg-secondary' : 'bg-outline-variant'}`} />}
+                    {i > 0 && (
+                      <div
+                        className={`w-8 h-px transition-colors ${
+                          isComplete || isActive ? 'bg-primary' : 'bg-outline-variant'
+                        }`}
+                      />
+                    )}
                     <div className="flex items-center gap-1.5">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                        isComplete ? 'bg-secondary text-on-secondary' :
-                        isActive ? 'bg-primary-container text-on-primary-container' :
-                        'bg-surface-container-high text-on-surface-variant'
-                      }`}>
-                        {isComplete ? <span className="material-symbols-outlined text-sm">check</span> : stepIndex + 1}
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                          isComplete
+                            ? 'bg-primary text-on-primary'
+                            : isActive
+                            ? 'bg-primary-container text-on-primary-container ring-2 ring-primary/30'
+                            : 'bg-surface-container-high text-on-surface-variant'
+                        }`}
+                      >
+                        {isComplete
+                          ? <span className="material-symbols-outlined text-sm">check</span>
+                          : i + 1
+                        }
                       </div>
-                      <span className={`font-label-sm text-label-sm hidden sm:inline ${isActive ? 'text-on-surface' : 'text-on-surface-variant'}`}>{label}</span>
+                      <span
+                        className={`font-label-sm text-label-sm hidden sm:inline transition-colors ${
+                          isActive ? 'text-on-surface font-bold' : 'text-on-surface-variant'
+                        }`}
+                      >
+                        {label}
+                      </span>
                     </div>
                   </div>
                 );
@@ -330,18 +361,46 @@ export default function Onboarding() {
         </div>
       </section>
 
-      <section className="hidden lg:flex w-1/2 bg-surface-container flex-col justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-secondary via-transparent to-transparent pointer-events-none" />
+      {/* ── RIGHT SECTION — Stitch refined dark panel ── */}
+      <section className="hidden lg:flex w-1/2 bg-primary-container flex-col justify-center relative overflow-hidden">
+        {/* Radial teal glow */}
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_50%,_#0D9488,_transparent_70%)] pointer-events-none" />
+        {/* Dot-grid texture */}
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(#0D9488 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
         <div className="max-w-lg w-full mx-auto px-margin-desktop relative z-10">
           <div className="mb-12">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">
-              {step === 'company' ? 'Company Setup' : 'CRM Integration'}
+            <h2 className="font-headline-lg text-headline-lg text-on-primary-container mb-2 font-black">
+              {step === 'company' ? 'Configure Workspace' : 'CRM Integration'}
             </h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">
+            <p className="font-body-md text-body-md text-primary-fixed-dim/80">
               {step === 'company'
-                ? 'Personalize your workspace with your company details.'
+                ? 'Set up your Rabih CRM intelligence hub in just a few steps.'
                 : 'Power your AI intelligence by connecting your data source.'}
             </p>
+          </div>
+          {/* Feature callout cards */}
+          <div className="space-y-4">
+            {[
+              { icon: 'psychology', label: 'AI Recommendations', desc: 'Arabic-first AI insights for each deal' },
+              { icon: 'model_training', label: 'ML Scoring', desc: 'RandomForest + LLM probability adjustment' },
+              { icon: 'cloud_sync', label: 'Zoho Integration', desc: 'Real-time CRM data synchronization' },
+            ].map(({ icon, label, desc }) => (
+              <div key={label} className="flex items-start gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-primary-fixed-dim">{icon}</span>
+                </div>
+                <div>
+                  <p className="font-label-md text-label-md text-on-primary-container">{label}</p>
+                  <p className="font-body-sm text-body-sm text-primary-fixed-dim/70 mt-0.5">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

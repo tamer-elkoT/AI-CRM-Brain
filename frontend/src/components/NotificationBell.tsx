@@ -17,10 +17,10 @@ function timeAgo(dateStr: string): string {
 }
 
 const TYPE_CONFIG: Record<string, { icon: string; color: string; bg: string }> = {
-  follow_up_due: { icon: 'schedule', color: 'text-amber-500', bg: 'bg-amber-500/10' },
-  deal_updated: { icon: 'update', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  score_changed: { icon: 'trending_up', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  system: { icon: 'info', color: 'text-on-surface-variant', bg: 'bg-surface-container' },
+  follow_up_due: { icon: 'schedule',    color: 'text-amber-600',          bg: 'bg-amber-50' },
+  deal_updated:  { icon: 'update',      color: 'text-blue-600',           bg: 'bg-blue-50' },
+  score_changed: { icon: 'trending_up', color: 'text-emerald-600',        bg: 'bg-emerald-50' },
+  system:        { icon: 'info',        color: 'text-on-surface-variant', bg: 'bg-surface-container' },
 };
 
 export default function NotificationBell() {
@@ -34,7 +34,7 @@ export default function NotificationBell() {
   const unreadCount = unreadData?.unread_count ?? 0;
   const notifications = notifData?.items ?? [];
 
-  // Close on click outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -46,50 +46,68 @@ export default function NotificationBell() {
   }, []);
 
   const handleNotifClick = (n: CrmNotification) => {
-    if (!n.is_read) {
-      markRead.mutate(n.id);
-    }
+    if (!n.is_read) markRead.mutate(n.id);
   };
 
   return (
     <div className="relative" ref={ref}>
-      {/* Bell Button */}
+      {/* ── Bell Button ── */}
       <button
         id="notification-bell"
-        onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-        aria-label="Notifications"
+        onClick={() => setOpen((v) => !v)}
+        className="relative p-2 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+        aria-label={`Notifications${unreadCount > 0 ? ` — ${unreadCount} unread` : ''}`}
+        aria-expanded={open}
+        aria-haspopup="dialog"
       >
         <span className="material-symbols-outlined text-[22px]">notifications</span>
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[10px] font-bold flex items-center justify-center animate-in zoom-in-50 duration-200">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[10px] font-black flex items-center justify-center shadow-sm animate-in zoom-in-50 duration-200">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Dropdown Panel */}
+      {/* ── Dropdown Panel ── */}
       {open && (
-        <div className="absolute right-0 md:right-auto md:left-0 top-full mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+        <div
+          className="absolute right-0 top-full mt-2 w-[360px] max-w-[calc(100vw-1.5rem)] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-[0_20px_60px_-10px_rgba(0,0,0,0.2)] z-[300] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Notifications panel"
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant">
-            <h3 className="font-headline-sm text-headline-sm text-on-surface">Notifications</h3>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-outline-variant bg-surface-container-lowest">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px] text-on-surface-variant">notifications</span>
+              <h3 className="font-semibold text-base text-on-surface">Notifications</h3>
+              {unreadCount > 0 && (
+                <span className="bg-error text-on-error text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllRead.mutate()}
-                className="font-label-sm text-label-sm text-secondary hover:text-secondary/80 transition-colors"
+                className="text-xs font-semibold text-secondary hover:text-secondary/70 transition-colors"
               >
-                Mark all as read
+                Mark all read
               </button>
             )}
           </div>
 
           {/* Notification List */}
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[420px] overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="py-12 text-center">
-                <span className="material-symbols-outlined text-[40px] text-on-surface-variant/40 mb-2">notifications_off</span>
-                <p className="font-body-md text-body-md text-on-surface-variant">No notifications yet</p>
+              <div className="py-14 text-center flex flex-col items-center gap-3">
+                <span className="material-symbols-outlined text-[44px] text-on-surface-variant/30">
+                  notifications_off
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-on-surface">All caught up!</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">No notifications yet</p>
+                </div>
               </div>
             ) : (
               notifications.map((n) => {
@@ -98,30 +116,45 @@ export default function NotificationBell() {
                   <button
                     key={n.id}
                     onClick={() => handleNotifClick(n)}
-                    className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors hover:bg-surface-container ${
-                      !n.is_read ? 'bg-secondary/5' : ''
+                    className={`w-full text-left px-5 py-4 flex items-start gap-3 transition-colors border-b border-outline-variant/40 last:border-b-0 hover:bg-surface-container ${
+                      !n.is_read ? 'bg-secondary/5' : 'bg-transparent'
                     }`}
                   >
-                    <div className={`w-9 h-9 rounded-full ${cfg.bg} ${cfg.color} flex items-center justify-center shrink-0 mt-0.5`}>
+                    {/* Icon */}
+                    <div className={`w-9 h-9 rounded-xl ${cfg.bg} ${cfg.color} flex items-center justify-center shrink-0 mt-0.5`}>
                       <span className="material-symbols-outlined text-[18px]">{cfg.icon}</span>
                     </div>
+                    {/* Text */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className={`font-label-md text-label-md truncate ${!n.is_read ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className={`text-sm leading-snug ${!n.is_read ? 'font-semibold text-on-surface' : 'font-normal text-on-surface-variant'}`}>
                           {n.title}
                         </p>
                         {!n.is_read && (
-                          <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-secondary shrink-0 mt-1.5" />
                         )}
                       </div>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">{n.body}</p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant/60 mt-1">{timeAgo(n.created_at)}</p>
+                      <p className="text-xs text-on-surface-variant leading-relaxed mt-0.5 line-clamp-2">
+                        {n.body}
+                      </p>
+                      <p className="text-[11px] text-on-surface-variant/60 mt-1.5 font-medium">
+                        {timeAgo(n.created_at)}
+                      </p>
                     </div>
                   </button>
                 );
               })
             )}
           </div>
+
+          {/* Footer */}
+          {notifications.length > 0 && (
+            <div className="px-5 py-3 border-t border-outline-variant bg-surface-container-lowest">
+              <button className="w-full text-center text-sm font-semibold text-secondary hover:underline transition-colors">
+                View all notifications
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -268,11 +268,11 @@ export default function Home() {
   return (
     <>
       {/* Header */}
-      <header className="bg-surface border-b border-outline-variant sticky top-0 z-30">
+      <header className="bg-surface border-b border-outline-variant sticky top-[48px] z-20">
         <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 w-full max-w-max-width mx-auto">
           <div className="flex-1">
             <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">All Deals Pipeline</h2>
-            <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">خط أنابيب جميع الصفقات</p>
+            <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">AI-ranked deals · Prioritize, act, and close faster</p>
           </div>
           <div className="flex items-center space-x-3">
             {/* ── Invite Team button (admin only) ── */}
