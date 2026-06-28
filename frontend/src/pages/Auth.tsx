@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
+import { useSplash } from '../App';
 import { Select } from '../components/ui/Select';
 import { authApi, ingestionApi, actionApi } from '../services/api';
 
@@ -13,6 +14,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, signupAdmin, signupTeam, googleLogin, isAuthenticated } = useAuth();
+  const { triggerSplash } = useSplash();
 
   const [view, setView] = useState<AuthView>('login');
   const [loading, setLoading] = useState(false);
@@ -55,7 +57,24 @@ export default function Auth() {
     }
   }, [searchParams]);
 
-  // Prevent routing to /home if we are in the middle of the admin wizard
+  // ── useGoogleLogin MUST come before any early return (Rules of Hooks) ──
+  const handleGoogleLoginAction = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true); setErrorMsg('');
+      try {
+        await googleLogin(tokenResponse.access_token);
+        await triggerSplash(1500);
+        navigate('/home');
+      } catch {
+        setErrorMsg('Google login failed.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: () => setErrorMsg('Google login failed.'),
+  });
+
+  // Early return is AFTER all hooks — safe per Rules of Hooks
   if (isAuthenticated && !['admin-wizard-zoho', 'admin-wizard-invite'].includes(view)) {
     return <Navigate to="/home" replace />;
   }
@@ -80,6 +99,7 @@ export default function Auth() {
     setLoading(true); setErrorMsg('');
     try {
       await login({ email, password });
+      await triggerSplash(1500);
       navigate('/home');
     } catch (err: any) {
       handleError(err);
@@ -106,6 +126,7 @@ export default function Auth() {
     setLoading(true); setErrorMsg('');
     try {
       await signupTeam({ invite_token: inviteToken, email, password, name, phone_number: phoneNumber });
+      await triggerSplash(1500);
       navigate('/home');
     } catch (err: any) {
       handleError(err);
@@ -159,20 +180,6 @@ export default function Auth() {
     }
   };
 
-  const handleGoogleLoginAction = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setLoading(true); setErrorMsg('');
-      try {
-        await googleLogin(tokenResponse.access_token);
-        navigate('/home');
-      } catch {
-        setErrorMsg('Google login failed.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => setErrorMsg('Google login failed.'),
-  });
 
   const renderError = () => errorMsg && (
     <div className="mb-6 p-4 bg-error-container text-on-error-container rounded-lg font-body-sm flex items-center gap-2">
@@ -548,8 +555,11 @@ export default function Auth() {
                 </button>
               </form>
 
-              <button className="w-full py-3 bg-surface-container-high text-on-surface font-bold rounded-lg hover:bg-surface-container-highest transition" onClick={() => navigate('/home')}>
-                Go to Dashboard &rarr;
+              <button
+                className="w-full py-3 bg-surface-container-high text-on-surface font-bold rounded-lg hover:bg-surface-container-highest transition"
+                onClick={async () => { await triggerSplash(1500); navigate('/home'); }}
+              >
+                Go to Dashboard →
               </button>
             </div>
           )}
