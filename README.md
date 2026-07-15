@@ -1,4 +1,4 @@
-﻿# 🧠 AI CRM Brain — Rabih CRM MVP v1.0
+# 🧠 AI CRM Brain — Rabih CRM MVP v1.0
 
 > **Transforming CRMs from passive data repositories into AI-driven decision engines.**
 >
@@ -449,13 +449,80 @@ Scan the QR code in the logs with your phone: **WhatsApp → Linked Devices → 
 
 ### Step 7 — Access the Application
 
-| Service | URL | Notes |
+Once all containers are healthy, open these URLs in your browser:
+
+---
+
+#### 🖥️ Frontend — React Dashboard
+```
+http://localhost
+```
+This is the **main application**. Register a new account or log in.
+- First time? Click **Sign Up**, enter your details, and verify your phone via WhatsApp OTP.
+- Google SSO is also available — click **Continue with Google**.
+
+---
+
+#### 📖 API Docs — Interactive Swagger UI
+```
+http://localhost:8000/docs
+```
+The **Swagger UI** lists every API endpoint with request/response schemas. You can test any endpoint directly from the browser — no Postman needed.
+- Try `GET /health` first to confirm the backend is alive.
+- Use `POST /api/v1/auth/login` to get a JWT token, then click **Authorize** (top-right lock icon) to authenticate all subsequent calls.
+
+#### ⚙️ Raw API — FastAPI Backend
+```
+http://localhost:8000
+```
+Direct access to the REST API. Use this for programmatic calls or curl testing:
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Login and get JWT token
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your@email.com", "password": "yourpassword"}'
+```
+
+---
+
+#### 🗄️ pgAdmin — Database Management UI
+```
+http://localhost:5050
+```
+Log in with the `PGADMIN_EMAIL` and `PGADMIN_PASSWORD` from your `.env` file.
+
+To connect pgAdmin to your database for the first time:
+1. Right-click **Servers → Register → Server**
+2. **General tab** → Name: `Rabih CRM`
+3. **Connection tab**:
+   - Host: `db` (the Docker service name)
+   - Port: `5432`
+   - Database: `ai_crm_brain`
+   - Username: value of `POSTGRES_USER` in your `.env`
+   - Password: value of `POSTGRES_PASSWORD` in your `.env`
+
+---
+
+#### 💬 WhatsApp Microservice
+```
+http://localhost:3000
+```
+Internal service status endpoint. If the service is running, it returns a JSON status response. The main interaction happens via QR code pairing (Step 6).
+
+---
+
+### 🗺️ Quick Reference — All URLs at a Glance
+
+| Service | URL | Login / Access |
 |---|---|---|
-| 🖥️ **Frontend** | http://localhost | Main React dashboard |
-| ⚙️ **API** | http://localhost:8000 | FastAPI backend |
-| 📖 **API Docs** | http://localhost:8000/docs | Interactive Swagger UI |
-| 💬 **WhatsApp Service** | http://localhost:3000 | Microservice status |
-| 🗄️ **pgAdmin** | http://localhost:5050 | Database management UI |
+| 🖥️ **Frontend (Main App)** | http://localhost | Register via Sign Up or Google SSO |
+| 📖 **API Docs (Swagger)** | http://localhost:8000/docs | Click Authorize after POST /auth/login |
+| ⚙️ **API Health Check** | http://localhost:8000/health | No auth needed — returns `{"status":"online"}` |
+| 🗄️ **pgAdmin** | http://localhost:5050 | `PGADMIN_EMAIL` / `PGADMIN_PASSWORD` from `.env` |
+| 💬 **WhatsApp Service** | http://localhost:3000 | Status endpoint — pair via QR in logs |
 
 ---
 
@@ -471,8 +538,11 @@ docker compose -f docker-compose.prod.yml logs -f api
 # Restart a single service after a code change
 docker compose -f docker-compose.prod.yml restart api
 
-# Rebuild and restart one service only
+# Rebuild and restart one service only (e.g. after a code fix)
 docker compose -f docker-compose.prod.yml up --build -d api
+
+# Check status of all containers
+docker compose -f docker-compose.prod.yml ps
 
 # Stop everything (data is preserved in the pgdata volume)
 docker compose -f docker-compose.prod.yml down
