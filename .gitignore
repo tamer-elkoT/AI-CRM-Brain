@@ -112,3 +112,10 @@ models/ml_engine/__pycache__
 whatsapp-microservice/node_modules
 whatsapp-microservice/auth_info_baileys
 whatsapp-microservice/auth_sessions/
+
+# OAuth tokens — must never be committed
+zoho_token.json
+*_token.json
+
+# Dev-only sample data
+sample_test_deals.csv

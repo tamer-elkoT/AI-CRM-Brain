@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────
+# whatsapp-microservice/Dockerfile.whatsapp
+# Baileys Node.js WhatsApp Microservice
+# Base: node:18-alpine  |  Port: 3000
+# ─────────────────────────────────────────────────────────────
+
+FROM node:18-alpine
+
+# ── System dependencies ───────────────────────────────────────
+# Baileys uses native crypto modules; these headers ensure
+# optional native add-ons compile correctly on Alpine.
+RUN apk add --no-cache \
+        python3 \
+        make \
+        g++
+
+# ── Non-root user (security best practice) ────────────────────
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# ── Node dependencies (cached layer) ─────────────────────────
+# Copy manifests first so layer is rebuilt only when deps change.
+COPY package.json package-lock.json ./
+
+# Install production dependencies only (no devDependencies)
+RUN npm ci --omit=dev
+
+# ── Application source code ───────────────────────────────────
+COPY . .
+
+# Create the session directory and set ownership
+# This directory is mounted as a volume so the QR auth session
+# persists across container restarts.
+RUN mkdir -p /app/auth_sessions \
+    && chown -R appuser:appgroup /app
+
+USER appuser
+
+# ── Runtime ───────────────────────────────────────────────────
+EXPOSE 3000
+
+CMD ["node", "server.js"]

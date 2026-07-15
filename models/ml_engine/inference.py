@@ -4,9 +4,12 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
-# Adjust paths to match your project structure
-WEIGHTS_DIR = Path("/mnt/d/01_Projects/NLP/AI CRM Brain/AI-CRM-Brain/weights")
-ARTIFACTS_DIR = Path("/mnt/d/01_Projects/NLP/AI CRM Brain/AI-CRM-Brain/artifacts")
+# Resolve paths relative to this file's location so the code works in
+# any environment: local Windows/WSL dev AND inside Docker (/app/...).
+_BASE_DIR   = Path(__file__).resolve().parent.parent.parent  # → project root
+WEIGHTS_DIR   = _BASE_DIR / "weights"
+ARTIFACTS_DIR = _BASE_DIR / "artifacts"
+
 # Load Artefacts globally so they stay in memory when the API starts
 with open(WEIGHTS_DIR / "random_forest_v1.pkl", "rb") as f:
     rf_model = pickle.load(f)

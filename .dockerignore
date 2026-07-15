@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────
+# .dockerignore — Rabih CRM
+# Keeps the Docker build context lean and prevents secrets
+# from being accidentally baked into images.
+# ─────────────────────────────────────────────────────────────
+
+# ── Python ────────────────────────────────────────────────────
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# ── Secrets & environment ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.template
+
+# ── Node / npm ────────────────────────────────────────────────
+frontend/node_modules/
+whatsapp-microservice/node_modules/
+frontend/.vite/
+frontend/dist/
+
+# ── Version control ───────────────────────────────────────────
+.git/
+.gitignore
+
+# ── Notebooks & development data ─────────────────────────────
+notebooks/
+*.ipynb
+*.csv
+*.xlsx
+
+# ── OS & IDE artifacts ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ── Docker files (don't nest Docker contexts) ─────────────────
+docker-compose.yaml
+docker-compose.prod.yml

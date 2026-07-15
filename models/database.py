@@ -17,9 +17,13 @@ print(f"DEBUG: Connecting as User: {DB_USER} to Database: {DB_NAME}")
 if not DB_USER:
     raise ValueError("DB_USER is None! Check your .env file.")
 
+# DB_HOST defaults to "localhost" for local dev.
+# Inside Docker Compose, set DB_HOST=db (the service name) and DB_PORT=5432.
+DB_HOST = os.getenv("DB_HOST", "localhost")
+
 # Keep only this one!
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:{DB_PORT}/{DB_NAME}"
+    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
 # Create the SQLAlchemy Engine
