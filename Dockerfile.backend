@@ -1,17 +1,45 @@
 # ─────────────────────────────────────────────────────────────
 # Dockerfile.backend — Rabih CRM FastAPI / Uvicorn Service
+# Multi-stage build:
+#   Stage 1 (builder) → compile Python wheels (has gcc/build-essential)
+#   Stage 2 (runtime) → lean final image (no compiler toolchain)
 # Base: python:3.11-slim  |  Port: 8000
 # ─────────────────────────────────────────────────────────────
 
-FROM python:3.11-slim
+# ════════════════════════════════════════════════════════════
+# Stage 1 — Builder
+# Install all build-time system deps + compile Python wheels.
+# This stage is discarded; only the compiled packages survive.
+# ════════════════════════════════════════════════════════════
+FROM python:3.11-slim AS builder
 
-# ── System dependencies ──────────────────────────────────────
-# build-essential  → compiles C-extension packages (e.g. psycopg2, numpy)
-# libpq-dev        → PostgreSQL client headers for psycopg2
-# curl             → used in healthcheck probe
+# build-essential → C-extension packages (psycopg2, numpy, scikit-learn)
+# libpq-dev       → PostgreSQL client headers
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Copy requirements and compile wheels into a local wheel cache directory.
+# Wheels are pre-compiled binaries — the runtime stage just installs them.
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && pip wheel --no-cache-dir --wheel-dir=/build/wheels -r requirements.txt
+
+
+# ════════════════════════════════════════════════════════════
+# Stage 2 — Runtime (final image)
+# Fresh slim base with NO compiler toolchain — much smaller.
+# Install pre-compiled wheels from Stage 1.
+# ════════════════════════════════════════════════════════════
+FROM python:3.11-slim
+
+# libpq5   → runtime PostgreSQL client library (not the -dev headers)
+# curl     → used in the healthcheck probe
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libpq5 \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,17 +48,19 @@ RUN useradd --create-home --shell /bin/bash appuser
 
 WORKDIR /app
 
-# ── Python dependencies (cached layer) ───────────────────────
-# Copy requirements first so Docker cache is reused when only
-# source code changes (not dependencies).
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+# Install wheels from the builder stage (fast — no compilation needed)
+COPY --from=builder /build/wheels /wheels
+RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* \
+    && rm -rf /wheels
 
 # ── Application source code ───────────────────────────────────
+# .dockerignore excludes: Docs/, artifacts/, scripts/, tests/,
+# notebooks/, __pycache__/, .env, node_modules/, *.md, etc.
 COPY . .
 
-# Create persistent data directories and hand ownership to appuser
+# Create persistent directories and hand ownership to appuser.
+# weights/  → ML model files (baked into image from COPY above).
+# artifacts/ → volume-mounted at runtime (mkdir ensures the mount point exists).
 RUN mkdir -p /app/artifacts /app/weights \
     && chown -R appuser:appuser /app
 

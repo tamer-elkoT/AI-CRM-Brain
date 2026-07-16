@@ -4,10 +4,11 @@
 # from being accidentally baked into images.
 # ─────────────────────────────────────────────────────────────
 
-# ── Python ────────────────────────────────────────────────────
+# ── Python cache & build artifacts ────────────────────────────
 venv/
 .venv/
 __pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -15,6 +16,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+*.egg
 
 # ── Secrets & environment ─────────────────────────────────────
 .env
@@ -27,9 +29,11 @@ frontend/node_modules/
 whatsapp-microservice/node_modules/
 frontend/.vite/
 frontend/dist/
+node_modules/
 
 # ── Version control ───────────────────────────────────────────
 .git/
+.git
 .gitignore
 
 # ── Notebooks & development data ─────────────────────────────
@@ -43,7 +47,45 @@ notebooks/
 Thumbs.db
 .idea/
 .vscode/
+*.swp
+*.swo
 
 # ── Docker files (don't nest Docker contexts) ─────────────────
 docker-compose.yaml
 docker-compose.prod.yml
+.dockerignore
+
+# ── Large documentation files (never needed in container) ─────
+Docs/
+*.pdf
+*.pptx
+*.mp4
+*.mov
+
+# ── ML artifacts (volume-mounted at runtime, not baked in) ────
+artifacts/
+
+# ── Development-only directories ──────────────────────────────
+# scripts/ — diagnostic/admin helpers, not part of the API
+scripts/
+# helper_scripts/ — dev utilities
+helper_scripts/
+# tests/ — unit tests, not needed at runtime
+tests/
+# Rabih_CRM/ — likely sample data directory
+Rabih_CRM/
+
+# ── Documentation & markdown (not needed in container) ────────
+*.md
+!README.md
+
+# ── Logs, temp files, databases ───────────────────────────────
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.tmp
+data/
+
+# ── Alembic migration history (optional; keep if you run migrations in container) ──
+# alembic/versions/   ← commented out; keep if you do DB migrations on startup

@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────
+# whatsapp-microservice/.dockerignore
+# Keeps the Baileys Node.js build context lean.
+# Context root is ./whatsapp-microservice
+# ─────────────────────────────────────────────────────────────
+
+# ── Node.js ───────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+
+# ── Auth sessions (sensitive — mounted as a volume at runtime) ─
+auth_sessions/
+
+# ── OS & IDE ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ── Environment & secrets ─────────────────────────────────────
+.env
+.env.*
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Shell scripts (used locally, not needed inside container) ──
+fix_node.sh
+reinstall_deps.sh
+install_node20.sh
