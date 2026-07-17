@@ -15,10 +15,17 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Add CORS middleware — use regex to match any localhost port (avoids 400 on OPTIONS preflight)
+# Add CORS middleware — allow localhost (dev) + Vercel domains (prod)
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:80",
+        "http://localhost",
+    ],
+    # Also allow any *.vercel.app subdomain and any https origin (covers custom domains)
+    allow_origin_regex=r"https://.*\.vercel\.app|http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
