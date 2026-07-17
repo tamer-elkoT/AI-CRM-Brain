@@ -2,7 +2,7 @@
 # docker-compose.prod.yml — Rabih CRM Production Stack
 #
 # Services:
-#   db                → PostgreSQL 16 (data layer)
+#   db                → PostgreSQL 16 (local dev only — not used when DATABASE_URL points to Neon)
 #   api               → FastAPI / Uvicorn (backend)
 #   frontend          → React / Nginx (UI)
 #   whatsapp_service  → Baileys Node.js (WhatsApp bridge)
@@ -46,19 +46,22 @@ services:
     env_file:
       - .env
     environment:
-      # Override DB connection for Docker networking.
-      # Inside Docker, the db is reachable by its service name on the internal port.
-      DB_HOST: db
-      DB_PORT: "5432"
+      # Cloud DB (Neon): DATABASE_URL in .env takes priority over DB_HOST/DB_PORT.
+      # Local DB: comment out DATABASE_URL in .env and uncomment DB_HOST below.
+      # DB_HOST: db
+      # DB_PORT: "5432"
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "8000:8000"
     volumes:
       # Persist ML model files and generated artifacts between deploys
       - ./artifacts:/app/artifacts
       - ./weights:/app/weights
-    depends_on:
-      db:
-        condition: service_healthy
+    # depends_on db removed — Neon is an external cloud service.
+    # Re-enable below if switching back to local Postgres:
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
